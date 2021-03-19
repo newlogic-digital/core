@@ -23,12 +23,128 @@ const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = process.cwd() + "/"
 
-// let config = fs.existsSync(root + "gulpfile.configg.js") ? (await import(root + "gulpfile.configg.js")).default : {};
-let conf;
 let Exists;
 let Modules;
 let Functions;
-let packageData = require(root + "package.json");
+let Package = require(root + "package.json");
+
+let conf = {
+    lang: "cs",
+    local: false,
+    errors: true,
+    vite: false,
+    serve: {
+        index: "",
+        mode: "",
+        rewriteOutput: true,
+        server: "wds"
+    },
+    modules: {},
+    cms: {
+        branch: "dev",
+        full: false,
+        format: {
+            templates: "tpl"
+        }
+    },
+    paths: {
+        temp: "temp",
+        cdn: "temp/cdn",
+        input: {
+            root: "src",
+            main: "src/main.json",
+            templates: "src/templates",
+            scripts: "src/scripts",
+            styles: "src/styles",
+            icons: "src/icons",
+            emails: "src/emails",
+            assets: "src/assets"
+        },
+        output: {
+            root: "dist",
+            scripts: "dist/assets/js",
+            styles: "dist/assets/css",
+            icons: "dist/assets/css",
+            emails: "dist",
+            emailsImg: "dist/img",
+            assets: "dist/assets"
+        },
+        cms: {
+            temp: "temp/cms",
+            templates: "www/templates",
+            components: "www/components"
+        }
+    },
+    icons: {
+        format: "css",
+        filename: "iconfont",
+        id: "",
+        local: false,
+        revision: true,
+        optimizations: true
+    },
+    scripts: {
+        optimizations: true,
+        revision: true,
+        legacy: true,
+        polyfillUrls: [],
+        polyfillFeatures: "default",
+        importResolution: {
+            directories: [],
+            filename: "+.js"
+        },
+        importMap: {
+            build: true,
+            cdn: "esm.sh",
+            trailingSlashes: "",
+            shortUrl: false,
+            localDownload: false
+        }
+    },
+    styles: {
+        format: "css",
+        revision: true,
+        optimizations: true,
+        purge: {
+            enabled: true,
+            content: [],
+            docs: true,
+            options: {},
+            tailwind: {
+                keyframes: true
+            }
+        },
+        vendor: {
+            cache: false,
+            path: ""
+        },
+        importResolution: {
+            subDir: true,
+            directories: [],
+            filename: "+.css",
+        },
+        import: ['all'],
+        themePath: ""
+    },
+    templates: {
+        format: "twig",
+        layout: "Layout/Main",
+        placeholder: {
+            webp: true,
+            picsum: false,
+            lorempixel: ""
+        }
+    },
+    emails: {
+        removeClasses: false,
+        inlineOnly: false,
+        zipPrefix: ["email"]
+    },
+    assets: {
+        revision: true
+    },
+    tailwind: {}
+}
 
 export class Utils {
     cleanup() {
@@ -1781,123 +1897,7 @@ export class Core {
         return conf;
     }
     init(config = {}) {
-        conf = lodash.merge({
-            lang: "cs",
-            local: false,
-            errors: true,
-            vite: false,
-            serve: {
-                index: "",
-                mode: "",
-                rewriteOutput: true,
-                server: "wds"
-            },
-            modules: {},
-            cms: {
-                branch: "dev",
-                full: false,
-                format: {
-                    templates: "tpl"
-                }
-            },
-            paths: {
-                temp: "temp",
-                cdn: "temp/cdn",
-                input: {
-                    root: "src",
-                    main: "src/main.json",
-                    templates: "src/templates",
-                    scripts: "src/scripts",
-                    styles: "src/styles",
-                    icons: "src/icons",
-                    emails: "src/emails",
-                    assets: "src/assets"
-                },
-                output: {
-                    root: "dist",
-                    scripts: "dist/assets/js",
-                    styles: "dist/assets/css",
-                    icons: "dist/assets/css",
-                    emails: "dist",
-                    emailsImg: "dist/img",
-                    assets: "dist/assets"
-                },
-                cms: {
-                    temp: "temp/cms",
-                    templates: "www/templates",
-                    components: "www/components"
-                }
-            },
-            icons: {
-                format: "css",
-                filename: "iconfont",
-                id: "",
-                local: false,
-                revision: true,
-                optimizations: true
-            },
-            scripts: {
-                optimizations: true,
-                revision: true,
-                legacy: true,
-                polyfillUrls: [],
-                polyfillFeatures: "default",
-                importResolution: {
-                    directories: [],
-                    filename: "+.js"
-                },
-                importMap: {
-                    build: true,
-                    cdn: "esm.sh",
-                    trailingSlashes: "",
-                    shortUrl: false,
-                    localDownload: false
-                }
-            },
-            styles: {
-                format: "css",
-                revision: true,
-                optimizations: true,
-                purge: {
-                    enabled: true,
-                    content: [],
-                    docs: true,
-                    options: {},
-                    tailwind: {
-                        keyframes: true
-                    }
-                },
-                vendor: {
-                    cache: false,
-                    path: ""
-                },
-                importResolution: {
-                    subDir: true,
-                    directories: [],
-                    filename: "+.css",
-                },
-                import: ['all'],
-                themePath: ""
-            },
-            templates: {
-                format: "twig",
-                layout: "Layout/Main",
-                placeholder: {
-                    webp: true,
-                    picsum: false,
-                    lorempixel: ""
-                }
-            },
-            emails: {
-                removeClasses: false,
-                inlineOnly: false,
-                zipPrefix: ["email"]
-            },
-            assets: {
-                revision: true
-            },
-            tailwind: {}
-        }, config);
+        conf = lodash.merge(conf, config);
 
         if (!fs.existsSync(root + conf.paths.temp)){
             fs.mkdirSync(root + conf.paths.temp);
@@ -2257,9 +2257,9 @@ export class Core {
             })
         }
 
-        Object.keys(packageData.scripts).forEach((script) => {
+        Object.keys(Package.scripts).forEach((script) => {
             gulp.task(script, (resolve) => {
-                Functions.execSync(packageData.scripts[script]);
+                Functions.execSync(Package.scripts[script]);
                 resolve()
             })
         })
