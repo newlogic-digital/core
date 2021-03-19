@@ -8,7 +8,8 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
-    "postinstall" : "node postinstall.js"
+    "postinstall" : "node postinstall.js",
+    "install": "node postinstall.js"
   },
   "dependencies": {
     "@web/dev-server": "^0.1.8",
