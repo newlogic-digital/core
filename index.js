@@ -61,13 +61,13 @@ let conf = {
             assets: "src/assets"
         },
         output: {
-            root: "dist",
-            scripts: "dist/assets/js",
-            styles: "dist/assets/css",
-            icons: "dist/assets/css",
-            emails: "dist",
-            emailsImg: "dist/img",
-            assets: "dist/assets"
+            root: "public",
+            scripts: "public/assets/js",
+            styles: "public/assets/css",
+            icons: "public/assets/css",
+            emails: "public",
+            emailsImg: "public/img",
+            assets: "public/assets"
         },
         cms: {
             temp: "temp/cms",
