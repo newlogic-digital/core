@@ -2257,12 +2257,14 @@ export class Core {
             })
         }
 
-        Object.keys(Package.scripts).forEach((script) => {
-            gulp.task(script, (resolve) => {
-                Functions.execSync(Package.scripts[script]);
-                resolve()
+        if (typeof Package.scripts !== "undefined") {
+            Object.keys(Package.scripts).forEach((script) => {
+                gulp.task(script, (resolve) => {
+                    Functions.execSync(Package.scripts[script]);
+                    resolve()
+                })
             })
-        })
+        }
 
         if (!conf.vite) {
             gulp.task("cms:install", () => {
