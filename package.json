@@ -1,5 +1,6 @@
 {
   "name": "newlogic-core",
+  "version": "0.9.0",
   "type": "module",
   "main": "gulpfile.js",
   "author": "New Logic Studio s.r.o.",
