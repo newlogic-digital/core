@@ -8,54 +8,52 @@ Zdrojové soubory se nachází ve složce `src` a svých určených složkách. 
 
 Je jednou jestli používáte Nette, Symfony nebo Laravel - strukturu lze libovolně upravit dle potřeby. Např. `resources` a `public`, `src` a `dist` nebo `app/assets` a `www`. 
 
-Všechny [cesty](http://localhost:3000/dokumentace/#cesty) jsou konfigurovatelné v `gulpfile.config.js`.
+Všechny [cesty](http://localhost:3000/dokumentace/#cesty) jsou konfigurovatelné v `gulpfile.js`.
 
 Zdrojové soubory se dělí podle modulů - styly, scripty, šablony, iconfont, emaily, assety. Je volitelné které moduly chcete pro projekt použít. Chcete z celého setu použít např. jen generování emailů? Není problém. V `src/` se bude nacházet jen složka `emails` a všechny ostatní tasky se deaktivují. Používáte opravdu jen to co chcete používat.
 
 Lze tak použít např. jen styly a scripty a šablony řešit přímo v PHP. Hlavně jelikož se javacript a css píše v moderním formátu, tak není potřeba nic kompilovat a při vývoji můžeme načítat soubory přímo ze zdrojových souborů.
 
-V případě SPA aplikace je možné integrovat Vue pomocí Vite, nebo jakýhokoliv jiný SPA framework. Z Newlogic Core pak lze využít jen dodatečné fukcionality jako auto generování importů do souborů v rámci složek, iconfont apod. Nebo si zautomatizovat některé procesy napsaním nových tasků v `gulpfile.config.js`.
+V případě SPA aplikace je možné integrovat Vue pomocí Vite, nebo jakýhokoliv jiný SPA framework. Z Newlogic Core pak lze využít jen dodatečné fukcionality jako auto generování importů do souborů v rámci složek, iconfont apod. Nebo si zautomatizovat některé procesy napsaním nových tasků v `gulpfile.js`.
 
 Základem tasků pro jednotlivé moduly je [Gulp](https://gulpjs.com/), při použití PhpStormu se pak automaticky zobrazí tasky které lze použít a to dynamicky podle dostupnosti jednotlivých modulů.
 
 ## Instalace
 
-::: warning UPOZORNĚNÍ
-Instalace skrze npmjs ještě není možná, ale tímto způsobem je to plánované
-:::
+  Minimální verze Node.js **14+**
 
 Přes NPM:
 
 ```bash
-$ npm init @newlogic/core
+$ npm i git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --save-dev
 ```
 
 Přes Yarn:
 
 ```bash
-$ yarn create @newlogic/core
+$ yarn add git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --dev
 ```
 
-Při vytvoření projektu lze vybrat prázdný projekt nebo kompletní řešení s Newlogic UI.
+Po instalaci je v projektu nutné vytvořit `gulpfile.js`, ve kterém lze dále upravovat jednotlivé nastavení. Všechna nastavení jsou do podrobna popsané v dokumentaci.
 
-Toto lze upřesnit hned v příkazovém řádku
+```js
+import {Core} from  "newlogic-core";
 
-```bash
-# npm 7+
-npm init @newlogic/core my-project-name -- --template ui
-
-# yarn
-yarn create @newlogic/core my-project-name --template ui
+new Core().init({
+    styles: {
+        purge: {
+            content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
+        }
+    }
+})
 ```
 
-Podporované šablony projektu:
-
-- `vanilla`
-- `ui`
 
 ## Tasky
 
 Každý modul má svůj set tasků, většinou se dělí na `dev`, `build` a `production`. Což je rozdělení kdy se kompiluje úplné minimum, základ nebo úplně všechno.
+
+Pro výpis všech dostupných tasků lze použít `gulp --tasks`
 
 ### default
 
@@ -71,7 +69,7 @@ V tomto tasku je vždy nastaveno `config.errors = true`, takže pokud v jakémko
 
 ### importmap
 
-Vygeneruje `importmap.json` do cesty nastavené v configu `paths.dist.importmap`. Importmapa se generuje na základě nastavených dependencies v package.json. Pokud je potřeba použít pro balíček např. jiné cdn, lze importmapu doplnit manuálně pomocí `"imports"`.
+Vygeneruje `importmap.json` do cesty nastavené v configu `paths.output.importmap`. Importmapa se generuje na základě nastavených dependencies v package.json. Pokud je potřeba použít pro balíček např. jiné cdn, lze importmapu doplnit manuálně pomocí `"imports"`.
 
 Díky [importmapám](https://github.com/WICG/import-maps) padá závislost na npm modulech, při přidání nové knihovny při vývoji tak není potřeba nic instalovat. Můžete si pak celou napsanou aplikaci vzít a použít jí třeba v [Deno](https://deno.land) 
 
@@ -176,11 +174,11 @@ Pokud jméno souboru začíná na dialog nebo json (v souboru je potřeba použ�
 Ve twigu i hbs jsou dostupné následující proměnné, filtry a funkce. Pokud chcete využít vlastní PHP šablnovací systém tak je doporučeno využít stejné vlastnosti.
 
 ##### proměnné
-* **conf** - data z `gulpfile.config.js`, včetně výchozích hodnot
+* **conf** - data z `gulpfile.js`, včetně výchozích hodnot
 * **distPath** - cesta k výstupním souborům (např. `src`)
 * **srcPath** - cesta k zdrojovým souborům (např. `dist`)
 * **resolvePath** - dynamická cesta ke zdrojovým souborům nebo vstupním souborům, mění se podle produkčního módu - zejména důležité pokud načítáme zdrojové soubory bez kompilace (např. obrázky), v takovém případě je chceme načítat přímo ze zdrojové složky protože počas vývoje nejsou kompilovány
-* **layout.template** - výchozí cesta k šabloně layoutu, výchozí cesta se nastavuje v configu `gulpfile.config.js` a to `templates.layout`
+* **layout.template** - výchozí cesta k šabloně layoutu, výchozí cesta se nastavuje v configu `gulpfile.js` a to `templates.layout`
 
 Další globální proměnné se potom propisují ze `src/main.json` a proměnné pro jednotlivé stránky se definují v `src/templates/`. 
 
@@ -246,7 +244,7 @@ Emailové šablony lze generovat do zipu pomocí tasku `emails:zip`, ve výchoz�
 
 ### assets
 
-Používá se na soubory použité na webu, jako obrázky, fonty apod. Ty se dávají do `paths.src.assets` a při zapnutí tohoto tasku se zkopírují do `paths.dist.assets` s unikátním hashem v názvu. Důležité pro správné cachování souborů. 
+Používá se na soubory použité na webu, jako obrázky, fonty apod. Ty se dávají do `paths.input.assets` a při zapnutí tohoto tasku se zkopírují do `paths.output.assets` s unikátním hashem v názvu. Důležité pro správné cachování souborů. 
 
 V cestě se vygeneruje `rev-manifest.json` na základě kterého pak lze tyto soubory načítat do šablon, nebo automaticky aplikovat správný hash v stylech nebo scriptech.
 
@@ -269,7 +267,7 @@ Vyčistí složku `temp` od dočasných souborů
 Tasky které se vztahují k Newlogic CMS. Dělí se na `cms:install` a `cms:prepare`.
 
 * **cms:install** stáhne cms do projektu, ve výchozím stavu z větve `dev` - toto lze upravit v configu `cms.branch`
-* **cms:prepare** kopíruje šablony z `paths.src.templates` do `paths.cms.templates` a vytvoří PHP soubory sekcí šablon do `paths.cms.components`
+* **cms:prepare** kopíruje šablony z `paths.input.templates` do `paths.cms.templates` a vytvoří PHP soubory sekcí šablon do `paths.cms.components`
 
 ### package.json
 

@@ -1,21 +1,31 @@
 # Dokumentace
 
-Newlogic Core používá pro svojí základní funkcionalitu Gulp. Ten lze různě konfigurovat 
+Newlogic Core používá pro svojí základní funkcionalitu Gulp. Ten lze různě konfigurovat. 
 
 ## Config
 
-Při použití `gulp` v příkazové řádce, se automaticky načte `gulpfile.config.js` pokud existuje.
+Nastavení configu lze upravovat v `gulpfile.js` v rámci inicializace knihovny
 
-Soubor vypadá následovně:
+Příklad základního nastavení:
 
 ```js
-// gulpfile.config.js
-export default {
-  // config nastavení
-}
+// gulpfile.js
+import {Core} from  "newlogic-core";
+
+new Core().init({
+  styles: {
+    purge: {
+      content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
+    }
+  }
+})
 ```
 
 Newlogic Core používá moderní zápis ES modulů, v package.json je nutné mít nastaveno `type: "module"`. V některých případech se tomuto dá vyhnout přejmenováním .js na .mjs
+
+Do `gulpfile.js` lze psát i vlastní Gulp tasky. Lze taky přímo využít interní třídy a to `Utils`, `Scripts`, `Styles`, `Templates`, `Icons`, `Emails`, `Cms`, `Serve`, `Watch` a `Core`. 
+
+K instanci configu lze přistupovat pomocí `new Core().config`.
 
 ## Hlavní nastavení
 
@@ -124,110 +134,110 @@ Newlogic Core používá moderní zápis ES modulů, v package.json je nutné m�
 
   Zde se ukládají stažené cdn odkazy použité v projektu, pro případný lokální vývoj a cache.
 
-### paths.src.root
+### paths.input.root
 
 - **Type:** `string`
 - **Default:** `"src"`
 
   Hlavní root složka zdrojových souborů
 
-### paths.src.main
+### paths.input.main
 
 - **Type:** `string`
 - **Default:** `"src/main.json"`
 
   Cesta k hlavnímu nastavovacímu souboru pro šablony
 
-### paths.src.templates
+### paths.input.templates
 
 - **Type:** `string`
 - **Default:** `"src/templates"`
 
   Cesta k kde se nachází šablony
 
-### paths.src.scripts
+### paths.input.scripts
 
 - **Type:** `string`
 - **Default:** `"src/scripts"`
 
   Cesta k kde se nachází javascript
 
-### paths.src.styles
+### paths.input.styles
 
 - **Type:** `string`
 - **Default:** `"src/styles"`
 
   Cesta k kde se nachází styly
 
-### paths.src.icons
+### paths.input.icons
 
 - **Type:** `string`
 - **Default:** `"src/icons"`
 
   Cesta k kde se nachází iconfont
 
-### paths.src.emails
+### paths.input.emails
 
 - **Type:** `string`
 - **Default:** `"src/emails"`
 
   Cesta k kde se nachází email šablony a styly
 
-### paths.src.assets
+### paths.input.assets
 
 - **Type:** `string`
 - **Default:** `"src/assets"`
 
   Cesta k kde se nachází další soubory jako obrázky, písma apod.
 
-### paths.dist.root
+### paths.output.root
 
 - **Type:** `string`
 - **Default:** `"dist"`
 
   Hlavní output složka zkompilovaných souborů
 
-### paths.dist.scripts
+### paths.output.scripts
 
 - **Type:** `string`
 - **Default:** `"dist/scripts"`
 
   Cesta k kde se nachází zkompilované javascript soubory
 
-### paths.dist.styles
+### paths.output.styles
 
 - **Type:** `string`
 - **Default:** `"dist/styles"`
 
   Cesta k kde se nachází zkompilované styly
 
-### paths.dist.icons
+### paths.output.icons
 
 - **Type:** `string`
 - **Default:** `"dist/styles"`
 
   Cesta k kde se nachází zkompilovaný iconfont
 
-### paths.dist.emails
+### paths.output.emails
 
 - **Type:** `string`
 - **Default:** `"dist"`
 
   Cesta k kde se nachází zkompilované emaily
 
-### paths.dist.emailsImg
+### paths.output.emailsImg
 
 - **Type:** `string`
 - **Default:** `"dist/img"`
 
   Cesta k kde se nachází obrázky k emailům
 
-### paths.dist.assets
+### paths.output.assets
 
 - **Type:** `string`
 - **Default:** `"dist/assets"`
 
-  Cesta kam se kopírují soubory ze `src.assets` s vlastním hashem v názvu
+  Cesta kam se kopírují soubory ze `input.assets` s vlastním hashem v názvu
 
 ### paths.cms.temp
 

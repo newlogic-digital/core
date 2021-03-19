@@ -1906,7 +1906,7 @@ export class Core {
         Exists = {
             scripts: fs.existsSync(root + conf.paths.input.scripts),
             styles: fs.existsSync(root + conf.paths.input.styles),
-            icons: fs.existsSync(root + conf.paths.input.icons),
+            icons: fs.existsSync(root + conf.paths.input.icons) && conf.icons.id !== "",
             emails: fs.existsSync(root + conf.paths.input.emails),
             assets: fs.existsSync(root + conf.paths.input.assets),
             templates: fs.existsSync(root + conf.paths.input.templates) && !conf.vite

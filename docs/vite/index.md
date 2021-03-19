@@ -47,7 +47,7 @@ export default defineConfig({
 }
 ```
 
-**gulpfile.config.js**
+**gulpfile.js**
 ```js
 vite: true
 ```
@@ -65,7 +65,7 @@ vite: true
 
 **Info**
 - Smazat obsah složky templates - zde se použijí Vue šablony, smazat main.json, smazat obsah složky scripts - zde se použijí Vue scripty
-- Tailwind si řeší Newlogic Core (včetně purgecss které se nastavuje v `gulpfile.config.js` - pozor nastavit příponu na .vue soubory)
+- Tailwind si řeší Newlogic Core (včetně purgecss které se nastavuje v `gulpfile.js` - pozor nastavit příponu na .vue soubory)
 - Tasky na Vue se zapínají přes gulp nebo npm scripts
 - Při serve je doporučeno zapnout i watch pro funkci imports resolution
 - Doporučuji si někde bokem hodit npm i `npm init @vitejs/app` a nakopírovat si vue věci
