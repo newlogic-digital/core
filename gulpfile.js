@@ -23,291 +23,14 @@ const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = process.cwd() + "/"
 
-let config = fs.existsSync(root + "gulpfile.config.js") ? (await import(root + "gulpfile.config.js")).default : {};
+// let config = fs.existsSync(root + "gulpfile.configg.js") ? (await import(root + "gulpfile.configg.js")).default : {};
+let conf;
+let Exists;
+let Modules;
+let Functions;
 let packageData = require(root + "package.json");
 
-let conf = lodash.merge({
-    lang: "cs",
-    local: false,
-    errors: true,
-    vite: false,
-    serve: {
-        index: "",
-        mode: "",
-        rewriteOutput: true,
-        server: "wds"
-    },
-    modules: {},
-    cms: {
-        branch: "dev",
-        full: false,
-        format: {
-            templates: "tpl"
-        }
-    },
-    paths: {
-        temp: "temp",
-        cdn: "temp/cdn",
-        input: {
-            root: "src",
-            main: "src/main.json",
-            templates: "src/templates",
-            scripts: "src/scripts",
-            styles: "src/styles",
-            icons: "src/icons",
-            emails: "src/emails",
-            assets: "src/assets"
-        },
-        output: {
-            root: "dist",
-            scripts: "dist/assets/js",
-            styles: "dist/assets/css",
-            icons: "dist/assets/css",
-            emails: "dist",
-            emailsImg: "dist/img",
-            assets: "dist/assets"
-        },
-        cms: {
-            temp: "temp/cms",
-            templates: "www/templates",
-            components: "www/components"
-        }
-    },
-    icons: {
-        format: "css",
-        filename: "iconfont",
-        id: "",
-        local: false,
-        revision: true,
-        optimizations: true
-    },
-    scripts: {
-        optimizations: true,
-        revision: true,
-        legacy: true,
-        polyfillUrls: [],
-        polyfillFeatures: "default",
-        importResolution: {
-            directories: [],
-            filename: "+.js"
-        },
-        importMap: {
-            build: true,
-            cdn: "esm.sh",
-            trailingSlashes: "",
-            shortUrl: false,
-            localDownload: false
-        }
-    },
-    styles: {
-        format: "css",
-        revision: true,
-        optimizations: true,
-        purge: {
-            enabled: true,
-            content: [],
-            docs: true,
-            options: {},
-            tailwind: {
-                keyframes: true
-            }
-        },
-        vendor: {
-            cache: false,
-            path: ""
-        },
-        importResolution: {
-            subDir: true,
-            directories: [],
-            filename: "+.css",
-        },
-        import: ['all'],
-        themePath: ""
-    },
-    templates: {
-        format: "twig",
-        layout: "Layout/Main",
-        placeholder: {
-            webp: true,
-            picsum: false,
-            lorempixel: ""
-        }
-    },
-    emails: {
-        removeClasses: false,
-        inlineOnly: false,
-        zipPrefix: ["email"]
-    },
-    assets: {
-        revision: true
-    },
-    tailwind: {}
-}, config);
-
-if (!fs.existsSync(root + conf.paths.temp)){
-    fs.mkdirSync(root + conf.paths.temp);
-}
-
-const Exists = {
-    scripts: fs.existsSync(root + conf.paths.input.scripts),
-    styles: fs.existsSync(root + conf.paths.input.styles),
-    icons: fs.existsSync(root + conf.paths.input.icons),
-    emails: fs.existsSync(root + conf.paths.input.emails),
-    assets: fs.existsSync(root + conf.paths.input.assets),
-    templates: fs.existsSync(root + conf.paths.input.templates) && !conf.vite
-}
-
-const Modules = {
-    hbs: {
-        module: () => {
-            let hbs = through.obj((file, enc, cb) => {
-                file.extname === ".hbs" && console.error("\x1b[31m", `Module gulp-hb is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
-                cb(null, file);
-            });
-
-            try {hbs = require("gulp-hb")()} catch {}
-
-            return hbs
-        },
-        helpers: (helpers) => {
-            if (typeof helpers === "undefined") {
-                helpers = {};
-            }
-
-            if (typeof conf.modules.hbs !== "undefined") {
-                helpers = Object.assign(helpers, new conf.modules.hbs().helpers);
-            }
-
-            return helpers;
-        }
-    },
-    less: {
-        module: () => {
-            let less = through.obj((file, enc, cb) => {
-                file.extname === ".less" && console.error("\x1b[31m", `Module gulp-less is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
-                cb(null, file);
-            });
-
-            try {less = require("gulp-less")()} catch {}
-
-            return less
-        }
-    },
-    autoprefixer: {
-        module() {
-            let autoprefixer = through.obj((file, enc, cb) => {
-                file.extname === ".less" && console.error("\x1b[31m", `Module gulp-autoprefixer is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
-                cb(null, file);
-            });
-
-            try {autoprefixer = require("gulp-autoprefixer")()} catch {}
-
-            return autoprefixer;
-        },
-        pipe: lazypipe().pipe(() => gulpif((file) => {
-            return file.extname === ".less" && conf.styles.optimizations
-        }, Modules.autoprefixer.module({overrideBrowserslist: ['ie >= 11', 'last 2 versions']})))
-    }
-}
-
-const Functions = {
-    stripIndent: (string) => {
-        const indent = () => {
-            const match = string.match(/^[ \t]*(?=\S)/gm);
-
-            if (!match) {
-                return 0;
-            }
-
-            return match.reduce((r, a) => Math.min(r, a.length), Infinity);
-        };
-
-        if (indent() === 0) {
-            return string;
-        }
-
-        const regex = new RegExp(`^[ \\t]{${indent()}}`, 'gm');
-
-        return string.replace(regex, '');
-    },
-    plumber: {
-        errorHandler(err) {
-            console.log("\x1b[31m", err.toString(), "\x1b[0m");
-            if (conf.errors) {
-                process.exit(-1);
-            } else {
-                this.emit('end');
-            }
-        }
-    },
-    revUpdate: (cleanup) => {
-        return through.obj((file, enc, cb) => {
-            if (typeof file.revOrigPath === "undefined") {
-                cb(null, file);
-                return false;
-            }
-
-            let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(root + conf.paths.input.root, root + conf.paths.output.root)
-
-            if (cleanup) {
-                let fileName = path.basename(file.revOrigPath).replace(path.extname(file.revOrigPath),"");
-                if (fs.existsSync(directory)) {
-                    let files = fs.readdirSync(directory);
-
-                    for (const file of files) {
-                        let fileRev = file.replace(".min.",".").replace(path.extname(file),"");
-
-                        if (fileRev.substr(0, fileRev.lastIndexOf('.')).indexOf(fileName) > -1 && fileRev.substr(0, fileRev.lastIndexOf('.')).length === fileName.length) {
-                            fs.unlinkSync(path.join(directory, file));
-                        }
-                    }
-                }
-            }
-
-            function modify(pth, modifier) {
-                return path.join(path.dirname(pth), modifier(path.basename(pth, path.extname(pth)), path.extname(pth)));
-            }
-
-            file.path = modify(file.revOrigPath, function (name, ext) {
-                return name + '.' + file.revHash + ext;
-            });
-
-            cb(null, file);
-        })
-    },
-    execSync: (cmd) => nodeCmd.execSync(cmd, {stdio:[0,1,2]}),
-    download: (url, dest) => {
-        return new Promise((resolve, reject) => {
-            https.get(url, response => {
-                if (response.statusCode === 200) {
-                    response.pipe(fs.createWriteStream(dest));
-                    response.on("end", resolve)
-                } else {
-                    console.error("\x1b[31m", `Error: ${url} returns ${response.statusCode}`, "\x1b[0m");
-                    reject()
-                }
-            });
-        })
-    },
-    devBuild() {
-        if (conf.serve.mode === "dev" || conf.serve.mode === "build") {
-            conf.errors = false;
-            conf.styles.revision = false;
-            conf.styles.purge.enabled = false;
-            conf.styles.optimizations = false;
-            conf.scripts.revision = false;
-            conf.scripts.optimizations = false;
-            conf.scripts.legacy = false;
-            conf.icons.optimizations = false;
-            conf.icons.revision = false;
-            conf.styles.vendor.cache = true;
-            conf.styles.import = ['local'];
-            conf.assets.revision = false;
-        }
-    }
-}
-
-class Utils {
+export class Utils {
     cleanup() {
         return new Promise(resolve => {
             if (fs.existsSync(root + conf.paths.temp)) {
@@ -564,7 +287,7 @@ class Utils {
     }
 }
 
-class Scripts {
+export class Scripts {
     importResolution() {
         return new Promise(resolve => {
             conf.scripts.importResolution.directories.map(directory => {
@@ -804,7 +527,7 @@ class Scripts {
     }
 }
 
-class Styles {
+export class Styles {
     get purge() {
         return {
             files: () => {
@@ -1057,7 +780,7 @@ class Styles {
     }
 }
 
-class Templates {
+export class Templates {
     get functions() {
         return {
             "color": (color, theme) => {
@@ -1449,7 +1172,7 @@ class Templates {
     }
 }
 
-class Icons {
+export class Icons {
     async fetch() {
         const http = (await import("https")).default;
 
@@ -1575,7 +1298,7 @@ class Icons {
     }
 }
 
-class Emails {
+export class Emails {
     async build() {
         const inlineCss = (await import('gulp-inline-css')).default;
         const replace = (await import('gulp-replace')).default;
@@ -1683,7 +1406,7 @@ class Emails {
     }
 }
 
-class Cms {
+export class Cms {
     install() {
         return new Promise(resolve => {
             if (fs.existsSync(`www`)) {
@@ -1902,7 +1625,7 @@ class Cms {
     }
 }
 
-class Serve {
+export class Serve {
     async init() {
         return new Promise(resolve => {
 
@@ -1981,7 +1704,7 @@ class Serve {
     }
 }
 
-class Watch {
+export class Watch {
     get paths() {
         return {
             scripts: [`${root + conf.paths.input.scripts}/**`, `!${root + conf.paths.input.scripts}/**/\\${conf.scripts.importResolution.filename}`],
@@ -2053,211 +1776,502 @@ class Watch {
     }
 }
 
-if (!conf.vite) {
-    gulp.task("default", resolve => {
-        let tasks = ["cleanup", "cdn"];
+export class Core {
+    get config() {
+        return conf;
+    }
+    init(config = {}) {
+        conf = lodash.merge({
+            lang: "cs",
+            local: false,
+            errors: true,
+            vite: false,
+            serve: {
+                index: "",
+                mode: "",
+                rewriteOutput: true,
+                server: "wds"
+            },
+            modules: {},
+            cms: {
+                branch: "dev",
+                full: false,
+                format: {
+                    templates: "tpl"
+                }
+            },
+            paths: {
+                temp: "temp",
+                cdn: "temp/cdn",
+                input: {
+                    root: "src",
+                    main: "src/main.json",
+                    templates: "src/templates",
+                    scripts: "src/scripts",
+                    styles: "src/styles",
+                    icons: "src/icons",
+                    emails: "src/emails",
+                    assets: "src/assets"
+                },
+                output: {
+                    root: "dist",
+                    scripts: "dist/assets/js",
+                    styles: "dist/assets/css",
+                    icons: "dist/assets/css",
+                    emails: "dist",
+                    emailsImg: "dist/img",
+                    assets: "dist/assets"
+                },
+                cms: {
+                    temp: "temp/cms",
+                    templates: "www/templates",
+                    components: "www/components"
+                }
+            },
+            icons: {
+                format: "css",
+                filename: "iconfont",
+                id: "",
+                local: false,
+                revision: true,
+                optimizations: true
+            },
+            scripts: {
+                optimizations: true,
+                revision: true,
+                legacy: true,
+                polyfillUrls: [],
+                polyfillFeatures: "default",
+                importResolution: {
+                    directories: [],
+                    filename: "+.js"
+                },
+                importMap: {
+                    build: true,
+                    cdn: "esm.sh",
+                    trailingSlashes: "",
+                    shortUrl: false,
+                    localDownload: false
+                }
+            },
+            styles: {
+                format: "css",
+                revision: true,
+                optimizations: true,
+                purge: {
+                    enabled: true,
+                    content: [],
+                    docs: true,
+                    options: {},
+                    tailwind: {
+                        keyframes: true
+                    }
+                },
+                vendor: {
+                    cache: false,
+                    path: ""
+                },
+                importResolution: {
+                    subDir: true,
+                    directories: [],
+                    filename: "+.css",
+                },
+                import: ['all'],
+                themePath: ""
+            },
+            templates: {
+                format: "twig",
+                layout: "Layout/Main",
+                placeholder: {
+                    webp: true,
+                    picsum: false,
+                    lorempixel: ""
+                }
+            },
+            emails: {
+                removeClasses: false,
+                inlineOnly: false,
+                zipPrefix: ["email"]
+            },
+            assets: {
+                revision: true
+            },
+            tailwind: {}
+        }, config);
 
-        Exists.assets && tasks.push("assets")
-        Exists.icons && tasks.push("icons:production")
-        Exists.styles && tasks.push("styles:production")
-        Exists.scripts && tasks.push("scripts:production")
-        Exists.templates && tasks.push("templates:production")
-
-        conf.errors = true
-
-        gulp.series(tasks)(resolve)
-    })
-
-    gulp.task("production", resolve => {
-        let tasks = [];
-
-        Exists.assets && tasks.push("assets")
-        Exists.styles && tasks.push("styles:production")
-        Exists.scripts && tasks.push("scripts:production")
-        Exists.icons && tasks.push("icons:production")
-
-        conf.errors = true
-        conf.styles.purge.docs = true
-
-        gulp.series(tasks)(resolve)
-    })
-
-    gulp.task("cleanup", () => {
-        return new Utils().cleanup()
-    })
-
-    gulp.task("importmap", () => {
-        return new Utils().importMap()
-    })
-
-    gulp.task("cdn", () => {
-        return Promise.all([new Utils().cdn("templates"), new Utils().cdn("scripts"), new Utils().cdn("styles")])
-    })
-
-    gulp.task("serve", (resolve) => {
-        // TODO odebrat cdn až se opraví buildless styly
-        let tasks = ["cleanup", "cdn"];
-
-        conf.serve.mode = "dev";
-
-        Exists.icons && tasks.push("icons")
-        Exists.styles && tasks.push("styles")
-        Exists.scripts && tasks.push("scripts")
-        Exists.templates && tasks.push("templates")
-
-        Functions.devBuild();
-
-        gulp.series(tasks, new Serve().init, "watch")(resolve)
-    });
-
-    gulp.task("serve:build", (resolve) => {
-        let tasks = ["cleanup", "cdn"];
-
-        if (conf.serve.mode === "") {
-            conf.serve.mode = "build";
+        if (!fs.existsSync(root + conf.paths.temp)){
+            fs.mkdirSync(root + conf.paths.temp);
         }
 
-        Exists.assets && tasks.push("assets")
-        Exists.icons && tasks.push("icons:build")
-        Exists.styles && tasks.push("styles:build")
-        Exists.scripts && tasks.push("scripts:build")
-        Exists.templates && tasks.push("templates")
-
-        Functions.devBuild();
-
-        gulp.series(tasks, new Serve().init, "watch:build")(resolve)
-    })
-
-    gulp.task("serve:production", (resolve) => {
-        let tasks = ["cleanup", "cdn"];
-
-        if (conf.serve.mode === "") {
-            conf.serve.mode = "production";
+        Exists = {
+            scripts: fs.existsSync(root + conf.paths.input.scripts),
+            styles: fs.existsSync(root + conf.paths.input.styles),
+            icons: fs.existsSync(root + conf.paths.input.icons),
+            emails: fs.existsSync(root + conf.paths.input.emails),
+            assets: fs.existsSync(root + conf.paths.input.assets),
+            templates: fs.existsSync(root + conf.paths.input.templates) && !conf.vite
         }
 
-        Exists.assets && tasks.push("assets")
-        Exists.icons && tasks.push("icons:production")
-        Exists.styles && tasks.push("styles:production")
-        Exists.scripts && tasks.push("scripts:production")
-        Exists.templates && tasks.push("templates:production")
+        Modules = {
+            hbs: {
+                module: () => {
+                    let hbs = through.obj((file, enc, cb) => {
+                        file.extname === ".hbs" && console.error("\x1b[31m", `Module gulp-hb is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
+                        cb(null, file);
+                    });
 
-        gulp.series(tasks, new Serve().init, "watch:production")(resolve)
-    })
-}
+                    try {hbs = require("gulp-hb")()} catch {}
 
-if (Exists.icons) {
-    gulp.task("icons", () => {
-        return new Icons().fetch()
-    })
+                    return hbs
+                },
+                helpers: (helpers) => {
+                    if (typeof helpers === "undefined") {
+                        helpers = {};
+                    }
 
-    gulp.task("icons:build", (resolve) => {
-        gulp.series(new Icons().fetch, new Icons().build)(resolve)
-    })
+                    if (typeof conf.modules.hbs !== "undefined") {
+                        helpers = Object.assign(helpers, new conf.modules.hbs().helpers);
+                    }
 
-    gulp.task("icons:production", () => {
-        return new Icons().build()
-    })
-}
+                    return helpers;
+                }
+            },
+            less: {
+                module: () => {
+                    let less = through.obj((file, enc, cb) => {
+                        file.extname === ".less" && console.error("\x1b[31m", `Module gulp-less is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
+                        cb(null, file);
+                    });
 
-if (Exists.scripts) {
-    if (!conf.vite) {
-        gulp.task("scripts", (resolve) => {
-            gulp.series(new Utils().importMap, new Scripts().importResolution)(resolve)
-        })
+                    try {less = require("gulp-less")()} catch {}
 
-        gulp.task("scripts:build", (resolve) => {
-            gulp.series(new Utils().importMap, new Scripts().importResolution, new Scripts().build)(resolve)
-        })
+                    return less
+                }
+            },
+            autoprefixer: {
+                module() {
+                    let autoprefixer = through.obj((file, enc, cb) => {
+                        file.extname === ".less" && console.error("\x1b[31m", `Module gulp-autoprefixer is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
+                        cb(null, file);
+                    });
 
-        gulp.task("scripts:production", (resolve) => {
-            const build = () => new Scripts().build("production");
+                    try {autoprefixer = require("gulp-autoprefixer")()} catch {}
 
-            gulp.series(new Utils().importMap, new Scripts().importResolution, build)(resolve)
-        })
-    } else {
-        gulp.task("scripts", (resolve) => {
-            gulp.series(new Scripts().importResolution)(resolve)
-        })
+                    return autoprefixer;
+                },
+                pipe: lazypipe().pipe(() => gulpif((file) => {
+                    return file.extname === ".less" && conf.styles.optimizations
+                }, Modules.autoprefixer.module({overrideBrowserslist: ['ie >= 11', 'last 2 versions']})))
+            }
+        }
+
+        Functions = {
+            stripIndent: (string) => {
+                const indent = () => {
+                    const match = string.match(/^[ \t]*(?=\S)/gm);
+
+                    if (!match) {
+                        return 0;
+                    }
+
+                    return match.reduce((r, a) => Math.min(r, a.length), Infinity);
+                };
+
+                if (indent() === 0) {
+                    return string;
+                }
+
+                const regex = new RegExp(`^[ \\t]{${indent()}}`, 'gm');
+
+                return string.replace(regex, '');
+            },
+            plumber: {
+                errorHandler(err) {
+                    console.log("\x1b[31m", err.toString(), "\x1b[0m");
+                    if (conf.errors) {
+                        process.exit(-1);
+                    } else {
+                        this.emit('end');
+                    }
+                }
+            },
+            revUpdate: (cleanup) => {
+                return through.obj((file, enc, cb) => {
+                    if (typeof file.revOrigPath === "undefined") {
+                        cb(null, file);
+                        return false;
+                    }
+
+                    let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(root + conf.paths.input.root, root + conf.paths.output.root)
+
+                    if (cleanup) {
+                        let fileName = path.basename(file.revOrigPath).replace(path.extname(file.revOrigPath),"");
+                        if (fs.existsSync(directory)) {
+                            let files = fs.readdirSync(directory);
+
+                            for (const file of files) {
+                                let fileRev = file.replace(".min.",".").replace(path.extname(file),"");
+
+                                if (fileRev.substr(0, fileRev.lastIndexOf('.')).indexOf(fileName) > -1 && fileRev.substr(0, fileRev.lastIndexOf('.')).length === fileName.length) {
+                                    fs.unlinkSync(path.join(directory, file));
+                                }
+                            }
+                        }
+                    }
+
+                    function modify(pth, modifier) {
+                        return path.join(path.dirname(pth), modifier(path.basename(pth, path.extname(pth)), path.extname(pth)));
+                    }
+
+                    file.path = modify(file.revOrigPath, function (name, ext) {
+                        return name + '.' + file.revHash + ext;
+                    });
+
+                    cb(null, file);
+                })
+            },
+            execSync: (cmd) => nodeCmd.execSync(cmd, {stdio:[0,1,2]}),
+            download: (url, dest) => {
+                return new Promise((resolve, reject) => {
+                    https.get(url, response => {
+                        if (response.statusCode === 200) {
+                            response.pipe(fs.createWriteStream(dest));
+                            response.on("end", resolve)
+                        } else {
+                            console.error("\x1b[31m", `Error: ${url} returns ${response.statusCode}`, "\x1b[0m");
+                            reject()
+                        }
+                    });
+                })
+            },
+            devBuild() {
+                if (conf.serve.mode === "dev" || conf.serve.mode === "build") {
+                    conf.errors = false;
+                    conf.styles.revision = false;
+                    conf.styles.purge.enabled = false;
+                    conf.styles.optimizations = false;
+                    conf.scripts.revision = false;
+                    conf.scripts.optimizations = false;
+                    conf.scripts.legacy = false;
+                    conf.icons.optimizations = false;
+                    conf.icons.revision = false;
+                    conf.styles.vendor.cache = true;
+                    conf.styles.import = ['local'];
+                    conf.assets.revision = false;
+                }
+            }
+        }
+
+        this.tasks();
     }
-}
+    tasks() {
+        if (!conf.vite) {
+            gulp.task("default", resolve => {
+                let tasks = ["cleanup", "cdn"];
 
-if (Exists.styles) {
-    gulp.task("styles", (resolve) => {
-        // TODO odebrat build až se opraví buildless styly
-        gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
-    })
+                Exists.assets && tasks.push("assets")
+                Exists.icons && tasks.push("icons:production")
+                Exists.styles && tasks.push("styles:production")
+                Exists.scripts && tasks.push("scripts:production")
+                Exists.templates && tasks.push("templates:production")
 
-    if (!conf.vite) {
-        gulp.task("styles:build", (resolve) => {
-            gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+                conf.errors = true
+
+                gulp.series(tasks)(resolve)
+            })
+
+            gulp.task("production", resolve => {
+                let tasks = [];
+
+                Exists.assets && tasks.push("assets")
+                Exists.styles && tasks.push("styles:production")
+                Exists.scripts && tasks.push("scripts:production")
+                Exists.icons && tasks.push("icons:production")
+
+                conf.errors = true
+                conf.styles.purge.docs = true
+
+                gulp.series(tasks)(resolve)
+            })
+
+            gulp.task("cleanup", () => {
+                return new Utils().cleanup()
+            })
+
+            gulp.task("importmap", () => {
+                return new Utils().importMap()
+            })
+
+            gulp.task("cdn", () => {
+                return Promise.all([new Utils().cdn("templates"), new Utils().cdn("scripts"), new Utils().cdn("styles")])
+            })
+
+            gulp.task("serve", (resolve) => {
+                // TODO odebrat cdn až se opraví buildless styly
+                let tasks = ["cleanup", "cdn"];
+
+                conf.serve.mode = "dev";
+
+                Exists.icons && tasks.push("icons")
+                Exists.styles && tasks.push("styles")
+                Exists.scripts && tasks.push("scripts")
+                Exists.templates && tasks.push("templates")
+
+                Functions.devBuild();
+
+                gulp.series(tasks, new Serve().init, "watch")(resolve)
+            });
+
+            gulp.task("serve:build", (resolve) => {
+                let tasks = ["cleanup", "cdn"];
+
+                if (conf.serve.mode === "") {
+                    conf.serve.mode = "build";
+                }
+
+                Exists.assets && tasks.push("assets")
+                Exists.icons && tasks.push("icons:build")
+                Exists.styles && tasks.push("styles:build")
+                Exists.scripts && tasks.push("scripts:build")
+                Exists.templates && tasks.push("templates")
+
+                Functions.devBuild();
+
+                gulp.series(tasks, new Serve().init, "watch:build")(resolve)
+            })
+
+            gulp.task("serve:production", (resolve) => {
+                let tasks = ["cleanup", "cdn"];
+
+                if (conf.serve.mode === "") {
+                    conf.serve.mode = "production";
+                }
+
+                Exists.assets && tasks.push("assets")
+                Exists.icons && tasks.push("icons:production")
+                Exists.styles && tasks.push("styles:production")
+                Exists.scripts && tasks.push("scripts:production")
+                Exists.templates && tasks.push("templates:production")
+
+                gulp.series(tasks, new Serve().init, "watch:production")(resolve)
+            })
+        }
+
+        if (Exists.icons) {
+            gulp.task("icons", () => {
+                return new Icons().fetch()
+            })
+
+            gulp.task("icons:build", (resolve) => {
+                gulp.series(new Icons().fetch, new Icons().build)(resolve)
+            })
+
+            gulp.task("icons:production", () => {
+                return new Icons().build()
+            })
+        }
+
+        if (Exists.scripts) {
+            if (!conf.vite) {
+                gulp.task("scripts", (resolve) => {
+                    gulp.series(new Utils().importMap, new Scripts().importResolution)(resolve)
+                })
+
+                gulp.task("scripts:build", (resolve) => {
+                    gulp.series(new Utils().importMap, new Scripts().importResolution, new Scripts().build)(resolve)
+                })
+
+                gulp.task("scripts:production", (resolve) => {
+                    const build = () => new Scripts().build("production");
+
+                    gulp.series(new Utils().importMap, new Scripts().importResolution, build)(resolve)
+                })
+            } else {
+                gulp.task("scripts", (resolve) => {
+                    gulp.series(new Scripts().importResolution)(resolve)
+                })
+            }
+        }
+
+        if (Exists.styles) {
+            gulp.task("styles", (resolve) => {
+                // TODO odebrat build až se opraví buildless styly
+                gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+            })
+
+            if (!conf.vite) {
+                gulp.task("styles:build", (resolve) => {
+                    gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+                })
+
+                gulp.task("styles:production", (resolve) => {
+                    gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+                })
+            }
+        }
+
+        if (Exists.templates) {
+            gulp.task("templates", () => {
+                return new Templates().build("development");
+            })
+
+            gulp.task("templates:production", () => {
+                return new Templates().build("production");
+            })
+        }
+
+        if (Exists.assets) {
+            gulp.task("assets", async () => {
+                const revision = (await import("gulp-rev")).default;
+
+                return gulp.src(`${root + conf.paths.input.assets}/**`)
+                    .pipe(gulpif(conf.assets.revision, revision()))
+                    .pipe(Functions.revUpdate(true))
+                    .pipe(gulp.dest(root + conf.paths.output.assets))
+                    .pipe(revision.manifest())
+                    .pipe(gulp.dest(root + conf.paths.output.assets))
+            })
+        }
+
+        if (Exists.emails) {
+            gulp.task("emails:build", () => {
+                return new Emails().build()
+            })
+
+            gulp.task("emails:zip", () => {
+                return new Emails().zip()
+            })
+        }
+
+        gulp.task("watch", () => {
+            new Watch().dev();
         })
 
-        gulp.task("styles:production", (resolve) => {
-            gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+        if (!conf.vite) {
+            gulp.task("watch:build", () => {
+                new Watch().build("build");
+            })
+
+            gulp.task("watch:production", () => {
+                new Watch().build("production");
+            })
+        }
+
+        Object.keys(packageData.scripts).forEach((script) => {
+            gulp.task(script, (resolve) => {
+                Functions.execSync(packageData.scripts[script]);
+                resolve()
+            })
         })
+
+        if (!conf.vite) {
+            gulp.task("cms:install", () => {
+                return new Cms().install()
+            })
+
+            gulp.task("cms:prepare", () => {
+                return new Cms().prepare()
+            })
+        }
     }
-}
-
-if (Exists.templates) {
-    gulp.task("templates", () => {
-        return new Templates().build("development");
-    })
-
-    gulp.task("templates:production", () => {
-        return new Templates().build("production");
-    })
-}
-
-if (Exists.assets) {
-    gulp.task("assets", async () => {
-        const revision = (await import("gulp-rev")).default;
-
-        return gulp.src(`${root + conf.paths.input.assets}/**`)
-            .pipe(gulpif(conf.assets.revision, revision()))
-            .pipe(Functions.revUpdate(true))
-            .pipe(gulp.dest(root + conf.paths.output.assets))
-            .pipe(revision.manifest())
-            .pipe(gulp.dest(root + conf.paths.output.assets))
-    })
-}
-
-if (Exists.emails) {
-    gulp.task("emails:build", () => {
-        return new Emails().build()
-    })
-
-    gulp.task("emails:zip", () => {
-        return new Emails().zip()
-    })
-}
-
-gulp.task("watch", () => {
-    new Watch().dev();
-})
-
-if (!conf.vite) {
-    gulp.task("watch:build", () => {
-        new Watch().build("build");
-    })
-
-    gulp.task("watch:production", () => {
-        new Watch().build("production");
-    })
-}
-
-Object.keys(packageData.scripts).forEach((script) => {
-    gulp.task(script, (resolve) => {
-        Functions.execSync(packageData.scripts[script]);
-        resolve()
-    })
-})
-
-if (!conf.vite) {
-    gulp.task("cms:install", () => {
-        return new Cms().install()
-    })
-
-    gulp.task("cms:prepare", () => {
-        return new Cms().prepare()
-    })
 }
