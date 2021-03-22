@@ -1232,10 +1232,7 @@ export class Templates {
                 return main;
             }
         })
-        .pipe(() => gulpif("*.hbs", Modules.hbs.module().partials(`${root + conf.paths.input.templates}/**/*.hbs`)
-            .helpers(Modules.hbs.helpers(Object.assign(this.filters, this.functions)))
-            .data(context)
-        ))
+        .pipe(() => gulpif("*.hbs", Modules.hbs.module(`${root + conf.paths.input.templates}/**/*.hbs`, Modules.hbs.helpers(Object.assign(this.filters, this.functions)), context)))
 
         return new Promise(resolve => {
             gulp.series(
@@ -1451,9 +1448,7 @@ export class Emails {
                 filters: new Templates().filters,
                 extensions: new Templates().tags
             })))
-            .pipe(() => gulpif(hbsFiles, Modules.hbs.module().partials(`${root + conf.paths.input.emails}/**/*.hbs`)
-                .helpers(Modules.hbs.helpers())
-            ))
+            .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + conf.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers())))
             .pipe(() => gulpif("*.{hbs,twig}", rename({ extname: ".html" })))
 
             gulp.series(
@@ -1914,13 +1909,13 @@ export class Core {
 
         Modules = {
             hbs: {
-                module: () => {
+                module: (partials, helpers, data = {}) => {
                     let hbs = through.obj((file, enc, cb) => {
                         file.extname === ".hbs" && console.error("\x1b[31m", `Module gulp-hb is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
                         cb(null, file);
                     });
 
-                    try {hbs = require("gulp-hb")()} catch {}
+                    try { hbs = require("gulp-hb")().partials(partials).helpers(helpers).data(data) } catch {}
 
                     return hbs
                 },

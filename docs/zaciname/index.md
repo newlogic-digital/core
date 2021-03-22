@@ -22,17 +22,11 @@ Základem tasků pro jednotlivé moduly je [Gulp](https://gulpjs.com/), při pou
 
   Minimální verze Node.js **14+**
 
-Přes NPM:
-
 ```bash
 $ npm i git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --save-dev
 ```
 
-Přes Yarn:
-
-```bash
-$ yarn add git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --dev
-```
+Yarn není doporučeno používat - instaluje z neznámého důvodu špatně závilosti.
 
 Po instalaci je v projektu nutné vytvořit `gulpfile.js`, ve kterém lze dále upravovat jednotlivé nastavení. Všechna nastavení jsou do podrobna popsané v dokumentaci.
 
