@@ -127,7 +127,7 @@ let conf = {
     },
     templates: {
         format: "twig",
-        layout: "Layout/Main",
+        layout: "",
         placeholder: {
             webp: true,
             picsum: false,
@@ -1255,9 +1255,11 @@ export class Templates {
                         content = `{{> (lookup layout 'template')}}`
                     }
 
-                    for (let i = 0; i < items; i++) {
-                        if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
-                            fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`), content);
+                    if (conf.templates.layout.length !== 0) {
+                        for (let i = 0; i < items; i++) {
+                            if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
+                                fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`), content);
+                            }
                         }
                     }
 
@@ -1277,7 +1279,11 @@ export class Templates {
                     for (let i = 0; i < items; i++) {
                         if (!fs.statSync(`${root + conf.paths.input.templates}/${pages[i]}`).isDirectory()) {
                             if (pages[i].indexOf("json") === -1 && pages[i].indexOf("dialog") === -1) {
-                                fs.unlinkSync(`${root + conf.paths.input.templates}/${pages[i]}`);
+                                let file = fs.readFileSync(`${root + conf.paths.input.templates}/${pages[i]}`).toString();
+
+                                if (file === `{% include layout.template %}` || file === `{{> (lookup layout 'template')}}`) {
+                                    fs.unlinkSync(`${root + conf.paths.input.templates}/${pages[i]}`);
+                                }
                             }
                         }
                     }

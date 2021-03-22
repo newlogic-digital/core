@@ -1,4 +1,4 @@
-import {Core} from  "newlogic-core";
+import {Core} from  "./index.js";
 
 new Core().init({
     styles: {
