@@ -20,7 +20,6 @@ import postcssPresetEnv from "postcss-preset-env";
 import {createRequire} from "module";
 
 const require = createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = process.cwd() + "/"
 
 let Exists;
@@ -323,6 +322,7 @@ export class Utils {
 
             fs.writeFileSync(`${root + conf.paths.output.root}/sri.json`, JSON.stringify(sri));
 
+            // TODO
             if (inject === true) {
                 let task = gulp.src(root + conf.paths.output.root + '/*.html');
 
@@ -374,6 +374,7 @@ export class Utils {
                 fs.writeFileSync(dir + "/" + "importmap.json", JSON.stringify(importmap));
             }
 
+            // TODO
             if (inject === true) {
                 let task_js = gulp.src(root + conf.paths.output.scripts + "/" + JSON.parse(fs.readFileSync(root + conf.paths.output.scripts + "/rev-manifest.json", 'utf8').toString())["core.js"]);
 
@@ -1295,7 +1296,7 @@ export class Icons {
             }
 
             if (typeof conf.icons.name === "undefined" || conf.icons.name === "") {
-                conf.icons.name = path.basename(path.resolve(__dirname));
+                conf.icons.name = path.basename(path.resolve(root));
             }
 
             let files = [
@@ -1767,7 +1768,7 @@ export class Serve {
                     }
                 `)
 
-                nodeCmd.exec(`npx wds --watch --open ${conf.serve.index} --config ${conf.paths.temp}/wds.config.mjs`);
+                nodeCmd.exec(`npx wds --watch --open ${conf.serve.index} --config ${conf.paths.temp}/wds.config.mjs`, err => err && console.log(err));
             }
 
             if (conf.serve.server === "vite") {
@@ -1790,7 +1791,7 @@ export class Serve {
                     }
                 `)
 
-                nodeCmd.exec(`npx vite --config ${conf.paths.temp}/vite.config.js`);
+                nodeCmd.exec(`npx vite --config ${conf.paths.temp}/vite.config.js`, err => err && console.log(err));
             }
 
             console.log("\x1b[34m", "[Web Dev Server] running at localhost","\x1b[0m");
@@ -2061,9 +2062,11 @@ export class Core {
     }
     tasks() {
         if (!conf.vite) {
-            gulp.task("default", resolve => {
-                let tasks = ["cleanup", "cdn"];
+            Exists.assets || Exists.icons || Exists.styles || Exists.scripts || Exists.templates
+            && gulp.task("default", resolve => {
+                let tasks = [];
 
+                !conf.local && tasks.push("cleanup", "cdn");
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
@@ -2075,7 +2078,8 @@ export class Core {
                 gulp.series(tasks)(resolve)
             })
 
-            gulp.task("production", resolve => {
+            Exists.assets || Exists.icons || Exists.styles || Exists.scripts
+            && gulp.task("production", resolve => {
                 let tasks = [];
 
                 Exists.assets && tasks.push("assets")
@@ -2102,11 +2106,12 @@ export class Core {
             })
 
             gulp.task("serve", (resolve) => {
-                // TODO odebrat cdn až se opraví buildless styly
-                let tasks = ["cleanup", "cdn"];
+                let tasks = [];
 
                 conf.serve.mode = "dev";
 
+                // TODO odebrat cdn až se opraví buildless styly
+                !conf.local && tasks.push("cleanup", "cdn")
                 Exists.icons && tasks.push("icons")
                 Exists.styles && tasks.push("styles")
                 Exists.scripts && tasks.push("scripts")
@@ -2114,41 +2119,49 @@ export class Core {
 
                 Functions.devBuild();
 
-                gulp.series(tasks, new Serve().init, "watch")(resolve)
+                tasks.push(new Serve().init, "watch")
+
+                gulp.series(tasks)(resolve)
             });
 
             gulp.task("serve:build", (resolve) => {
-                let tasks = ["cleanup", "cdn"];
+                let tasks = [];
 
                 if (conf.serve.mode === "") {
                     conf.serve.mode = "build";
                 }
 
+                !conf.local && tasks.push("cleanup", "cdn")
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:build")
                 Exists.styles && tasks.push("styles:build")
                 Exists.scripts && tasks.push("scripts:build")
                 Exists.templates && tasks.push("templates")
 
-                Functions.devBuild();
+                Functions.devBuild()
 
-                gulp.series(tasks, new Serve().init, "watch:build")(resolve)
+                tasks.push(new Serve().init, "watch:build")
+
+                gulp.series(tasks)(resolve)
             })
 
             gulp.task("serve:production", (resolve) => {
-                let tasks = ["cleanup", "cdn"];
+                let tasks = [];
 
                 if (conf.serve.mode === "") {
                     conf.serve.mode = "production";
                 }
 
+                !conf.local && tasks.push("cleanup", "cdn")
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
                 Exists.scripts && tasks.push("scripts:production")
                 Exists.templates && tasks.push("templates:production")
 
-                gulp.series(tasks, new Serve().init, "watch:production")(resolve)
+                tasks.push(new Serve().init, "watch:production")
+
+                gulp.series(tasks)(resolve)
             })
         }
 
