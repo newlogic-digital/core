@@ -649,10 +649,13 @@ export class Styles {
         return {
             files: () => {
                 let purgeFiles = conf.styles.purge.content;
+                let dependencies = JSON.parse(fs.readFileSync(`package.json`).toString()).dependencies;
 
-                Object.keys(JSON.parse(fs.readFileSync(`package.json`).toString()).dependencies).map(lib => {
-                    purgeFiles.push(`node_modules/${lib}/**/*.js`)
-                });
+                if (typeof dependencies !== "undefined") {
+                    Object.keys(dependencies).map(lib => {
+                        purgeFiles.push(`node_modules/${lib}/**/*.js`)
+                    });
+                }
 
                 if (conf.styles.purge.docs) {
                     purgeFiles = purgeFiles.toString().replace("/*." + conf.templates.format, "/!(Ui)." + conf.templates.format).split(",");
