@@ -180,21 +180,6 @@ export class Utils {
                 }
             })();
 
-            (function(){
-                if (fs.existsSync(root + conf.paths.input.templates)) {
-                    let pages = fs.readdirSync(root + conf.paths.input.templates),
-                        items = pages.length;
-
-                    for (let i = 0; i < items; i++) {
-                        if (!fs.statSync(`${root + conf.paths.input.templates}/${pages[i]}`).isDirectory()) {
-                            if (pages[i].indexOf("json") === -1 && pages[i].indexOf("dialog") === -1) {
-                                fs.unlinkSync(`${root + conf.paths.input.templates}/${pages[i]}`);
-                            }
-                        }
-                    }
-                }
-            })();
-
             resolve()
         });
     }
@@ -1255,11 +1240,6 @@ export class Templates {
                     if (conf.templates.format === "hbs") {
                         content = `{{> (lookup layout 'template')}}`
                     }
-
-                    // TODO
-                    // if (conf.templates.layout.length !== 0) {
-                    //
-                    // }
 
                     for (let i = 0; i < items; i++) {
                         if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
