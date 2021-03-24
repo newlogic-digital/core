@@ -1256,11 +1256,14 @@ export class Templates {
                         content = `{{> (lookup layout 'template')}}`
                     }
 
-                    if (conf.templates.layout.length !== 0) {
-                        for (let i = 0; i < items; i++) {
-                            if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
-                                fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`), content);
-                            }
+                    // TODO
+                    // if (conf.templates.layout.length !== 0) {
+                    //
+                    // }
+
+                    for (let i = 0; i < items; i++) {
+                        if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
+                            fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`), content);
                         }
                     }
 
