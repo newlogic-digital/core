@@ -42,6 +42,7 @@ let conf = {
     cms: {
         branch: "dev",
         full: false,
+        sectionsDir: "Sections",
         format: {
             templates: "tpl"
         }
@@ -1562,15 +1563,7 @@ export class Cms {
     }
     prepare(done) {
         gulp.series(
-            function templates(done) {
-                let templates = conf.modules.hbs
-
-                if (typeof templates !== "undefined") {
-                    return new templates().templates
-                } else {
-                    done()
-                }
-            },
+            typeof conf.modules.hbs !== "undefined" ? new conf.modules.hbs().templates : done => done,
             function components() {
                 let pathComp = root + conf.paths.cms.components;
 
@@ -1587,7 +1580,7 @@ export class Cms {
                 }
 
                 return new Promise(resolve => {
-                    let items = fs.readdirSync(`${root + conf.paths.input.templates}/comp`);
+                    let items = fs.readdirSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}`);
                     let pages = fs.readdirSync(`${root + conf.paths.input.templates}/`);
                     let pageComponents = [];
 
@@ -1721,17 +1714,20 @@ export class Cms {
 
                     function getComponents(callback) {
                         items.forEach((i) => {
-                            if (fs.statSync(`${root + conf.paths.input.templates}/comp/${i}`).isDirectory()) {
-                                let items = fs.readdirSync(`${root + conf.paths.input.templates}/comp/${i}`);
+                            if (i === ".gitkeep") {
+                                return
+                            }
+                            if (fs.statSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}/${i}`).isDirectory()) {
+                                let items = fs.readdirSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}/${i}`);
 
                                 items.forEach((e) => {
                                     let name = i.replace("." + conf.templates.format,"").toCamel().capitalize() + e.replace("." + conf.templates.format,"").toCamel().capitalize();
-                                    let path = `comp/${i}/${e.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
+                                    let path = `${conf.cms.sectionsDir}/${i}/${e.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
                                     callback(name, path)
                                 });
                             } else {
                                 let name = i.replace("." + conf.templates.format,"").toCamel().capitalize();
-                                let path = `comp/${i.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
+                                let path = `${conf.cms.sectionsDir}/${i.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
                                 callback(name, path)
                             }
                         });
@@ -2288,8 +2284,8 @@ export class Core {
                 return new Cms().install()
             })
 
-            gulp.task("cms:prepare", () => {
-                return new Cms().prepare()
+            gulp.task("cms:prepare", (done) => {
+                return new Cms().prepare(done)
             })
         }
     }
