@@ -90,6 +90,7 @@ let conf = {
         polyfillUrls: [],
         polyfillFeatures: "default",
         importResolution: {
+            subDir: false,
             directories: [],
             filename: "+.js"
         },
@@ -153,7 +154,7 @@ export class Utils {
                 fse.emptyDirSync(root + conf.paths.temp);
             }
 
-            if (fs.existsSync(root + conf.paths.output.assets)) {
+            if (fs.existsSync(root + conf.paths.output.assets) && conf.paths.output.assets !== conf.paths.output.root) {
                 fse.removeSync(root + conf.paths.output.assets);
             }
 
@@ -289,7 +290,7 @@ export class Utils {
                     if (Array.isArray(urls[name])) {
                         urls[name].forEach(async (url) => {
                             if (url.includes("http")) {
-                                files.push(downloadFiles(name[name]))
+                                files.push(downloadFiles(url))
                             }
                         })
                     } else {
@@ -416,6 +417,9 @@ export class Scripts {
                                 }
                             }
                         } else {
+                            if (conf.scripts.importResolution.subDir) {
+                                imports = imports + `import "${item}/${conf.scripts.importResolution.filename}";\r\n`
+                            }
                             findPaths(fs.readdirSync(path), path);
                         }
                     });
@@ -424,6 +428,8 @@ export class Scripts {
                         if (fs.readFileSync(`${directory}/${conf.scripts.importResolution.filename}`).toString() !== imports) {
                             fs.writeFileSync(`${directory}/${conf.scripts.importResolution.filename}`, imports);
                         }
+                    } else {
+                        fs.writeFileSync(`${directory}/${conf.scripts.importResolution.filename}`, imports);
                     }
                 }
 
@@ -488,7 +494,7 @@ export class Scripts {
             }
 
             let assetsManifest = fs.existsSync(`${root + conf.paths.output.assets}/rev-manifest.json`) ? JSON.parse(fs.readFileSync(`${root + conf.paths.output.assets}/rev-manifest.json`).toString()) : {};
-            let importMapFile = fs.readFileSync(root + conf.paths.output.root + "/importmap.json").toString();
+            let importMapFile = fs.existsSync(`${root + conf.paths.output.root}/importmap.json`) ? JSON.parse(fs.readFileSync(`${root + conf.paths.output.root}/importmap.json`).toString()) : {};
             let files = fs.readdirSync(root + conf.paths.input.scripts);
 
             if (!fs.existsSync(root + conf.paths.output.scripts)){
@@ -503,7 +509,7 @@ export class Scripts {
                             context: 'window',
                             preserveEntrySignatures: true,
                             plugins: [
-                                conf.scripts.importMap.build && rollupImportMapPlugin(JSON.parse(importMapFile)),
+                                (conf.scripts.importMap.build && typeof importMapFile["imports"] !== "undefined") && rollupImportMapPlugin(importMapFile),
                                 !conf.scripts.importMap.build && nodeResolve(),
                                 !conf.scripts.importMap.build && commonjs(),
                                 replace({
@@ -2054,7 +2060,7 @@ export class Core {
     }
     tasks() {
         if (!conf.vite) {
-            Exists.assets || Exists.icons || Exists.styles || Exists.scripts || Exists.templates
+            (Exists.assets || Exists.icons || Exists.styles || Exists.scripts || Exists.templates)
             && gulp.task("default", resolve => {
                 let tasks = [];
 
@@ -2068,9 +2074,9 @@ export class Core {
                 conf.errors = true
 
                 gulp.series(tasks)(resolve)
-            })
+            });
 
-            Exists.assets || Exists.icons || Exists.styles || Exists.scripts
+            (Exists.assets || Exists.icons || Exists.styles || Exists.scripts)
             && gulp.task("production", resolve => {
                 let tasks = [];
 
@@ -2083,7 +2089,7 @@ export class Core {
                 conf.styles.purge.docs = true
 
                 gulp.series(tasks)(resolve)
-            })
+            });
 
             gulp.task("cleanup", () => {
                 return new Utils().cleanup()
