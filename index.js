@@ -1054,7 +1054,11 @@ export class Templates {
                 }
 
                 if (conf.serve.mode !== "dev" && output.indexOf(`/${conf.paths.input.root}`) === 0) {
-                    output = output.replace(`/${conf.paths.input.root}`, `/${root + conf.paths.output.root}`)
+                    if (conf.serve.rewriteOutput) {
+                        output = output.replace(`/${conf.paths.input.root}`, `/${conf.paths.output.root}`)
+                    } else {
+                        output = output.replace(`/${conf.paths.input.root}`, "")
+                    }
                 }
 
                 if (conf.serve.rewriteOutput && output.indexOf(`/${conf.paths.output.root}`) === 0) {
