@@ -2164,8 +2164,9 @@ export class Core {
         }
 
         if (Exists.icons) {
-            gulp.task("icons", () => {
-                return new Icons().fetch()
+            gulp.task("icons", (resolve) => {
+                // TODO tady jen fetch
+                gulp.series(new Icons().fetch, new Icons().build)(resolve)
             })
 
             gulp.task("icons:build", (resolve) => {
