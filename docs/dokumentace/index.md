@@ -430,6 +430,13 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
       }
   ```
 
+### styles.purge.nodeResolve
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+  Zahrnout node_modules knihovny v `styles.purge.content`
+
 ### styles.purge.tailwind
 
 - **Type:** `object`

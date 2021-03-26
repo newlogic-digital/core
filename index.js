@@ -111,6 +111,7 @@ let conf = {
             content: [],
             docs: false,
             options: {},
+            nodeResolve: true,
             tailwind: {
                 keyframes: true
             }
@@ -643,7 +644,7 @@ export class Styles {
                 let purgeFiles = conf.styles.purge.content;
                 let dependencies = JSON.parse(fs.readFileSync(`package.json`).toString()).dependencies;
 
-                if (typeof dependencies !== "undefined") {
+                if (typeof dependencies !== "undefined" && conf.styles.purge.nodeResolve) {
                     Object.keys(dependencies).map(lib => {
                         purgeFiles.push(`node_modules/${lib}/**/*.js`)
                     });
