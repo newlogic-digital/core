@@ -109,7 +109,7 @@ let conf = {
         purge: {
             enabled: true,
             content: [],
-            docs: true,
+            docs: false,
             options: {},
             tailwind: {
                 keyframes: true
