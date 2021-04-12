@@ -1465,7 +1465,7 @@ export class Emails {
                 filters: new Templates().filters,
                 extensions: new Templates().tags
             })))
-            .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + conf.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers())))
+            .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + conf.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers(Object.assign(new Templates().filters, new Templates().functions)))))
             .pipe(() => gulpif("*.{hbs,twig}", rename({ extname: ".html" })))
 
             gulp.series(
