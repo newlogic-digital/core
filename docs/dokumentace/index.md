@@ -36,7 +36,7 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 
   Výchozí jazyk aplikace
 
-### local
+### local (momentálně nefunguje)
 
 - **Type:** `boolean`
 - **Default:** `false`
