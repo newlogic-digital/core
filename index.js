@@ -97,6 +97,8 @@ let conf = {
         importMap: {
             build: true,
             cdn: "esm.sh",
+            version: "",
+            target: "es2020",
             trailingSlashes: "",
             shortUrl: false,
             localDownload: false
@@ -190,6 +192,7 @@ export class Utils {
             fs.readFile(`package.json`, 'utf8', (err, data) => {
                 let dependencies = JSON.parse(data)["dependencies"];
                 let cdn = conf.scripts.importMap.cdn;
+                let version = "";
                 let url;
                 let urlSub;
                 let imports = JSON.parse(data)["imports"];
@@ -203,9 +206,12 @@ export class Utils {
                 }
 
                 if (cdn === "esm.sh") {
+                    if (conf.scripts.importMap.version !== "") {
+                        version = `${conf.scripts.importMap.version}/`
+                    }
                     if (!conf.scripts.importMap.shortUrl) {
-                        url = "https://cdn.esm.sh/{DEPENDENCY}@{VERSION}/esnext/{DEPENDENCY}.js";
-                        urlSub = "https://cdn.esm.sh/{DEPENDENCY}@{VERSION}/esnext/";
+                        url = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${conf.scripts.importMap.target}/{DEPENDENCY}.js`;
+                        urlSub = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${conf.scripts.importMap.target}/`;
                     } else {
                         url = `https://esm.sh/{DEPENDENCY}@{VERSION}`;
                         urlSub = "https://esm.sh/{DEPENDENCY}@{VERSION}/";
@@ -218,6 +224,9 @@ export class Utils {
                         url = `https://esm.run/{DEPENDENCY}@{VERSION}`;
                         urlSub = "https://esm.run/{DEPENDENCY}@{VERSION}/";
                     }
+                } else if (cdn === "jspm.dev") {
+                    url = `https://jspm.dev/{DEPENDENCY}@{VERSION}`;
+                    urlSub = "https://jspm.dev/{DEPENDENCY}@{VERSION}/";
                 }
 
                 Object.keys(dependencies).forEach((dependency) => {
@@ -1084,6 +1093,9 @@ export class Templates {
             },
             "exists": (path) => {
                 fs.existsSync(path)
+            },
+            "tel": (value) => {
+                return value.replace(/\s+/g, '').replace("(","").replace(")","");
             }
         }
     }

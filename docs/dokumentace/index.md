@@ -373,7 +373,20 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 - **Type:** `string`
 - **Default:** `"esm.sh"`
 
-  Které CDN se má použít pro generování importmapy, lze nastavit `esm.sh` a `esm.run`
+  Které CDN se má použít pro generování importmapy, lze nastavit `esm.sh`, `esm.run` nebo `jspm.dev` (vhodné jen pro vývoj)
+
+### scripts.importMap.target
+
+- **Type:** `string`
+- **Default:** `"es2020"`
+
+  používá se pro esm.sh konfiguraci, lze nastavit `es2020`, `esnext`, `es2015`, `deno`
+
+### scripts.importMap.version
+
+- **Type:** `string`
+
+  upřesnění použití esm.sh verze, např. `v40`
 
 ### scripts.importMap.trailingSlashes
 
