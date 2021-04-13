@@ -108,6 +108,7 @@ let conf = {
         format: "css",
         revision: true,
         optimizations: true,
+        cacheTailwind: true,
         purge: {
             enabled: true,
             content: [],
@@ -728,8 +729,9 @@ export class Styles {
 
         if (!fs.existsSync(`${root + conf.paths.input.styles}/tailwind.css`)) {
             conf.styles.format === "less" && await new Promise(resolve => {
-                if (fs.readdirSync(root + conf.paths.temp).toString().includes("-modifiers")) {
-                    resolve()
+                if (fs.readdirSync(root + conf.paths.temp).toString().includes("-modifiers") && conf.styles.cacheTailwind) {
+                    resolve();
+                    return false;
                 }
 
                 const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
@@ -747,8 +749,9 @@ export class Styles {
         }
 
         return new Promise(resolve => {
-            if (fs.readdirSync(root + conf.paths.temp).toString().includes("tailwind")) {
-                resolve()
+            if (fs.readdirSync(root + conf.paths.temp).toString().includes("tailwind") && conf.styles.cacheTailwind) {
+                resolve();
+                return false;
             }
 
             const purge = lazypipe().pipe(purgeCSS, Object.assign({
