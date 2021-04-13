@@ -1830,9 +1830,9 @@ export class Serve {
 export class Watch {
     get paths() {
         return {
-            scripts: [`${root + conf.paths.input.scripts}/**`, `!${root + conf.paths.input.scripts}/**/\\${conf.scripts.importResolution.filename}`],
-            styles: [`${root + conf.paths.input.styles}/**`, `!${root + conf.paths.input.styles}/**/\\${conf.styles.importResolution.filename}`],
-            templates: [`${root + conf.paths.input.templates}/**`, root + conf.paths.input.main, `!${root + conf.paths.input.templates}/*.${conf.templates.format}`]
+            scripts: [`${conf.paths.input.scripts}/**`, `!${conf.paths.input.scripts}/**/\\${conf.scripts.importResolution.filename}`],
+            styles: [`${conf.paths.input.styles}/**`, `!${conf.paths.input.styles}/**/\\${conf.styles.importResolution.filename}`],
+            templates: [`${conf.paths.input.templates}/**`, conf.paths.input.main, `!${conf.paths.input.templates}/*.${conf.templates.format}`]
         }
     }
     dev() {
@@ -1853,7 +1853,7 @@ export class Watch {
         }
 
         if (Exists.emails) {
-            gulp.watch(`${root + conf.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${conf.paths.input.emails}/**`, gulp.series("emails:build"))
         }
     }
     build(type) {
@@ -1886,15 +1886,15 @@ export class Watch {
         }
 
         if (Exists.icons && Exists.templates && conf.icons.revision === true) {
-            gulp.watch(`${root + conf.paths.output.icons}/${conf.icons.filename}*`, gulp.series(templates));
+            gulp.watch(`${conf.paths.output.icons}/${conf.icons.filename}*`, gulp.series(templates));
         }
 
         if (Exists.assets && type === "production") {
-            gulp.watch(`${root + conf.paths.input.assets}/**`, gulp.series("assets"))
+            gulp.watch(`${conf.paths.input.assets}/**`, gulp.series("assets"))
         }
 
         if (Exists.emails) {
-            gulp.watch(`${root + conf.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${conf.paths.input.emails}/**`, gulp.series("emails:build"))
         }
     }
 }
