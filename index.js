@@ -726,6 +726,7 @@ export class Styles {
         const autoprefixer = (await import("autoprefixer")).default;
         const tailwindcss = (await import("tailwindcss")).default;
         const purgeCSS = (await import("gulp-purgecss")).default;
+        const nesting = (await import("postcss-nesting")).default
 
         if (!fs.existsSync(`${root + conf.paths.input.styles}/tailwind.css`)) {
             conf.styles.format === "less" && await new Promise(resolve => {
@@ -765,7 +766,7 @@ export class Styles {
             }, conf.styles.purge.tailwind));
 
             gulp.src(`${root + conf.paths.input.styles}/tailwind.css`)
-                .pipe(postcss([tailwindcss({ config: conf.tailwind }), autoprefixer]))
+                .pipe(postcss([nesting, tailwindcss({ config: conf.tailwind }), autoprefixer]))
                 .pipe(gulpif(conf.styles.purge.enabled, purge()))
                 .pipe(gulp.dest(root + conf.paths.temp))
                 .on("end", resolve)
@@ -1095,7 +1096,11 @@ export class Templates {
                 return "data:image/svg+xml;charset=UTF-8,"+svg;
             },
             "exists": (path) => {
-                fs.existsSync(path)
+                if (path.indexOf("/") === 0) {
+                    path = path.slice(1);
+                }
+
+                return fs.existsSync(root + path)
             },
             "tel": (value) => {
                 return value.replace(/\s+/g, '').replace("(","").replace(")","");
@@ -1767,7 +1772,7 @@ export class Serve {
                     export default {
                         middleware: [
                             function rewriteIndex(context, next) {
-                                if (${conf.serve.rewriteOutput} && !context.url.startsWith("/${conf.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/__")) {
+                                if (${conf.serve.rewriteOutput} && !context.url.startsWith("/${conf.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
                                     context.url = '/${conf.paths.output.root}/' + context.url;
                                 }
                                 
@@ -1778,7 +1783,7 @@ export class Serve {
                             '${conf.paths.input.root}/**/*.css': 'js',
                             '${conf.paths.input.root}/**/*.less': 'js'
                         },
-                        plugins: [styles({ plugins: [importCSS, postcssPresetEnv({ stage: 0 })], include: ['${conf.paths.input.root}/**/*.css', '${conf.paths.input.root}/**/*.less'] })],
+                        plugins: [styles({ plugins: [importCSS, postcssPresetEnv({ stage: 0 })], include: ['${conf.paths.input.root}/**/*.css', '${conf.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
                     }
                 `)
 
