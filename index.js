@@ -818,7 +818,7 @@ export class Styles {
                         let value = `[${val}]{aspect-ratio: ${val.match(/\d+/g)[0]} / ${val.match(/\d+/g)[1]}}`;
 
                         if (file.extname === ".less") {
-                            let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[0]) * 100;
+                            let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[1]) * 100;
                             value = `[${val}]:before{padding-bottom: ${calc}%}`
                         }
 
@@ -1129,10 +1129,16 @@ export class Templates {
                     parse: function (token, context, chain) {
                         let type = Reflect.apply(Twig.expression.parse, this, [token.stack, context]);
                         let output = this.parse(token.output, context);
+                        let mirror = false;
+
+                        if (type.includes(":mirror")) {
+                            mirror = true;
+                            type = type.replace(":mirror", "")
+                        }
 
                         return {
                             chain: chain,
-                            output: `${output}
+                            output: `${mirror ? output : ""}
                             <pre style="width: 100%">
                                 <code class="language-${type}">
                                     <xmp>
@@ -1421,7 +1427,7 @@ export class Icons {
             .pipe(rename(function(path){
                 path.basename = conf.icons.filename;
             }))
-            .pipe(replace('--"]', '--"]:before'))
+            .pipe(replace('-"]', '-"]:before'))
             .pipe(replace('!important;', ';'))
             .pipe(replace('@font-face {', '@font-face { font-display: block;'))
             .pipe(build())
