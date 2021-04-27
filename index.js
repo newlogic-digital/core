@@ -14,11 +14,14 @@ import glob from "glob";
 import {fileURLToPath} from "url";
 
 import twig from "gulp-twig2html";
+import autoprefixer from "autoprefixer";
 import postcss from "gulp-postcss";
-import importCSS from "postcss-import";
-import postcssPresetEnv from "postcss-preset-env";
-import {createRequire} from "module";
+import postcssImport from "postcss-import";
+import postcssNesting from "postcss-nesting/dist/index.mjs";
+import postcssCustomSelectors from "postcss-custom-selectors";
+import postcssCustomMedia from "postcss-custom-media";
 
+import {createRequire} from "module";
 const require = createRequire(import.meta.url);
 const root = process.cwd() + "/"
 
@@ -73,6 +76,12 @@ let conf = {
             temp: "temp/cms",
             templates: "www/templates",
             components: "www/components"
+        },
+        configs: {
+            postcss: "postcss.config.js",
+            tailwind: "tailwind.config.js",
+            vite: "vite.config.js",
+            wds: "wds.config.mjs"
         }
     },
     icons: {
@@ -81,7 +90,8 @@ let conf = {
         id: "",
         local: false,
         revision: true,
-        optimizations: true
+        optimizations: true,
+        postcss: {}
     },
     scripts: {
         optimizations: true,
@@ -108,7 +118,6 @@ let conf = {
         format: "css",
         revision: true,
         optimizations: true,
-        cacheTailwind: true,
         purge: {
             enabled: true,
             content: [],
@@ -129,7 +138,15 @@ let conf = {
             filename: "+.css",
         },
         import: ['all'],
-        themePath: ""
+        themePath: "",
+        ratio: ["main.css"],
+        join: {"main.css": ["temp/tailwind.css"]},
+        tailwind: {
+            cache: true,
+            postcss: {},
+            basename: "tailwind.css"
+        },
+        postcss: {}
     },
     templates: {
         format: "twig",
@@ -143,13 +160,16 @@ let conf = {
     emails: {
         removeClasses: false,
         inlineOnly: false,
-        zipPrefix: ["email"]
+        zipPrefix: ["email"],
+        postcss: {}
     },
     assets: {
         revision: true
     },
     tailwind: {}
 }
+
+let postcssPlugins = [postcssImport, postcssNesting, postcssCustomMedia, postcssCustomSelectors];
 
 export class Utils {
     cleanup() {
@@ -399,6 +419,18 @@ export class Utils {
                 await Promise.all(files)
             }
         }
+    }
+    postcssConfig(config, after) {
+        let plugins = postcssPlugins;
+
+        if (fs.existsSync(root + conf.paths.configs.postcss)) {
+        } else if (typeof config.extend !== "undefined") {
+            plugins = plugins.concat(config.extend)
+        } else if (typeof config.plugins !== "undefined") {
+            plugins = config;
+        }
+
+        return plugins.concat(after);
     }
 }
 
@@ -723,14 +755,13 @@ export class Styles {
         })
     }
     async tailwind() {
-        const autoprefixer = (await import("autoprefixer")).default;
+        const cleanCSS = (await import("./packages/gulp-clean-css/index.js")).default;
         const tailwindcss = (await import("tailwindcss")).default;
         const purgeCSS = (await import("gulp-purgecss")).default;
-        const nesting = (await import("postcss-nesting")).default
 
-        if (!fs.existsSync(`${root + conf.paths.input.styles}/tailwind.css`)) {
+        if (!fs.existsSync(`${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`)) {
             conf.styles.format === "less" && await new Promise(resolve => {
-                if (fs.readdirSync(root + conf.paths.temp).toString().includes("-modifiers") && conf.styles.cacheTailwind) {
+                if (fs.readdirSync(root + conf.paths.temp).toString().includes("-modifiers") && conf.styles.tailwind.cache) {
                     resolve();
                     return false;
                 }
@@ -750,10 +781,15 @@ export class Styles {
         }
 
         return new Promise(resolve => {
-            if (fs.readdirSync(root + conf.paths.temp).toString().includes("tailwind") && conf.styles.cacheTailwind) {
+            if (fs.existsSync(`${root + conf.paths.temp}/${conf.styles.tailwind.basename}`) && conf.styles.tailwind.cache) {
                 resolve();
                 return false;
             }
+
+            const clean = lazypipe().pipe(cleanCSS, {
+                inline: conf.styles.import,
+                level: {1: {specialComments: 0}, 2: {all: false}}
+            });
 
             const purge = lazypipe().pipe(purgeCSS, Object.assign({
                 content: conf.styles.purge.content,
@@ -765,16 +801,16 @@ export class Styles {
                 ]
             }, conf.styles.purge.tailwind));
 
-            gulp.src(`${root + conf.paths.input.styles}/tailwind.css`)
-                .pipe(postcss([nesting, tailwindcss({ config: conf.tailwind }), autoprefixer]))
+            gulp.src(`${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`)
+                .pipe(postcss(new Utils().postcssConfig(conf.styles.tailwind.postcss, [postcssNesting, tailwindcss({ config: conf.tailwind }), autoprefixer])))
                 .pipe(gulpif(conf.styles.purge.enabled, purge()))
+                .pipe(gulpif(conf.styles.optimizations, clean()))
                 .pipe(gulp.dest(root + conf.paths.temp))
                 .on("end", resolve)
         })
     }
     async build() {
-        const autoprefixer = (await import("autoprefixer")).default;
-        const cleanCSS = (await import("gulp-clean-css")).default;
+        const cleanCSS = (await import("./packages/gulp-clean-css/index.js")).default;
         const purgeCSS = (await import("gulp-purgecss")).default;
         const revision = (await import("gulp-rev")).default;
         const revRewrite = require('gulp-rev-rewrite');
@@ -806,6 +842,11 @@ export class Styles {
             });
 
             return through.obj((file, enc, cb) => {
+                if (!conf.styles.ratio.includes(file.basename)) {
+                    cb(null, file);
+                    return false;
+                }
+
                 if (file.isNull()) {
                     cb(null, file);
                 }
@@ -851,6 +892,28 @@ export class Styles {
             });
         }
 
+        const join = () => {
+            return through.obj((file, enc, cb) => {
+                if (file.isNull()) {
+                    cb(null, file);
+                }
+                if (file.isBuffer()) {
+                    Object.keys(conf.styles.join).forEach(joinFile => {
+                        if (joinFile === file.basename) {
+                            let contents = file.contents.toString();
+
+                            conf.styles.join[joinFile].forEach(targetFile => {
+                                contents += fs.readFileSync(root + targetFile).toString();
+                            })
+
+                            file.contents = Buffer.from(contents);
+                        }
+                    });
+                    cb(null, file);
+                }
+            });
+        }
+
         const aspectRatio = () => {
             return {
                 postcssPlugin: 'aspect-ratio',
@@ -877,24 +940,20 @@ export class Styles {
 
         aspectRatio.postcss = true;
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss([importCSS, autoprefixer, postcssPresetEnv({
-                stage: 0,
-                features: {
-                    'custom-properties': false
-                }
-            }), aspectRatio]))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.styles.postcss, [autoprefixer, aspectRatio])))
         ).pipe(() => gulpif("*.less", Modules.less.module()));
 
         return new Promise(resolve => {
-            gulp.src([`${root + conf.paths.input.styles}/*.{css,less}`, `!${root + conf.paths.input.styles}/tailwind.{css,less}`, `!${root + conf.paths.input.styles}/*-modifiers.less`])
+            gulp.src([`${root + conf.paths.input.styles}/*.{css,less}`, `!${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`, `!${root + conf.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
                 .pipe(ratio([`${root + conf.paths.input.templates}/**/*.{hbs,html,twig}`, `${root + conf.paths.cms.templates}/**/*.{tpl,twig}`]))
                 .pipe(vendor())
                 .pipe(build())
                 .pipe(gulpif(conf.styles.purge.enabled, purge()))
                 .pipe(Modules.autoprefixer.pipe())
-                .pipe(gulpif(conf.styles.revision, rev()))
                 .pipe(gulpif(conf.styles.optimizations, clean()))
+                .pipe(join())
+                .pipe(gulpif(conf.styles.revision, rev()))
                 .pipe(gulp.dest(root + conf.paths.output.styles))
                 .pipe(revision.manifest(root + conf.paths.output.styles + "/rev-manifest.json",{
                     merge: true,
@@ -1406,7 +1465,7 @@ export class Icons {
     }
     async build() {
         const replace = (await import('gulp-replace')).default;
-        const cleanCSS = (await import('gulp-clean-css')).default;
+        const cleanCSS = (await import("./packages/gulp-clean-css/index.js")).default;
         const rename = (await import('gulp-rename')).default;
         const revision = (await import("gulp-rev")).default;
 
@@ -1414,12 +1473,7 @@ export class Icons {
 
         const clean = lazypipe().pipe(cleanCSS);
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss([importCSS, postcssPresetEnv({
-            stage: 0,
-            features: {
-                'custom-properties': false
-            }
-        })]))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.icons.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return gulp.src(`${root + conf.paths.input.icons}/style.{css,less}`)
@@ -1454,14 +1508,7 @@ export class Emails {
             removeStyleTags: conf.emails.inlineOnly
         }
 
-        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss([importCSS, postcssPresetEnv({
-            stage: 0,
-            features: {
-                'custom-properties': {
-                    preserve: false
-                }
-            }
-        })]))
+        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.emails.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return new Promise(resolve => {
@@ -1765,61 +1812,75 @@ export class Cms {
 export class Serve {
     async init() {
         return new Promise(resolve => {
-
             if (conf.serve.server === "wds") {
-                fs.writeFileSync(`${root + conf.paths.temp}/wds.config.mjs`,`
-                    import rollupStyles from 'rollup-plugin-styles';
-                    import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
-                    import postcssPresetEnv from "postcss-preset-env"
-                    import importCSS from "postcss-import"
-                    
-                    const styles = fromRollup(rollupStyles);
-                    
-                    export default {
-                        middleware: [
-                            function rewriteIndex(context, next) {
-                                if (${conf.serve.rewriteOutput} && !context.url.startsWith("/${conf.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
-                                    context.url = '/${conf.paths.output.root}/' + context.url;
-                                }
-                                
-                                return next();
-                            },
-                        ],
-                        mimeTypes: {
-                            '${conf.paths.input.root}/**/*.css': 'js',
-                            '${conf.paths.input.root}/**/*.less': 'js'
-                        },
-                        plugins: [styles({ plugins: [importCSS, postcssPresetEnv({ stage: 0 })], include: ['${conf.paths.input.root}/**/*.css', '${conf.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
-                    }
-                `)
+                let config = `${conf.paths.temp}/wds.config.mjs`;
 
-                nodeCmd.exec(`npx wds --watch --open ${conf.serve.index} --config ${conf.paths.temp}/wds.config.mjs`, err => err && console.log(err));
+                if (fs.existsSync(root + conf.paths.configs.wds)) {
+                    config = conf.paths.configs.wds;
+                } else {
+                    fs.writeFileSync(`${root + conf.paths.temp}/wds.config.mjs`,`
+                        import rollupStyles from 'rollup-plugin-styles';
+                        import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
+                        import core from "../gulpfile.js";
+                        
+                        const conf = core.Config;
+                        const styles = fromRollup(rollupStyles);
+                        
+                        export default {
+                            middleware: [
+                                function rewriteIndex(context, next) {
+                                    if (${conf.serve.rewriteOutput} && !context.url.startsWith("/${conf.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
+                                        context.url = '/${conf.paths.output.root}/' + context.url;
+                                    }
+                                    
+                                    return next();
+                                },
+                            ],
+                            mimeTypes: {
+                                '${conf.paths.input.root}/**/*.css': 'js',
+                                '${conf.paths.input.root}/**/*.less': 'js'
+                            },
+                            plugins: [styles({ plugins: core.Utils.postcssConfig(conf.styles.postcss, []), include: ['${conf.paths.input.root}/**/*.css', '${conf.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
+                        }
+                    `)
+                }
+
+                nodeCmd.exec(`npx wds --watch --open ${conf.serve.index} --config ${config}`, err => err && console.log(err));
+
+                console.log("\x1b[34m", "[Web Dev Server] running at localhost","\x1b[0m");
             }
 
             if (conf.serve.server === "vite") {
-                fs.writeFileSync(`${root + conf.paths.temp}/vite.config.js`,`
-                    import postcssPresetEnv from "postcss-preset-env"
-                    import importCSS from "postcss-import"
-                    
-                    export default {
-                        server: {open: "${conf.serve.index}"},
-                        css: {
-                            postcss: {
-                                plugins: [importCSS, postcssPresetEnv({
-                                    stage: 0,
-                                    features: {
-                                        'custom-properties': false
-                                    }
-                                })]
+                let config = `${conf.paths.temp}/vite.config.js`;
+
+                if (fs.existsSync(root + conf.paths.configs.vite)) {
+                    config = conf.paths.configs.vite;
+                } else {
+                    fs.writeFileSync(`${root + conf.paths.temp}/vite.config.js`,`
+                        import postcssPresetEnv from "postcss-preset-env"
+                        import importCSS from "postcss-import"
+                        
+                        export default {
+                            server: {open: "${conf.serve.index}"},
+                            css: {
+                                postcss: {
+                                    plugins: [importCSS, postcssPresetEnv({
+                                        stage: 0,
+                                        features: {
+                                            'custom-properties': false
+                                        }
+                                    })]
+                                }
                             }
                         }
-                    }
-                `)
+                    `)
+                }
 
-                nodeCmd.exec(`npx vite --config ${conf.paths.temp}/vite.config.js`, err => err && console.log(err));
+                nodeCmd.exec(`npx vite --config ${config}`, err => err && console.log(err));
+
+                console.log("\x1b[34m", "[Vite] running at localhost","\x1b[0m");
             }
 
-            console.log("\x1b[34m", "[Web Dev Server] running at localhost","\x1b[0m");
             resolve();
         })
 
@@ -1914,9 +1975,6 @@ export class Watch {
 }
 
 export class Core {
-    get config() {
-        return conf;
-    }
     init(config = {}) {
         conf = lodash.merge(conf, config);
 
@@ -2084,6 +2142,8 @@ export class Core {
         }
 
         this.tasks();
+
+        return {Config: conf, Utils: new Utils()};
     }
     tasks() {
         if (!conf.vite) {
