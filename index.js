@@ -1857,19 +1857,13 @@ export class Serve {
                     config = conf.paths.configs.vite;
                 } else {
                     fs.writeFileSync(`${root + conf.paths.temp}/vite.config.js`,`
-                        import postcssPresetEnv from "postcss-preset-env"
-                        import importCSS from "postcss-import"
+                        import core from "../gulpfile.js";
                         
                         export default {
                             server: {open: "${conf.serve.index}"},
                             css: {
                                 postcss: {
-                                    plugins: [importCSS, postcssPresetEnv({
-                                        stage: 0,
-                                        features: {
-                                            'custom-properties': false
-                                        }
-                                    })]
+                                    plugins: core.Utils.postcssConfig(core.Config.styles.postcss, [])
                                 }
                             }
                         }
