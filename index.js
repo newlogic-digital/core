@@ -970,7 +970,7 @@ export class Templates {
         return {
             "color": (color, theme) => {
                 if (typeof theme === "undefined") {
-                    theme = "core"
+                    theme = "main"
                 }
 
                 if (!Exists.styles) {
