@@ -980,8 +980,8 @@ export class Templates {
                 if ((theme || color) && conf.styles.themePath.length !== 0) {
                     let pathColors = conf.styles.themePath.replace("{THEME}", theme).replace("{FORMAT}", conf.styles.format);
 
-                    if (fs.existsSync(pathColors)) {
-                        let colors = fs.readFileSync(pathColors, 'utf8').toString();
+                    if (fs.existsSync(`${root + conf.paths.input.styles}/${pathColors}`)) {
+                        let colors = fs.readFileSync(`${root + conf.paths.input.styles}/${pathColors}`, 'utf8').toString();
                         let parse = colors.substring(colors.indexOf(color)+color.length+1,colors.length);
 
                         return parse.substring(0,parse.indexOf(";")).replace(" ", "");
