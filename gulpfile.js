@@ -1,4 +1,4 @@
-import {Core} from  "./index.js";
+import {Core} from "./index.js";
 
 export default new Core().init({
     styles: {

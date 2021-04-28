@@ -29,8 +29,7 @@ let Exists;
 let Modules;
 let Functions;
 let Package = require(root + "package.json");
-
-let conf = {
+let Config = {
     lang: "cs",
     local: false,
     errors: true,
@@ -174,32 +173,32 @@ let postcssPlugins = [postcssImport, postcssNesting, postcssCustomMedia, postcss
 export class Utils {
     cleanup() {
         return new Promise(resolve => {
-            if (fs.existsSync(root + conf.paths.temp)) {
-                fse.emptyDirSync(root + conf.paths.temp);
+            if (fs.existsSync(root + Config.paths.temp)) {
+                fse.emptyDirSync(root + Config.paths.temp);
             }
 
-            if (fs.existsSync(root + conf.paths.output.assets) && conf.paths.output.assets !== conf.paths.output.root) {
-                fse.removeSync(root + conf.paths.output.assets);
+            if (fs.existsSync(root + Config.paths.output.assets) && Config.paths.output.assets !== Config.paths.output.root) {
+                fse.removeSync(root + Config.paths.output.assets);
             }
 
-            if (fs.existsSync(root + conf.paths.output.styles)) {
-                fse.removeSync(root + conf.paths.output.styles);
+            if (fs.existsSync(root + Config.paths.output.styles)) {
+                fse.removeSync(root + Config.paths.output.styles);
             }
 
-            if (fs.existsSync(root + conf.paths.output.scripts)) {
-                fse.removeSync(root + conf.paths.output.scripts);
+            if (fs.existsSync(root + Config.paths.output.scripts)) {
+                fse.removeSync(root + Config.paths.output.scripts);
             }
 
             (function(){
-                if (fs.existsSync(`${root + conf.paths.input.templates}/`)) {
-                    let pages = fs.readdirSync(`${root + conf.paths.input.templates}/`),
+                if (fs.existsSync(`${root + Config.paths.input.templates}/`)) {
+                    let pages = fs.readdirSync(`${root + Config.paths.input.templates}/`),
                         items = pages.length;
 
                     for (let i = 0; i < items; i++) {
-                        if (fs.existsSync(`${root + conf.paths.output.root}/${pages[i]}`)) {
-                            fs.unlinkSync(`${root + conf.paths.output.root}/${pages[i]}`);
-                        } else if (fs.existsSync(`${root + conf.paths.output.root}/${pages[i].replace('.json', '.html')}`)) {
-                            fs.unlinkSync(`${root + conf.paths.output.root}/${pages[i].replace('.json', '.html')}`);
+                        if (fs.existsSync(`${root + Config.paths.output.root}/${pages[i]}`)) {
+                            fs.unlinkSync(`${root + Config.paths.output.root}/${pages[i]}`);
+                        } else if (fs.existsSync(`${root + Config.paths.output.root}/${pages[i].replace('.json', '.html')}`)) {
+                            fs.unlinkSync(`${root + Config.paths.output.root}/${pages[i].replace('.json', '.html')}`);
                         }
                     }
                 }
@@ -212,7 +211,7 @@ export class Utils {
         return new Promise((resolve) => {
             fs.readFile(`package.json`, 'utf8', (err, data) => {
                 let dependencies = JSON.parse(data)["dependencies"];
-                let cdn = conf.scripts.importMap.cdn;
+                let cdn = Config.scripts.importMap.cdn;
                 let version = "";
                 let url;
                 let urlSub;
@@ -227,18 +226,18 @@ export class Utils {
                 }
 
                 if (cdn === "esm.sh") {
-                    if (conf.scripts.importMap.version !== "") {
-                        version = `${conf.scripts.importMap.version}/`
+                    if (Config.scripts.importMap.version !== "") {
+                        version = `${Config.scripts.importMap.version}/`
                     }
-                    if (!conf.scripts.importMap.shortUrl) {
-                        url = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${conf.scripts.importMap.target}/{DEPENDENCY}.js`;
-                        urlSub = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${conf.scripts.importMap.target}/`;
+                    if (!Config.scripts.importMap.shortUrl) {
+                        url = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${Config.scripts.importMap.target}/{DEPENDENCY}.js`;
+                        urlSub = `https://cdn.esm.sh/${version}{DEPENDENCY}@{VERSION}/${Config.scripts.importMap.target}/`;
                     } else {
                         url = `https://esm.sh/{DEPENDENCY}@{VERSION}`;
                         urlSub = "https://esm.sh/{DEPENDENCY}@{VERSION}/";
                     }
                 } else if (cdn === "esm.run") {
-                    if (!conf.scripts.importMap.shortUrl) {
+                    if (!Config.scripts.importMap.shortUrl) {
                         url = "https://cdn.jsdelivr.net/npm/{DEPENDENCY}@{VERSION}/+esm";
                         urlSub = "https://cdn.jsdelivr.net/npm/{DEPENDENCY}@{VERSION}/";
                     } else {
@@ -257,7 +256,7 @@ export class Utils {
                         importMap.imports[dependency] = url.replace(new RegExp("{DEPENDENCY}", 'g'), dependency).replace("{VERSION}", dependencies[dependency].replace("^",""))
                     }
 
-                    if (dependency.match(conf.scripts.importMap.trailingSlashes)) {
+                    if (dependency.match(Config.scripts.importMap.trailingSlashes)) {
                         importMap.imports[`${dependency}/`] = urlSub.replace("{DEPENDENCY}", dependency).replace("{VERSION}", dependencies[dependency].replace("^",""))
                     }
                 });
@@ -268,24 +267,24 @@ export class Utils {
                     };
                 }
 
-                if (!fs.existsSync(root + conf.paths.output.root)){
-                    fs.mkdirSync(root + conf.paths.output.root);
+                if (!fs.existsSync(root + Config.paths.output.root)){
+                    fs.mkdirSync(root + Config.paths.output.root);
                 }
 
-                fs.writeFileSync(root + conf.paths.output.root + "/importmap.json", JSON.stringify(importMap),'utf8');
+                fs.writeFileSync(root + Config.paths.output.root + "/importmap.json", JSON.stringify(importMap),'utf8');
                 resolve();
             })
         })
     }
     async cdn(type, inject) {
         const replace = (await import('gulp-replace')).default;
-        const dir = root + conf.paths.cdn;
+        const dir = root + Config.paths.cdn;
 
         let cdnPaths = [];
         let sri = {};
 
-        if (!fs.existsSync(root + conf.paths.cdn)){
-            fs.mkdirSync(root + conf.paths.cdn);
+        if (!fs.existsSync(root + Config.paths.cdn)){
+            fs.mkdirSync(root + Config.paths.cdn);
         }
 
         function spawnCmd(cmd) {
@@ -301,18 +300,18 @@ export class Utils {
             let urlName = url.lastIndexOf("/");
             let fileName = url.substring(urlName + 1, url.length);
 
-            if (!fs.existsSync(root + conf.paths.cdn + "/" + fileName)) {
+            if (!fs.existsSync(root + Config.paths.cdn + "/" + fileName)) {
                 await Functions.download(url, dir + "/" + fileName);
             }
 
-            sri[url] = `sha256-${spawnCmd(`cat ${root + conf.paths.cdn}/${fileName} | openssl dgst -sha256 -binary | openssl base64 -A`)}`;
+            sri[url] = `sha256-${spawnCmd(`cat ${root + Config.paths.cdn}/${fileName} | openssl dgst -sha256 -binary | openssl base64 -A`)}`;
 
             cdnPaths.push(url.substring(0, urlName));
         }
 
         if (type === "templates") {
-            if (fs.existsSync(`${root + conf.paths.input.main}`)) {
-                const main = fs.readFileSync(root + conf.paths.input.main).toString();
+            if (fs.existsSync(`${root + Config.paths.input.main}`)) {
+                const main = fs.readFileSync(root + Config.paths.input.main).toString();
 
                 let urls = JSON.parse(main)["assets"]["js"];
                 let files = []
@@ -334,27 +333,27 @@ export class Utils {
                 await Promise.all(files);
             }
 
-            if (!fs.existsSync(root + conf.paths.output.root)) {
-                fs.mkdirSync(root + conf.paths.output.root);
+            if (!fs.existsSync(root + Config.paths.output.root)) {
+                fs.mkdirSync(root + Config.paths.output.root);
             }
 
-            fs.writeFileSync(`${root + conf.paths.output.root}/sri.json`, JSON.stringify(sri));
+            fs.writeFileSync(`${root + Config.paths.output.root}/sri.json`, JSON.stringify(sri));
 
             // TODO
             if (inject === true) {
-                let task = gulp.src(root + conf.paths.output.root + '/*.html');
+                let task = gulp.src(root + Config.paths.output.root + '/*.html');
 
                 cdnPaths.forEach(function(rep) {
-                    task = task.pipe(replace(rep, `/${conf.paths.cdn}`));
+                    task = task.pipe(replace(rep, `/${Config.paths.cdn}`));
                 });
 
-                task.pipe(gulp.dest(root + conf.paths.output.root));
+                task.pipe(gulp.dest(root + Config.paths.output.root));
             }
         }
 
         if (type === "scripts") {
-            if (fs.existsSync(`${root + conf.paths.input.scripts}/Utils/cdn.js`)) {
-                const urls = fs.readFileSync(`${root + conf.paths.input.scripts}/Utils/cdn.js`).toString().split(/\r?\n/g);
+            if (fs.existsSync(`${root + Config.paths.input.scripts}/Utils/cdn.js`)) {
+                const urls = fs.readFileSync(`${root + Config.paths.input.scripts}/Utils/cdn.js`).toString().split(/\r?\n/g);
 
                 let files = []
 
@@ -370,14 +369,14 @@ export class Utils {
                 await Promise.all(files);
             }
 
-            if (fs.existsSync(`${root + conf.paths.output.root}/importmap.json`) && conf.scripts.importMap.localDownload) {
-                let importmap = JSON.parse(fs.readFileSync(`${root + conf.paths.output.root}/importmap.json`).toString());
+            if (fs.existsSync(`${root + Config.paths.output.root}/importmap.json`) && Config.scripts.importMap.localDownload) {
+                let importmap = JSON.parse(fs.readFileSync(`${root + Config.paths.output.root}/importmap.json`).toString());
                 let files = []
 
                 Object.keys(importmap["imports"]).map((name) => {
                     let filename = "esm." + name.replace(new RegExp("/", 'g'),"-") + ".js";
 
-                    if (!fs.existsSync(root + conf.paths.cdn + "/" + filename) && name.slice(-1) !== "/") {
+                    if (!fs.existsSync(root + Config.paths.cdn + "/" + filename) && name.slice(-1) !== "/") {
                         files.push(Functions.download(importmap["imports"][name], dir + "/" + filename));
                         importmap["imports"][name] = "/" + dir + "/" + filename;
                     }
@@ -394,19 +393,19 @@ export class Utils {
 
             // TODO
             if (inject === true) {
-                let task_js = gulp.src(root + conf.paths.output.scripts + "/" + JSON.parse(fs.readFileSync(root + conf.paths.output.scripts + "/rev-manifest.json", 'utf8').toString())["core.js"]);
+                let task_js = gulp.src(root + Config.paths.output.scripts + "/" + JSON.parse(fs.readFileSync(root + Config.paths.output.scripts + "/rev-manifest.json", 'utf8').toString())["core.js"]);
 
                 cdnPaths.forEach(function (rep) {
-                    task_js = task_js.pipe(replace(rep, "/" + root + conf.paths.cdn));
+                    task_js = task_js.pipe(replace(rep, "/" + root + Config.paths.cdn));
                 });
 
-                task_js.pipe(gulp.dest(root + conf.paths.output.scripts));
+                task_js.pipe(gulp.dest(root + Config.paths.output.scripts));
             }
         }
 
         if (type === "styles") {
-            if (fs.existsSync(`${root + conf.paths.input.styles}/${conf.styles.vendor.path}`) && conf.styles.vendor.path.length !== 0) {
-                const urls = fs.readFileSync(`${root + conf.paths.input.styles}/${conf.styles.vendor.path}`).toString().split(/\r?\n/g);
+            if (fs.existsSync(`${root + Config.paths.input.styles}/${Config.styles.vendor.path}`) && Config.styles.vendor.path.length !== 0) {
+                const urls = fs.readFileSync(`${root + Config.paths.input.styles}/${Config.styles.vendor.path}`).toString().split(/\r?\n/g);
 
                 let files = [];
 
@@ -423,7 +422,7 @@ export class Utils {
     postcssConfig(config, after) {
         let plugins = postcssPlugins;
 
-        if (fs.existsSync(root + conf.paths.configs.postcss)) {
+        if (fs.existsSync(root + Config.paths.configs.postcss)) {
         } else if (typeof config.extend !== "undefined") {
             plugins = plugins.concat(config.extend)
         } else if (typeof config.plugins !== "undefined") {
@@ -437,13 +436,13 @@ export class Utils {
 export class Scripts {
     importResolution() {
         return new Promise(resolve => {
-            conf.scripts.importResolution.directories.map(directory => {
-                if (!fs.existsSync(`${root + conf.paths.input.scripts}/${directory}`)) {
-                    console.log("\x1b[31m", `importResolution - ${conf.paths.input.scripts}/${directory} doesn't exists`, "\x1b[0m");
+            Config.scripts.importResolution.directories.map(directory => {
+                if (!fs.existsSync(`${root + Config.paths.input.scripts}/${directory}`)) {
+                    console.log("\x1b[31m", `importResolution - ${Config.paths.input.scripts}/${directory} doesn't exists`, "\x1b[0m");
                     return false;
                 }
 
-                let items = fs.readdirSync(`${root + conf.paths.input.scripts}/${directory}`);
+                let items = fs.readdirSync(`${root + Config.paths.input.scripts}/${directory}`);
 
                 function findPaths(items, directory) {
                     let imports = "";
@@ -452,7 +451,7 @@ export class Scripts {
                         let path = `${directory}/${item}`;
 
                         if (fs.statSync(path).isFile()) {
-                            if (path.includes(".js") && !path.includes(conf.scripts.importResolution.filename)) {
+                            if (path.includes(".js") && !path.includes(Config.scripts.importResolution.filename)) {
                                 if (fs.readFileSync(path).toString().includes("export default")) {
                                     imports = imports + `export { default as ${item.replace(".js","")} } from './${item}';\r\n`
                                 } else {
@@ -460,23 +459,23 @@ export class Scripts {
                                 }
                             }
                         } else {
-                            if (conf.scripts.importResolution.subDir) {
-                                imports = imports + `import "${item}/${conf.scripts.importResolution.filename}";\r\n`
+                            if (Config.scripts.importResolution.subDir) {
+                                imports = imports + `import "${item}/${Config.scripts.importResolution.filename}";\r\n`
                             }
                             findPaths(fs.readdirSync(path), path);
                         }
                     });
 
-                    if (fs.existsSync(`${directory}/${conf.scripts.importResolution.filename}`)) {
-                        if (fs.readFileSync(`${directory}/${conf.scripts.importResolution.filename}`).toString() !== imports) {
-                            fs.writeFileSync(`${directory}/${conf.scripts.importResolution.filename}`, imports);
+                    if (fs.existsSync(`${directory}/${Config.scripts.importResolution.filename}`)) {
+                        if (fs.readFileSync(`${directory}/${Config.scripts.importResolution.filename}`).toString() !== imports) {
+                            fs.writeFileSync(`${directory}/${Config.scripts.importResolution.filename}`, imports);
                         }
                     } else {
-                        fs.writeFileSync(`${directory}/${conf.scripts.importResolution.filename}`, imports);
+                        fs.writeFileSync(`${directory}/${Config.scripts.importResolution.filename}`, imports);
                     }
                 }
 
-                findPaths(items, `${root + conf.paths.input.scripts}/${directory}`);
+                findPaths(items, `${root + Config.paths.input.scripts}/${directory}`);
             });
 
             resolve();
@@ -491,11 +490,11 @@ export class Scripts {
         const replace = (await import('@rollup/plugin-replace')).default;
 
         return new Promise(resolve => {
-            fse.removeSync(root + conf.paths.output.scripts);
+            fse.removeSync(root + Config.paths.output.scripts);
 
             const hashManifest = function(opts = {}) {
                 const defaults = {
-                    path: root + conf.paths.output.scripts
+                    path: root + Config.paths.output.scripts
                 };
 
                 opts = Object.assign({}, defaults, opts);
@@ -536,53 +535,53 @@ export class Scripts {
                 };
             }
 
-            let assetsManifest = fs.existsSync(`${root + conf.paths.output.assets}/rev-manifest.json`) ? JSON.parse(fs.readFileSync(`${root + conf.paths.output.assets}/rev-manifest.json`).toString()) : {};
-            let importMapFile = fs.existsSync(`${root + conf.paths.output.root}/importmap.json`) ? JSON.parse(fs.readFileSync(`${root + conf.paths.output.root}/importmap.json`).toString()) : {};
-            let files = fs.readdirSync(root + conf.paths.input.scripts);
+            let assetsManifest = fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? JSON.parse(fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`).toString()) : {};
+            let importMapFile = fs.existsSync(`${root + Config.paths.output.root}/importmap.json`) ? JSON.parse(fs.readFileSync(`${root + Config.paths.output.root}/importmap.json`).toString()) : {};
+            let files = fs.readdirSync(root + Config.paths.input.scripts);
 
-            if (!fs.existsSync(root + conf.paths.output.scripts)){
-                fs.mkdirSync(root + conf.paths.output.scripts);
+            if (!fs.existsSync(root + Config.paths.output.scripts)){
+                fs.mkdirSync(root + Config.paths.output.scripts);
             }
 
             Promise.all(files.map(async file => {
-                if (!fs.statSync(`${root + conf.paths.input.scripts}/${file}`).isDirectory()) {
+                if (!fs.statSync(`${root + Config.paths.input.scripts}/${file}`).isDirectory()) {
                     await (async() => {
 
                         const inputOptions = {
                             context: 'window',
                             preserveEntrySignatures: true,
                             plugins: [
-                                (conf.scripts.importMap.build && typeof importMapFile["imports"] !== "undefined") && rollupImportMapPlugin(importMapFile),
-                                !conf.scripts.importMap.build && nodeResolve(),
-                                !conf.scripts.importMap.build && commonjs(),
+                                (Config.scripts.importMap.build && typeof importMapFile["imports"] !== "undefined") && rollupImportMapPlugin(importMapFile),
+                                !Config.scripts.importMap.build && nodeResolve(),
+                                !Config.scripts.importMap.build && commonjs(),
                                 replace({
                                     preventAssignment: true,
                                     values: Object.assign({
                                         'process.env.NODE_ENV': JSON.stringify('production')
                                     }, assetsManifest)
                                 }),
-                                conf.scripts.optimizations && terser(),
-                                conf.scripts.revision && hashManifest()
+                                Config.scripts.optimizations && terser(),
+                                Config.scripts.revision && hashManifest()
                             ]
                         };
 
                         const outputOptions = {
-                            dir: root + conf.paths.output.scripts,
+                            dir: root + Config.paths.output.scripts,
                             format: 'es',
                             sourcemap: false,
                             compact: true,
-                            entryFileNames: `[name]${conf.scripts.revision ? ".[hash]" : ""}.js`,
+                            entryFileNames: `[name]${Config.scripts.revision ? ".[hash]" : ""}.js`,
                             chunkFileNames: '[name].[hash].js'
                         };
 
-                        const bundle = await rollup(Object.assign({input: root + conf.paths.input.scripts + '/' + file}, inputOptions));
+                        const bundle = await rollup(Object.assign({input: root + Config.paths.input.scripts + '/' + file}, inputOptions));
 
                         await bundle.write(outputOptions);
 
                         await bundle.close();
                     })();
 
-                    type === "production" && conf.scripts.legacy && await (async() => {
+                    type === "production" && Config.scripts.legacy && await (async() => {
 
                         const {getBabelOutputPlugin} = await import('@rollup/plugin-babel');
 
@@ -598,16 +597,16 @@ export class Scripts {
                                         'process.env.NODE_ENV': JSON.stringify('production')
                                     }, assetsManifest)
                                 }),
-                                conf.scripts.revision && hashManifest({path: root + conf.paths.output.scripts + "/es5/"})
+                                Config.scripts.revision && hashManifest({path: root + Config.paths.output.scripts + "/es5/"})
                             ]
                         };
 
                         const outputOptions = {
-                            dir: root + conf.paths.output.scripts + "/es5/",
+                            dir: root + Config.paths.output.scripts + "/es5/",
                             format: 'es',
                             sourcemap: false,
                             compact: true,
-                            entryFileNames: `[name]${conf.scripts.revision ? ".[hash]" : ""}.js`,
+                            entryFileNames: `[name]${Config.scripts.revision ? ".[hash]" : ""}.js`,
                             chunkFileNames: '[name].[hash].js',
                             plugins: [
                                 getBabelOutputPlugin({
@@ -622,11 +621,11 @@ export class Scripts {
                             ]
                         };
 
-                        if (!fs.existsSync(root + conf.paths.output.scripts + "/es5")){
-                            fs.mkdirSync(root + conf.paths.output.scripts + "/es5");
+                        if (!fs.existsSync(root + Config.paths.output.scripts + "/es5")){
+                            fs.mkdirSync(root + Config.paths.output.scripts + "/es5");
                         }
 
-                        const bundle = await rollup(Object.assign({input: root + conf.paths.input.scripts + `/${file}`}, inputOptions));
+                        const bundle = await rollup(Object.assign({input: root + Config.paths.input.scripts + `/${file}`}, inputOptions));
 
                         await bundle.write(outputOptions);
 
@@ -634,17 +633,17 @@ export class Scripts {
                     })();
                 }
             })).then(async () => {
-                type === "production" && conf.scripts.legacy && await (async() => {
+                type === "production" && Config.scripts.legacy && await (async() => {
                     let polyfills = "";
 
-                    if (typeof conf.scripts.polyfillUrls !== "undefined") {
-                        conf.scripts.polyfillUrls.map((script) => {
+                    if (typeof Config.scripts.polyfillUrls !== "undefined") {
+                        Config.scripts.polyfillUrls.map((script) => {
                             polyfills = polyfills.concat(`document.write('<script src="${script}"><\\/script>');`)
                         });
                     }
 
-                    fs.writeFileSync(root + conf.paths.temp + `/polyfills.js`, Functions.stripIndent(`
-                        document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=${conf.scripts.polyfillFeatures}"><\\/script>');
+                    fs.writeFileSync(root + Config.paths.temp + `/polyfills.js`, Functions.stripIndent(`
+                        document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=${Config.scripts.polyfillFeatures}"><\\/script>');
                         document.write('<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.5.0/dist/fetch.umd.min.js"><\\/script>');
                         document.write('<script src="https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.7/runtime.min.js"><\\/script>');
                         document.write('<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js"><\\/script>');
@@ -655,18 +654,18 @@ export class Scripts {
                         context: 'window',
                         preserveEntrySignatures: false,
                         plugins: [
-                            conf.scripts.revision && hashManifest({path: root + conf.paths.output.scripts + "/es5/"})
+                            Config.scripts.revision && hashManifest({path: root + Config.paths.output.scripts + "/es5/"})
                         ]
                     };
 
                     const outputOptions = {
-                        dir: root + conf.paths.output.scripts + "/es5/",
+                        dir: root + Config.paths.output.scripts + "/es5/",
                         format: 'es',
                         sourcemap: false,
                         compact: true,
-                        entryFileNames: `[name]${conf.scripts.revision ? ".[hash]" : ""}.js`
+                        entryFileNames: `[name]${Config.scripts.revision ? ".[hash]" : ""}.js`
                     };
-                    const bundle = await rollup(Object.assign({input: root + conf.paths.temp + `/polyfills.js`}, inputOptions));
+                    const bundle = await rollup(Object.assign({input: root + Config.paths.temp + `/polyfills.js`}, inputOptions));
 
                     await bundle.write(outputOptions);
 
@@ -683,17 +682,17 @@ export class Styles {
     get purge() {
         return {
             files: () => {
-                let purgeFiles = conf.styles.purge.content;
+                let purgeFiles = Config.styles.purge.content;
                 let dependencies = JSON.parse(fs.readFileSync(`package.json`).toString()).dependencies;
 
-                if (typeof dependencies !== "undefined" && conf.styles.purge.nodeResolve) {
+                if (typeof dependencies !== "undefined" && Config.styles.purge.nodeResolve) {
                     Object.keys(dependencies).map(lib => {
                         purgeFiles.push(`node_modules/${lib}/**/*.js`)
                     });
                 }
 
-                if (conf.styles.purge.docs) {
-                    purgeFiles = purgeFiles.toString().replace("/*." + conf.templates.format, "/!(Ui)." + conf.templates.format).split(",");
+                if (Config.styles.purge.docs) {
+                    purgeFiles = purgeFiles.toString().replace("/*." + Config.templates.format, "/!(Ui)." + Config.templates.format).split(",");
                 }
 
                 return purgeFiles;
@@ -707,19 +706,19 @@ export class Styles {
                             extensions: ['html', 'js', 'hbs', 'tpl', 'latte', 'twig']
                         }
                     ]
-                }, conf.styles.purge.options)
+                }, Config.styles.purge.options)
             }
         }
     }
     importResolution() {
         return new Promise(resolve => {
-            conf.styles.importResolution.directories.map(directory => {
-                if (!fs.existsSync(`${root + conf.paths.input.styles}/${directory}`)) {
-                    console.log("\x1b[31m", `importResolution - ${root + conf.paths.input.styles}/${directory} doesn't exists`, "\x1b[0m");
+            Config.styles.importResolution.directories.map(directory => {
+                if (!fs.existsSync(`${root + Config.paths.input.styles}/${directory}`)) {
+                    console.log("\x1b[31m", `importResolution - ${root + Config.paths.input.styles}/${directory} doesn't exists`, "\x1b[0m");
                     return false;
                 }
 
-                let items = fs.readdirSync(`${root + conf.paths.input.styles}/${directory}`);
+                let items = fs.readdirSync(`${root + Config.paths.input.styles}/${directory}`);
 
                 function findPaths(items, directory) {
                     let imports = "";
@@ -728,27 +727,27 @@ export class Styles {
                         let path = `${directory}/${item}`;
 
                         if (fs.statSync(path).isFile()) {
-                            if (path.includes(`.${conf.styles.format}`) && !path.includes(conf.styles.importResolution.filename)) {
+                            if (path.includes(`.${Config.styles.format}`) && !path.includes(Config.styles.importResolution.filename)) {
                                 imports = imports + `@import "${item}";\r\n`
                             }
                         } else {
-                            if (conf.styles.importResolution.subDir) {
-                                imports = imports + `@import "${item}/${conf.styles.importResolution.filename}";\r\n`
+                            if (Config.styles.importResolution.subDir) {
+                                imports = imports + `@import "${item}/${Config.styles.importResolution.filename}";\r\n`
                             }
                             findPaths(fs.readdirSync(path), path);
                         }
                     });
 
-                    if (fs.existsSync(`${directory}/${conf.styles.importResolution.filename}`)) {
-                        if (fs.readFileSync(`${directory}/${conf.styles.importResolution.filename}`).toString() !== imports) {
-                            fs.writeFileSync(`${directory}/${conf.styles.importResolution.filename}`, imports);
+                    if (fs.existsSync(`${directory}/${Config.styles.importResolution.filename}`)) {
+                        if (fs.readFileSync(`${directory}/${Config.styles.importResolution.filename}`).toString() !== imports) {
+                            fs.writeFileSync(`${directory}/${Config.styles.importResolution.filename}`, imports);
                         }
                     } else {
-                        fs.writeFileSync(`${directory}/${conf.styles.importResolution.filename}`, imports);
+                        fs.writeFileSync(`${directory}/${Config.styles.importResolution.filename}`, imports);
                     }
                 }
 
-                findPaths(items, `${root + conf.paths.input.styles}/${directory}`);
+                findPaths(items, `${root + Config.paths.input.styles}/${directory}`);
             });
 
             resolve();
@@ -759,21 +758,21 @@ export class Styles {
         const tailwindcss = (await import("tailwindcss")).default;
         const purgeCSS = (await import("gulp-purgecss")).default;
 
-        if (!fs.existsSync(`${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`)) {
-            conf.styles.format === "less" && await new Promise(resolve => {
-                if (fs.readdirSync(root + conf.paths.temp).toString().includes("-modifiers") && conf.styles.tailwind.cache) {
+        if (!fs.existsSync(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)) {
+            Config.styles.format === "less" && await new Promise(resolve => {
+                if (fs.readdirSync(root + Config.paths.temp).toString().includes("-modifiers") && Config.styles.tailwind.cache) {
                     resolve();
                     return false;
                 }
 
                 const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
 
-                gulp.src([`${root + conf.paths.input.styles}/*-modifiers.less`])
+                gulp.src([`${root + Config.paths.input.styles}/*-modifiers.less`])
                     .pipe(plumber(Functions.plumber))
                     .pipe(Modules.less.module())
-                    .pipe(gulpif(conf.styles.purge.enabled, purge()))
+                    .pipe(gulpif(Config.styles.purge.enabled, purge()))
                     .pipe(Modules.autoprefixer.pipe())
-                    .pipe(gulp.dest(root + conf.paths.temp))
+                    .pipe(gulp.dest(root + Config.paths.temp))
                     .on("end", resolve)
             })
 
@@ -781,31 +780,31 @@ export class Styles {
         }
 
         return new Promise(resolve => {
-            if (fs.existsSync(`${root + conf.paths.temp}/${conf.styles.tailwind.basename}`) && conf.styles.tailwind.cache) {
+            if (fs.existsSync(`${root + Config.paths.temp}/${Config.styles.tailwind.basename}`) && Config.styles.tailwind.cache) {
                 resolve();
                 return false;
             }
 
             const clean = lazypipe().pipe(cleanCSS, {
-                inline: conf.styles.import,
+                inline: Config.styles.import,
                 level: {1: {specialComments: 0}, 2: {all: false}}
             });
 
             const purge = lazypipe().pipe(purgeCSS, Object.assign({
-                content: conf.styles.purge.content,
+                content: Config.styles.purge.content,
                 extractors: [
                     {
                         extractor: content => content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [],
                         extensions: ['html', 'js', 'hbs', 'tpl', 'latte']
                     }
                 ]
-            }, conf.styles.purge.tailwind));
+            }, Config.styles.purge.tailwind));
 
-            gulp.src(`${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`)
-                .pipe(postcss(new Utils().postcssConfig(conf.styles.tailwind.postcss, [postcssNesting, tailwindcss({ config: conf.tailwind }), autoprefixer])))
-                .pipe(gulpif(conf.styles.purge.enabled, purge()))
-                .pipe(gulpif(conf.styles.optimizations, clean()))
-                .pipe(gulp.dest(root + conf.paths.temp))
+            gulp.src(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)
+                .pipe(postcss(new Utils().postcssConfig(Config.styles.tailwind.postcss, [postcssNesting, tailwindcss({ config: Config.tailwind }), autoprefixer])))
+                .pipe(gulpif(Config.styles.purge.enabled, purge()))
+                .pipe(gulpif(Config.styles.optimizations, clean()))
+                .pipe(gulp.dest(root + Config.paths.temp))
                 .on("end", resolve)
         })
     }
@@ -816,14 +815,14 @@ export class Styles {
         const revRewrite = require('gulp-rev-rewrite');
 
         const clean = lazypipe().pipe(cleanCSS, {
-            inline: conf.styles.import,
+            inline: Config.styles.import,
             level: {1: {specialComments: 0}, 2: {all: true}}
         });
 
         const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
 
         const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true)
-                    .pipe(revRewrite, {manifest: fs.existsSync(`${root + conf.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + conf.paths.output.assets}/rev-manifest.json`) : ""});
+                    .pipe(revRewrite, {manifest: fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`) : ""});
 
         const ratio = (source) => {
             let sourceFiles = [],
@@ -842,7 +841,7 @@ export class Styles {
             });
 
             return through.obj((file, enc, cb) => {
-                if (!conf.styles.ratio.includes(file.basename)) {
+                if (!Config.styles.ratio.includes(file.basename)) {
                     cb(null, file);
                     return false;
                 }
@@ -882,10 +881,10 @@ export class Styles {
                     cb(null, file);
                 }
                 if (file.isBuffer()) {
-                    if (conf.styles.vendor.path.length !== 0 && (fs.existsSync(`${root + conf.paths.input.styles}/${conf.styles.vendor.path}`) && conf.local === true || fs.existsSync(`${root + conf.paths.input.styles}/${conf.styles.vendor.path}`) && conf.styles.vendor.cache === true)) {
-                        let vendorUrl = fs.readFileSync(`${root + conf.paths.input.styles}/${conf.styles.vendor.path}`).toString().replace(/url\((.*)\//g,`url(../../${conf.paths.cdn}/`);
+                    if (Config.styles.vendor.path.length !== 0 && (fs.existsSync(`${root + Config.paths.input.styles}/${Config.styles.vendor.path}`) && Config.local === true || fs.existsSync(`${root + Config.paths.input.styles}/${Config.styles.vendor.path}`) && Config.styles.vendor.cache === true)) {
+                        let vendorUrl = fs.readFileSync(`${root + Config.paths.input.styles}/${Config.styles.vendor.path}`).toString().replace(/url\((.*)\//g,`url(../../${Config.paths.cdn}/`);
 
-                        file.contents = Buffer.from(file.contents.toString().replace(`@import "${conf.styles.vendor.path}";`, vendorUrl));
+                        file.contents = Buffer.from(file.contents.toString().replace(`@import "${Config.styles.vendor.path}";`, vendorUrl));
                     }
                     cb(null, file);
                 }
@@ -898,11 +897,11 @@ export class Styles {
                     cb(null, file);
                 }
                 if (file.isBuffer()) {
-                    Object.keys(conf.styles.join).forEach(joinFile => {
+                    Object.keys(Config.styles.join).forEach(joinFile => {
                         if (joinFile === file.basename) {
                             let contents = file.contents.toString();
 
-                            conf.styles.join[joinFile].forEach(targetFile => {
+                            Config.styles.join[joinFile].forEach(targetFile => {
                                 contents += fs.readFileSync(root + targetFile).toString();
                             })
 
@@ -940,26 +939,26 @@ export class Styles {
 
         aspectRatio.postcss = true;
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.styles.postcss, [autoprefixer, aspectRatio])))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.styles.postcss, [autoprefixer, aspectRatio])))
         ).pipe(() => gulpif("*.less", Modules.less.module()));
 
         return new Promise(resolve => {
-            gulp.src([`${root + conf.paths.input.styles}/*.{css,less}`, `!${root + conf.paths.input.styles}/${conf.styles.tailwind.basename}`, `!${root + conf.paths.input.styles}/*-modifiers.less`])
+            gulp.src([`${root + Config.paths.input.styles}/*.{css,less}`, `!${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`, `!${root + Config.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
-                .pipe(ratio([`${root + conf.paths.input.templates}/**/*.{hbs,html,twig}`, `${root + conf.paths.cms.templates}/**/*.{tpl,twig}`]))
+                .pipe(ratio([`${root + Config.paths.input.templates}/**/*.{hbs,html,twig}`, `${root + Config.paths.cms.templates}/**/*.{tpl,twig}`]))
                 .pipe(vendor())
                 .pipe(build())
-                .pipe(gulpif(conf.styles.purge.enabled, purge()))
+                .pipe(gulpif(Config.styles.purge.enabled, purge()))
                 .pipe(Modules.autoprefixer.pipe())
-                .pipe(gulpif(conf.styles.optimizations, clean()))
+                .pipe(gulpif(Config.styles.optimizations, clean()))
                 .pipe(join())
-                .pipe(gulpif(conf.styles.revision, rev()))
-                .pipe(gulp.dest(root + conf.paths.output.styles))
-                .pipe(revision.manifest(root + conf.paths.output.styles + "/rev-manifest.json",{
+                .pipe(gulpif(Config.styles.revision, rev()))
+                .pipe(gulp.dest(root + Config.paths.output.styles))
+                .pipe(revision.manifest(root + Config.paths.output.styles + "/rev-manifest.json",{
                     merge: true,
-                    base: root + conf.paths.output.styles
+                    base: root + Config.paths.output.styles
                 }))
-                .pipe(gulp.dest(root + conf.paths.output.styles))
+                .pipe(gulp.dest(root + Config.paths.output.styles))
                 .on("end", resolve)
         })
     }
@@ -977,11 +976,11 @@ export class Templates {
                     return "inherit"
                 }
 
-                if ((theme || color) && conf.styles.themePath.length !== 0) {
-                    let pathColors = conf.styles.themePath.replace("{THEME}", theme).replace("{FORMAT}", conf.styles.format);
+                if ((theme || color) && Config.styles.themePath.length !== 0) {
+                    let pathColors = Config.styles.themePath.replace("{THEME}", theme).replace("{FORMAT}", Config.styles.format);
 
-                    if (fs.existsSync(`${root + conf.paths.input.styles}/${pathColors}`)) {
-                        let colors = fs.readFileSync(`${root + conf.paths.input.styles}/${pathColors}`, 'utf8').toString();
+                    if (fs.existsSync(`${root + Config.paths.input.styles}/${pathColors}`)) {
+                        let colors = fs.readFileSync(`${root + Config.paths.input.styles}/${pathColors}`, 'utf8').toString();
                         let parse = colors.substring(colors.indexOf(color)+color.length+1,colors.length);
 
                         return parse.substring(0,parse.indexOf(";")).replace(" ", "");
@@ -990,13 +989,13 @@ export class Templates {
             },
             "fetch": (data) => {
                 if (typeof data !== "undefined") {
-                    if (!fs.existsSync(root + conf.paths.cdn)){
-                        fs.mkdirSync(root + conf.paths.cdn);
+                    if (!fs.existsSync(root + Config.paths.cdn)){
+                        fs.mkdirSync(root + Config.paths.cdn);
                     }
                     if (data.indexOf("http") > -1) {
                         if (data.indexOf("googleapis.com") > -1) {
                             let google_name = data.substring(data.indexOf("=") + 1, data.length).toLowerCase(),
-                                google_name_path = root + conf.paths.cdn + "/inline." + google_name.substring(0,google_name.indexOf(":")) + ".css";
+                                google_name_path = root + Config.paths.cdn + "/inline." + google_name.substring(0,google_name.indexOf(":")) + ".css";
 
                             if (fs.existsSync(google_name_path)) {
                                 return fs.readFileSync(google_name_path, 'utf8').toString();
@@ -1007,7 +1006,7 @@ export class Templates {
                             }
                         } else {
                             let font_name = data.substring(data.lastIndexOf("/") + 1, data.length).toLowerCase(),
-                                font_name_path = root + conf.paths.cdn + "/inline." + font_name;
+                                font_name_path = root + Config.paths.cdn + "/inline." + font_name;
 
                             if (fs.existsSync(font_name_path)) {
                                 return fs.readFileSync(font_name_path, 'utf8').toString();
@@ -1036,18 +1035,18 @@ export class Templates {
                 } else {
                     colors = [colors]
                 }
-                if (conf.local === false) {
+                if (Config.local === false) {
                     let webp = "";
-                    if (conf.templates.placeholder.webp === true) {
+                    if (Config.templates.placeholder.webp === true) {
                         webp = ".webp"
                     }
-                    if (!conf.templates.placeholder.picsum) {
-                        if(conf.templates.placeholder.lorempixel === ""){
+                    if (!Config.templates.placeholder.picsum) {
+                        if(Config.templates.placeholder.lorempixel === ""){
 
                             return "https://via.placeholder.com/"+width+"x"+height+"/"+colors[Math.floor(Math.random()*colors.length)]+`${webp}`;
                         }
                         else {
-                            return "https://lorempixel.com/"+width+"/"+height+"/"+conf.templates.placeholder.lorempixel+"/"+Math.floor(Math.random()*10);
+                            return "https://lorempixel.com/"+width+"/"+height+"/"+Config.templates.placeholder.lorempixel+"/"+Math.floor(Math.random()*10);
                         }
                     } else {
                         if (!isNaN(picsum)) {
@@ -1100,7 +1099,7 @@ export class Templates {
                 let output = "";
                 let path = data.substr(0, data.lastIndexOf("/"));
 
-                if (conf.serve.mode === "dev" && path.indexOf("/" + conf.paths.input.root) === 0) {
+                if (Config.serve.mode === "dev" && path.indexOf("/" + Config.paths.input.root) === 0) {
                     return data;
                 }
 
@@ -1116,8 +1115,8 @@ export class Templates {
                             output = data.replace(key,rev[key]);
                         }
                     })
-                } else if (path.indexOf(conf.paths.output.assets) !== -1 && fs.existsSync(`${root + conf.paths.output.assets}/rev-manifest.json`)) {
-                    let rev = JSON.parse(fs.readFileSync(root + conf.paths.output.assets + '/rev-manifest.json', 'utf8').toString());
+                } else if (path.indexOf(Config.paths.output.assets) !== -1 && fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`)) {
+                    let rev = JSON.parse(fs.readFileSync(root + Config.paths.output.assets + '/rev-manifest.json', 'utf8').toString());
 
                     Object.keys(rev).forEach(function eachKey(key) {
                         if (data.indexOf(key) > -1) {
@@ -1132,16 +1131,16 @@ export class Templates {
                     output = data
                 }
 
-                if (conf.serve.mode !== "dev" && output.indexOf(`/${conf.paths.input.root}`) === 0) {
-                    if (conf.serve.rewriteOutput) {
-                        output = output.replace(`/${conf.paths.input.root}`, `/${conf.paths.output.root}`)
+                if (Config.serve.mode !== "dev" && output.indexOf(`/${Config.paths.input.root}`) === 0) {
+                    if (Config.serve.rewriteOutput) {
+                        output = output.replace(`/${Config.paths.input.root}`, `/${Config.paths.output.root}`)
                     } else {
-                        output = output.replace(`/${conf.paths.input.root}`, "")
+                        output = output.replace(`/${Config.paths.input.root}`, "")
                     }
                 }
 
-                if (conf.serve.rewriteOutput && output.indexOf(`/${conf.paths.output.root}`) === 0) {
-                    output = output.replace(`/${conf.paths.output.root}`, "")
+                if (Config.serve.rewriteOutput && output.indexOf(`/${Config.paths.output.root}`) === 0) {
+                    output = output.replace(`/${Config.paths.output.root}`, "")
                 }
 
                 return output;
@@ -1279,18 +1278,18 @@ export class Templates {
         const renameJson = lazypipe().pipe(rename, { extname: '.json' });
         const renameHtml = lazypipe().pipe(rename, { extname: '.html' }).pipe(htmlmin,opts);
 
-        let outputDir = "/" + root + conf.paths.output.root;
+        let outputDir = "/" + root + Config.paths.output.root;
 
-        if (conf.paths.output.root === conf.paths.output.assets) {
+        if (Config.paths.output.root === Config.paths.output.assets) {
             outputDir = ""
         }
 
         const context = {
-            conf: conf,
-            lang: conf.lang,
-            outputPath: "/" + conf.paths.output.root,
-            inputPath: "/" + conf.paths.input.root,
-            resolvePath: conf.serve.mode === "dev" ? "/" + root + conf.paths.input.root : outputDir,
+            Config: Config,
+            lang: Config.lang,
+            outputPath: "/" + Config.paths.output.root,
+            inputPath: "/" + Config.paths.input.root,
+            resolvePath: Config.serve.mode === "dev" ? "/" + root + Config.paths.input.root : outputDir,
         }
 
         const build = lazypipe().pipe(() => gulpif("*.twig", twig({
@@ -1298,9 +1297,9 @@ export class Templates {
             filters: this.filters,
             extensions: this.tags,
             context: lodash.merge(context, {
-                layout: {template: conf.templates.layout.replace(".twig","") + ".twig"}
+                layout: {template: Config.templates.layout.replace(".twig","") + ".twig"}
             }),
-            globals: root + conf.paths.input.main
+            globals: root + Config.paths.input.main
         })))
         .pipe(data, (file) => {
 
@@ -1309,8 +1308,8 @@ export class Templates {
             }
 
             let fileName = path.basename(file.path);
-            let filePath = `${root + conf.paths.input.templates}/${fileName.replace(`.${conf.templates.format}`,'.json')}`;
-            let main = lodash.merge({layout: {template: conf.templates.layout}}, JSON.parse(fs.readFileSync(root + conf.paths.input.main).toString()));
+            let filePath = `${root + Config.paths.input.templates}/${fileName.replace(`.${Config.templates.format}`,'.json')}`;
+            let main = lodash.merge({layout: {template: Config.templates.layout}}, JSON.parse(fs.readFileSync(root + Config.paths.input.main).toString()));
 
             if (fs.existsSync(filePath)) {
                 return lodash.merge(main, JSON.parse(fs.readFileSync(filePath).toString()));
@@ -1318,51 +1317,51 @@ export class Templates {
                 return main;
             }
         })
-        .pipe(() => gulpif("*.hbs", Modules.hbs.module(`${root + conf.paths.input.templates}/**/*.hbs`, Modules.hbs.helpers(Object.assign(this.filters, this.functions)), context)))
+        .pipe(() => gulpif("*.hbs", Modules.hbs.module(`${root + Config.paths.input.templates}/**/*.hbs`, Modules.hbs.helpers(Object.assign(this.filters, this.functions)), context)))
 
         return new Promise(resolve => {
             gulp.series(
                 function init(resolve) {
-                    let pagesPath = `${root + conf.paths.input.templates}/`;
-                    let templatesPath = `${root + conf.paths.input.templates}/`;
+                    let pagesPath = `${root + Config.paths.input.templates}/`;
+                    let templatesPath = `${root + Config.paths.input.templates}/`;
                     let pages = fs.readdirSync(pagesPath);
                     let items = pages.length;
                     let content = "";
 
-                    if (conf.templates.format === "twig") {
+                    if (Config.templates.format === "twig") {
                         content = `{% include layout.template %}`
                     }
 
-                    if (conf.templates.format === "hbs") {
+                    if (Config.templates.format === "hbs") {
                         content = `{{> (lookup layout 'template')}}`
                     }
 
                     for (let i = 0; i < items; i++) {
-                        if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`))) {
-                            fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${conf.templates.format}`), content);
+                        if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${Config.templates.format}`))) {
+                            fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${Config.templates.format}`), content);
                         }
                     }
 
                     resolve();
                 },
                 function core() {
-                    return gulp.src([`${root + conf.paths.input.templates}/*.{hbs,html,twig}`])
+                    return gulp.src([`${root + Config.paths.input.templates}/*.{hbs,html,twig}`])
                         .pipe(plumber(Functions.plumber))
                         .pipe(build())
                         .pipe(gulpif(fileJSON, renameJson(), renameHtml()))
-                        .pipe(gulp.dest(root + conf.paths.output.root));
+                        .pipe(gulp.dest(root + Config.paths.output.root));
                 },
                 function cleanup(resolve) {
-                    let pages = fs.readdirSync(root + conf.paths.input.templates),
+                    let pages = fs.readdirSync(root + Config.paths.input.templates),
                         items = pages.length;
 
                     for (let i = 0; i < items; i++) {
-                        if (!fs.statSync(`${root + conf.paths.input.templates}/${pages[i]}`).isDirectory()) {
+                        if (!fs.statSync(`${root + Config.paths.input.templates}/${pages[i]}`).isDirectory()) {
                             if (pages[i].indexOf("json") === -1 && pages[i].indexOf("dialog") === -1) {
-                                let file = fs.readFileSync(`${root + conf.paths.input.templates}/${pages[i]}`).toString();
+                                let file = fs.readFileSync(`${root + Config.paths.input.templates}/${pages[i]}`).toString();
 
                                 if (file === `{% include layout.template %}` || file === `{{> (lookup layout 'template')}}`) {
-                                    fs.unlinkSync(`${root + conf.paths.input.templates}/${pages[i]}`);
+                                    fs.unlinkSync(`${root + Config.paths.input.templates}/${pages[i]}`);
                                 }
                             }
                         }
@@ -1380,33 +1379,33 @@ export class Icons {
         const http = (await import("https")).default;
 
         return new Promise((resolve, reject) => {
-            if (conf.icons.local === true || conf.local === true) {
+            if (Config.icons.local === true || Config.local === true) {
                 resolve();
             }
 
-            if (typeof conf.icons.name === "undefined" || conf.icons.name === "") {
-                conf.icons.name = path.basename(path.resolve(root));
+            if (typeof Config.icons.name === "undefined" || Config.icons.name === "") {
+                Config.icons.name = path.basename(path.resolve(root));
             }
 
             let files = [
-                `https://i.icomoon.io/public/${conf.icons.id}/${conf.icons.name}/variables.less`,
-                `https://i.icomoon.io/public/${conf.icons.id}/${conf.icons.name}/style.less`,
-                `https://i.icomoon.io/public/${conf.icons.id}/${conf.icons.name}/selection.json`
+                `https://i.icomoon.io/public/${Config.icons.id}/${Config.icons.name}/variables.less`,
+                `https://i.icomoon.io/public/${Config.icons.id}/${Config.icons.name}/style.less`,
+                `https://i.icomoon.io/public/${Config.icons.id}/${Config.icons.name}/selection.json`
             ]
 
-            if (!fs.existsSync(root + conf.paths.input.icons)) {
-                fs.mkdirSync(root + conf.paths.input.icons);
+            if (!fs.existsSync(root + Config.paths.input.icons)) {
+                fs.mkdirSync(root + Config.paths.input.icons);
             }
 
             let variables = {};
 
             Promise.allSettled(files.map(async (url) => {
-                let name = url.substring(url.indexOf(conf.icons.name) + conf.icons.name.length, url.length).replace("/","");
+                let name = url.substring(url.indexOf(Config.icons.name) + Config.icons.name.length, url.length).replace("/","");
 
                 return new Promise((resolveFile, rejectFile) => {
                     http.get(url, response => {
                         if (response.statusCode === 200) {
-                            if ((name === "variables.less" || name === "style.less") && conf.icons.format !== "less") {
+                            if ((name === "variables.less" || name === "style.less") && Config.icons.format !== "less") {
                                 response.setEncoding('utf8');
                                 let body = "";
                                 response.on('data', chunk => body += chunk);
@@ -1421,18 +1420,18 @@ export class Icons {
 
                                         body = `:root {${Object.keys(variables).map(variable => `--${variable}: "${variables[variable]}";\n`).join("")}}`;
 
-                                        fs.writeFile(`${root + conf.paths.input.icons}/variables.css`, body, resolveFile);
+                                        fs.writeFile(`${root + Config.paths.input.icons}/variables.css`, body, resolveFile);
                                     }
 
                                     if (name === "style.less") {
                                         body = body.replace(`@import "variables";`, `@import "variables.css";`)
 
-                                        fs.writeFile(`${root + conf.paths.input.icons}/style.css`, body, resolveFile)
+                                        fs.writeFile(`${root + Config.paths.input.icons}/style.css`, body, resolveFile)
                                     }
                                 });
 
                             } else {
-                                response.pipe(fs.createWriteStream(`${root + conf.paths.input.icons}/${name}`));
+                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/${name}`));
                                 resolveFile();
                             }
                         } else {
@@ -1443,18 +1442,18 @@ export class Icons {
                 })
             })).then(result => {
                 if (result[0].status !== "rejected") {
-                    if (fs.existsSync(`${root + conf.paths.input.icons}/style.css`)) {
-                        let file = fs.readFileSync(`${root + conf.paths.input.icons}/style.css`).toString();
+                    if (fs.existsSync(`${root + Config.paths.input.icons}/style.css`)) {
+                        let file = fs.readFileSync(`${root + Config.paths.input.icons}/style.css`).toString();
 
                         Object.keys(variables).map(variable => {
                             file = file.replace(new RegExp(`@{${variable}}`, 'g'), `${variables[variable]}`)
                             file = file.replace(`@${variable}`, `var(--${variable})`)
                         })
 
-                        fs.writeFileSync(`${root + conf.paths.input.icons}/style.css`, file);
+                        fs.writeFileSync(`${root + Config.paths.input.icons}/style.css`, file);
                     }
 
-                    console.log("\x1b[34m", `Icomoon demo - https://i.icomoon.io/public/reference.html#/${conf.icons.id}/${conf.icons.name}/`, "\x1b[0m");
+                    console.log("\x1b[34m", `Icomoon demo - https://i.icomoon.io/public/reference.html#/${Config.icons.id}/${Config.icons.name}/`, "\x1b[0m");
                     resolve();
                 } else {
                     console.error("\x1b[31m", `Is project added in icomoon.app, has the correct name or is quick usage enabled?`, "\x1b[0m");
@@ -1473,26 +1472,26 @@ export class Icons {
 
         const clean = lazypipe().pipe(cleanCSS);
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.icons.postcss, [autoprefixer])))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.icons.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
-        return gulp.src(`${root + conf.paths.input.icons}/style.{css,less}`)
+        return gulp.src(`${root + Config.paths.input.icons}/style.{css,less}`)
             .pipe(plumber(Functions.plumber))
             .pipe(rename(function(path){
-                path.basename = conf.icons.filename;
+                path.basename = Config.icons.filename;
             }))
             .pipe(replace('-"]', '-"]:before'))
             .pipe(replace('!important;', ';'))
             .pipe(replace('@font-face {', '@font-face { font-display: block;'))
             .pipe(build())
-            .pipe(gulpif(conf.icons.revision, rev()))
-            .pipe(gulpif(conf.icons.optimizations, clean()))
-            .pipe(gulp.dest(root + conf.paths.output.icons))
-            .pipe(revision.manifest(root + conf.paths.output.icons + "/rev-manifest.json",{
+            .pipe(gulpif(Config.icons.revision, rev()))
+            .pipe(gulpif(Config.icons.optimizations, clean()))
+            .pipe(gulp.dest(root + Config.paths.output.icons))
+            .pipe(revision.manifest(root + Config.paths.output.icons + "/rev-manifest.json",{
                 merge: true,
-                base: root + conf.paths.output.icons
+                base: root + Config.paths.output.icons
             }))
-            .pipe(gulp.dest(root + conf.paths.output.icons));
+            .pipe(gulp.dest(root + Config.paths.output.icons));
     }
 }
 
@@ -1505,19 +1504,19 @@ export class Emails {
         const inlineCssOpt = {
             applyStyleTags: true,
             applyLinkTags: true,
-            removeStyleTags: conf.emails.inlineOnly
+            removeStyleTags: Config.emails.inlineOnly
         }
 
-        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(conf.emails.postcss, [autoprefixer])))
+        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.emails.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return new Promise(resolve => {
             let twigFiles = "*.twig";
             let hbsFiles = "*.hbs";
 
-            if (conf.emails.format === "twig") {
+            if (Config.emails.format === "twig") {
                 twigFiles = twigFiles.replace("twig", "{twig,latte,tpl}")
-            } else if (conf.emails.format === "hbs") {
+            } else if (Config.emails.format === "hbs") {
                 hbsFiles = hbsFiles.replace("hbs", "{hbs,latte,tpl}")
             }
 
@@ -1526,23 +1525,23 @@ export class Emails {
                 filters: new Templates().filters,
                 extensions: new Templates().tags
             })))
-            .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + conf.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers(Object.assign(new Templates().filters, new Templates().functions)))))
+            .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + Config.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers(Object.assign(new Templates().filters, new Templates().functions)))))
             .pipe(() => gulpif("*.{hbs,twig}", rename({ extname: ".html" })))
 
             gulp.series(
                 function styles() {
-                    return gulp.src(root + conf.paths.input.emails + '/*.{css,less}')
+                    return gulp.src(root + Config.paths.input.emails + '/*.{css,less}')
                         .pipe(buildCss())
-                        .pipe(gulp.dest(root + conf.paths.temp + "/emails"));
+                        .pipe(gulp.dest(root + Config.paths.temp + "/emails"));
                 },
                 function templates() {
-                    return gulp.src(root + conf.paths.input.emails + '/*.{hbs,twig,tpl,latte}')
+                    return gulp.src(root + Config.paths.input.emails + '/*.{hbs,twig,tpl,latte}')
                         .pipe(build())
                         .pipe(replace('<table', '<table border="0" cellpadding="0" cellspacing="0"'))
                         .pipe(inlineCss(inlineCssOpt))
-                        .pipe(gulpif(conf.emails.removeClasses,replace(/class="([A-Za-z0-9 _]*)"/g, '')))
-                        .pipe(gulpif(("*.html"), gulp.dest(root + conf.paths.output.emails)))
-                        .pipe(gulpif("*.{latte,tpl}", gulp.dest(root + conf.paths.cms.emails)))
+                        .pipe(gulpif(Config.emails.removeClasses,replace(/class="([A-Za-z0-9 _]*)"/g, '')))
+                        .pipe(gulpif(("*.html"), gulp.dest(root + Config.paths.output.emails)))
+                        .pipe(gulpif("*.{latte,tpl}", gulp.dest(root + Config.paths.cms.emails)))
                 }
             )(resolve)
         })
@@ -1551,13 +1550,13 @@ export class Emails {
         return new Promise(async (resolve) => {
             const AdmZip = (await import('adm-zip')).default;
 
-            let files = fs.readdirSync(root + conf.paths.output.emails);
-            let prefixes = conf.emails.zipPrefix;
+            let files = fs.readdirSync(root + Config.paths.output.emails);
+            let prefixes = Config.emails.zipPrefix;
 
             function zipFile(file, imageSubfolder) {
                 let zip = new AdmZip();
 
-                if (typeof imageSubfolder !== "undefined" && fs.existsSync(`${root + conf.paths.output.emailsImg}/${imageSubfolder}`)) {
+                if (typeof imageSubfolder !== "undefined" && fs.existsSync(`${root + Config.paths.output.emailsImg}/${imageSubfolder}`)) {
                     if (imageSubfolder.endsWith("-")) {
                         imageSubfolder.slice(0, imageSubfolder.length - 1)
                     }
@@ -1566,19 +1565,19 @@ export class Emails {
                     imageSubfolder = ""
                 }
 
-                zip.addFile("index.html", fs.readFileSync(`${root + conf.paths.output.emails}/${file}`));
+                zip.addFile("index.html", fs.readFileSync(`${root + Config.paths.output.emails}/${file}`));
                 zip.toBuffer();
 
-                if (fs.existsSync(`${root + conf.paths.output.emailsImg}${imageSubfolder}`)) {
-                    zip.addLocalFolder(`${root + conf.paths.output.emailsImg}${imageSubfolder}`, `images${imageSubfolder}`);
+                if (fs.existsSync(`${root + Config.paths.output.emailsImg}${imageSubfolder}`)) {
+                    zip.addLocalFolder(`${root + Config.paths.output.emailsImg}${imageSubfolder}`, `images${imageSubfolder}`);
                 }
 
-                zip.writeZip(`${root + conf.paths.output.emails}/${file.replace(".html", ".zip")}`);
+                zip.writeZip(`${root + Config.paths.output.emails}/${file.replace(".html", ".zip")}`);
             }
 
             files.forEach((file) => {
                 if (file.endsWith(".html")) {
-                    if (conf.emails.zipPrefix) {
+                    if (Config.emails.zipPrefix) {
                         prefixes.filter((prefix) => {
                             if (file.startsWith(prefix)) {
                                 zipFile(file, prefix);
@@ -1603,36 +1602,36 @@ export class Cms {
                 resolve();
             }
 
-            Functions.execSync(`git clone -b ${conf.cms.branch} --single-branch --depth 1 git@git.newlogic.cz:newlogic-dev/cms-develop.git ${root + conf.paths.temp}/cms`);
+            Functions.execSync(`git clone -b ${Config.cms.branch} --single-branch --depth 1 git@git.newlogic.cz:newlogic-dev/cms-develop.git ${root + Config.paths.temp}/cms`);
 
             function errorMessage(err) {
                 console.log("\x1b[31m", err, "\x1b[0m");
             }
 
             (async() => {
-                await fse.remove(`${root + conf.paths.cms.temp}/www/examples`);
-                await fse.move(`${root + conf.paths.cms.temp}/index.php`, 'index.php').catch(err => errorMessage(err));
-                await fse.move(`${root + conf.paths.cms.temp}/.htaccess`, '.htaccess').catch(err => errorMessage(err));
-                await fse.move(`${root + conf.paths.cms.temp}/robots.php`, 'robots.php').catch(err => errorMessage(err));
-                await fse.move(`${root + conf.paths.cms.temp}/admin_ex/js/main.js`, 'admin_ex/js/main.js').catch(err => errorMessage(err));
-                await fse.move(`${root + conf.paths.cms.temp}/api`, 'api').catch(err => errorMessage(err));
-                await fse.move(`${root + conf.paths.cms.temp}/www`, 'www').catch(err => errorMessage(err));
+                await fse.remove(`${root + Config.paths.cms.temp}/www/examples`);
+                await fse.move(`${root + Config.paths.cms.temp}/index.php`, 'index.php').catch(err => errorMessage(err));
+                await fse.move(`${root + Config.paths.cms.temp}/.htaccess`, '.htaccess').catch(err => errorMessage(err));
+                await fse.move(`${root + Config.paths.cms.temp}/robots.php`, 'robots.php').catch(err => errorMessage(err));
+                await fse.move(`${root + Config.paths.cms.temp}/admin_ex/js/main.js`, 'admin_ex/js/main.js').catch(err => errorMessage(err));
+                await fse.move(`${root + Config.paths.cms.temp}/api`, 'api').catch(err => errorMessage(err));
+                await fse.move(`${root + Config.paths.cms.temp}/www`, 'www').catch(err => errorMessage(err));
 
-                if (conf.cms.full) {
-                    await fse.move(`${root + conf.paths.cms.temp}/admin`, 'admin').catch(err => errorMessage(err));
-                    await fse.move(`${root + conf.paths.cms.temp}/userfiles`, 'userfiles').catch(err => errorMessage(err));
-                    await fse.move(`${root + conf.paths.cms.temp}/xml`, 'xml').catch(err => errorMessage(err));
+                if (Config.cms.full) {
+                    await fse.move(`${root + Config.paths.cms.temp}/admin`, 'admin').catch(err => errorMessage(err));
+                    await fse.move(`${root + Config.paths.cms.temp}/userfiles`, 'userfiles').catch(err => errorMessage(err));
+                    await fse.move(`${root + Config.paths.cms.temp}/xml`, 'xml').catch(err => errorMessage(err));
                 }
 
-                await fse.remove(`${root + conf.paths.cms.temp}`);
+                await fse.remove(`${root + Config.paths.cms.temp}`);
             })().then(resolve);
         })
     }
     prepare(done) {
         gulp.series(
-            typeof conf.modules.hbs !== "undefined" ? new conf.modules.hbs().templates : done => done,
+            typeof Config.modules.hbs !== "undefined" ? new Config.modules.hbs().templates : done => done,
             function components() {
-                let pathComp = root + conf.paths.cms.components;
+                let pathComp = root + Config.paths.cms.components;
 
                 String.prototype.toCamel = function(){
                     return this.replace(/[-_]([a-z])/g, function (g) { return g[1].toUpperCase(); })
@@ -1647,19 +1646,19 @@ export class Cms {
                 }
 
                 return new Promise(resolve => {
-                    let items = fs.readdirSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}`);
-                    let pages = fs.readdirSync(`${root + conf.paths.input.templates}/`);
+                    let items = fs.readdirSync(`${root + Config.paths.input.templates}/${Config.cms.sectionsDir}`);
+                    let pages = fs.readdirSync(`${root + Config.paths.input.templates}/`);
                     let pageComponents = [];
 
                     getComponents((name, path) => {
-                        path = path.replace("." + conf.cms.format.templates,"");
+                        path = path.replace("." + Config.cms.format.templates,"");
 
                         pages.forEach((page) => {
                             if (!page.includes(".json")) {
                                 return
                             }
 
-                            let json = JSON.parse(fs.readFileSync(`${root + conf.paths.input.templates}/${page}`).toString());
+                            let json = JSON.parse(fs.readFileSync(`${root + Config.paths.input.templates}/${page}`).toString());
                             let main;
 
                             if (typeof json["page"] !== "undefined") {
@@ -1784,17 +1783,17 @@ export class Cms {
                             if (i === ".gitkeep") {
                                 return
                             }
-                            if (fs.statSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}/${i}`).isDirectory()) {
-                                let items = fs.readdirSync(`${root + conf.paths.input.templates}/${conf.cms.sectionsDir}/${i}`);
+                            if (fs.statSync(`${root + Config.paths.input.templates}/${Config.cms.sectionsDir}/${i}`).isDirectory()) {
+                                let items = fs.readdirSync(`${root + Config.paths.input.templates}/${Config.cms.sectionsDir}/${i}`);
 
                                 items.forEach((e) => {
-                                    let name = i.replace("." + conf.templates.format,"").toCamel().capitalize() + e.replace("." + conf.templates.format,"").toCamel().capitalize();
-                                    let path = `${conf.cms.sectionsDir}/${i}/${e.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
+                                    let name = i.replace("." + Config.templates.format,"").toCamel().capitalize() + e.replace("." + Config.templates.format,"").toCamel().capitalize();
+                                    let path = `${Config.cms.sectionsDir}/${i}/${e.replace("." + Config.templates.format, "")}.${Config.cms.format.templates}`;
                                     callback(name, path)
                                 });
                             } else {
-                                let name = i.replace("." + conf.templates.format,"").toCamel().capitalize();
-                                let path = `${conf.cms.sectionsDir}/${i.replace("." + conf.templates.format, "")}.${conf.cms.format.templates}`;
+                                let name = i.replace("." + Config.templates.format,"").toCamel().capitalize();
+                                let path = `${Config.cms.sectionsDir}/${i.replace("." + Config.templates.format, "")}.${Config.cms.format.templates}`;
                                 callback(name, path)
                             }
                         });
@@ -1812,55 +1811,55 @@ export class Cms {
 export class Serve {
     async init() {
         return new Promise(resolve => {
-            if (conf.serve.server === "wds") {
-                let config = `${conf.paths.temp}/wds.config.mjs`;
+            if (Config.serve.server === "wds") {
+                let config = `${Config.paths.temp}/wds.config.mjs`;
 
-                if (fs.existsSync(root + conf.paths.configs.wds)) {
-                    config = conf.paths.configs.wds;
+                if (fs.existsSync(root + Config.paths.configs.wds)) {
+                    config = Config.paths.configs.wds;
                 } else {
-                    fs.writeFileSync(`${root + conf.paths.temp}/wds.config.mjs`,`
+                    fs.writeFileSync(`${root + Config.paths.temp}/wds.config.mjs`,`
                         import rollupStyles from 'rollup-plugin-styles';
                         import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
                         import core from "../gulpfile.js";
                         
-                        const conf = core.Config;
+                        const Config = core.Config;
                         const styles = fromRollup(rollupStyles);
                         
                         export default {
                             middleware: [
                                 function rewriteIndex(context, next) {
-                                    if (${conf.serve.rewriteOutput} && !context.url.startsWith("/${conf.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
-                                        context.url = '/${conf.paths.output.root}/' + context.url;
+                                    if (${Config.serve.rewriteOutput} && !context.url.startsWith("/${Config.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
+                                        context.url = '/${Config.paths.output.root}/' + context.url;
                                     }
                                     
                                     return next();
                                 },
                             ],
                             mimeTypes: {
-                                '${conf.paths.input.root}/**/*.css': 'js',
-                                '${conf.paths.input.root}/**/*.less': 'js'
+                                '${Config.paths.input.root}/**/*.css': 'js',
+                                '${Config.paths.input.root}/**/*.less': 'js'
                             },
-                            plugins: [styles({ plugins: core.Utils.postcssConfig(conf.styles.postcss, []), include: ['${conf.paths.input.root}/**/*.css', '${conf.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
+                            plugins: [styles({ plugins: core.Utils.postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
                         }
                     `)
                 }
 
-                nodeCmd.exec(`npx wds --watch --open ${conf.serve.index} --config ${config}`, err => err && console.log(err));
+                nodeCmd.exec(`npx wds --watch --open ${Config.serve.index} --config ${config}`, err => err && console.log(err));
 
                 console.log("\x1b[34m", "[Web Dev Server] running at localhost","\x1b[0m");
             }
 
-            if (conf.serve.server === "vite") {
-                let config = `${conf.paths.temp}/vite.config.js`;
+            if (Config.serve.server === "vite") {
+                let config = `${Config.paths.temp}/vite.config.js`;
 
-                if (fs.existsSync(root + conf.paths.configs.vite)) {
-                    config = conf.paths.configs.vite;
+                if (fs.existsSync(root + Config.paths.configs.vite)) {
+                    config = Config.paths.configs.vite;
                 } else {
-                    fs.writeFileSync(`${root + conf.paths.temp}/vite.config.js`,`
+                    fs.writeFileSync(`${root + Config.paths.temp}/vite.config.js`,`
                         import core from "../gulpfile.js";
                         
                         export default {
-                            server: {open: "${conf.serve.index}"},
+                            server: {open: "${Config.serve.index}"},
                             css: {
                                 postcss: {
                                     plugins: core.Utils.postcssConfig(core.Config.styles.postcss, [])
@@ -1882,7 +1881,7 @@ export class Serve {
         //
         // return startDevServer({
         //     config: {
-        //         appIndex: `${root + conf.paths.output.root}/${conf.serve.index}`,
+        //         appIndex: `${root + Config.paths.output.root}/${Config.serve.index}`,
         //         watch: true,
         //         open: true,
         //         mimeTypes: {
@@ -1899,13 +1898,13 @@ export class Serve {
 export class Watch {
     get paths() {
         return {
-            scripts: [`${conf.paths.input.scripts}/**`, `!${conf.paths.input.scripts}/**/\\${conf.scripts.importResolution.filename}`],
-            styles: [`${conf.paths.input.styles}/**`, `!${conf.paths.input.styles}/**/\\${conf.styles.importResolution.filename}`],
-            templates: [`${conf.paths.input.templates}/**`, conf.paths.input.main, `!${conf.paths.input.templates}/*.${conf.templates.format}`]
+            scripts: [`${Config.paths.input.scripts}/**`, `!${Config.paths.input.scripts}/**/\\${Config.scripts.importResolution.filename}`],
+            styles: [`${Config.paths.input.styles}/**`, `!${Config.paths.input.styles}/**/\\${Config.styles.importResolution.filename}`],
+            templates: [`${Config.paths.input.templates}/**`, Config.paths.input.main, `!${Config.paths.input.templates}/*.${Config.templates.format}`]
         }
     }
     dev() {
-        if (!conf.vite) {
+        if (!Config.vite) {
             gulp.watch("package.json", Exists.templates ? gulp.series("importmap", "templates") : gulp.series("importmap"))
         }
 
@@ -1922,7 +1921,7 @@ export class Watch {
         }
 
         if (Exists.emails) {
-            gulp.watch(`${conf.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails:build"))
         }
     }
     build(type) {
@@ -1933,7 +1932,7 @@ export class Watch {
         if (Exists.scripts) {
             let tasks = [`scripts:${type}`]
 
-            if (Exists.templates && conf.scripts.revision === true) {
+            if (Exists.templates && Config.scripts.revision === true) {
                 tasks.push(templates)
             }
 
@@ -1943,7 +1942,7 @@ export class Watch {
         if (Exists.styles) {
             let tasks = [`styles:${type}`]
 
-            if (Exists.templates && conf.styles.revision === true) {
+            if (Exists.templates && Config.styles.revision === true) {
                 tasks.push(templates)
             }
 
@@ -1954,35 +1953,35 @@ export class Watch {
             gulp.watch(this.paths.templates, gulp.series(templates))
         }
 
-        if (Exists.icons && Exists.templates && conf.icons.revision === true) {
-            gulp.watch(`${conf.paths.output.icons}/${conf.icons.filename}*`, gulp.series(templates));
+        if (Exists.icons && Exists.templates && Config.icons.revision === true) {
+            gulp.watch(`${Config.paths.output.icons}/${Config.icons.filename}*`, gulp.series(templates));
         }
 
         if (Exists.assets && type === "production") {
-            gulp.watch(`${conf.paths.input.assets}/**`, gulp.series("assets"))
+            gulp.watch(`${Config.paths.input.assets}/**`, gulp.series("assets"))
         }
 
         if (Exists.emails) {
-            gulp.watch(`${conf.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails:build"))
         }
     }
 }
 
 export class Core {
-    init(config = {}) {
-        conf = lodash.merge(conf, config);
+    init(ExtendConfig = {}) {
+        Config = lodash.merge(Config, ExtendConfig);
 
-        if (!fs.existsSync(root + conf.paths.temp)){
-            fs.mkdirSync(root + conf.paths.temp);
+        if (!fs.existsSync(root + Config.paths.temp)){
+            fs.mkdirSync(root + Config.paths.temp);
         }
 
         Exists = {
-            scripts: fs.existsSync(root + conf.paths.input.scripts),
-            styles: fs.existsSync(root + conf.paths.input.styles),
-            icons: fs.existsSync(root + conf.paths.input.icons) && conf.icons.id !== "",
-            emails: fs.existsSync(root + conf.paths.input.emails),
-            assets: fs.existsSync(root + conf.paths.input.assets),
-            templates: fs.existsSync(root + conf.paths.input.templates) && !conf.vite
+            scripts: fs.existsSync(root + Config.paths.input.scripts),
+            styles: fs.existsSync(root + Config.paths.input.styles),
+            icons: fs.existsSync(root + Config.paths.input.icons) && Config.icons.id !== "",
+            emails: fs.existsSync(root + Config.paths.input.emails),
+            assets: fs.existsSync(root + Config.paths.input.assets),
+            templates: fs.existsSync(root + Config.paths.input.templates) && !Config.vite
         }
 
         Modules = {
@@ -2002,8 +2001,8 @@ export class Core {
                         helpers = {};
                     }
 
-                    if (typeof conf.modules.hbs !== "undefined") {
-                        helpers = Object.assign(helpers, new conf.modules.hbs().helpers);
+                    if (typeof Config.modules.hbs !== "undefined") {
+                        helpers = Object.assign(helpers, new Config.modules.hbs().helpers);
                     }
 
                     return helpers;
@@ -2033,7 +2032,7 @@ export class Core {
                     return autoprefixer;
                 },
                 pipe: lazypipe().pipe(() => gulpif((file) => {
-                    return file.extname === ".less" && conf.styles.optimizations
+                    return file.extname === ".less" && Config.styles.optimizations
                 }, Modules.autoprefixer.module({overrideBrowserslist: ['ie >= 11', 'last 2 versions']})))
             }
         }
@@ -2061,7 +2060,7 @@ export class Core {
             plumber: {
                 errorHandler(err) {
                     console.log("\x1b[31m", err.toString(), "\x1b[0m");
-                    if (conf.errors) {
+                    if (Config.errors) {
                         process.exit(-1);
                     } else {
                         this.emit('end');
@@ -2075,7 +2074,7 @@ export class Core {
                         return false;
                     }
 
-                    let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(root + conf.paths.input.root, root + conf.paths.output.root)
+                    let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(root + Config.paths.input.root, root + Config.paths.output.root)
 
                     if (cleanup) {
                         let fileName = path.basename(file.revOrigPath).replace(path.extname(file.revOrigPath),"");
@@ -2118,41 +2117,41 @@ export class Core {
                 })
             },
             devBuild() {
-                if (conf.serve.mode === "dev" || conf.serve.mode === "build") {
-                    conf.errors = false;
-                    conf.styles.revision = false;
-                    conf.styles.purge.enabled = false;
-                    conf.styles.optimizations = false;
-                    conf.scripts.revision = false;
-                    conf.scripts.optimizations = false;
-                    conf.scripts.legacy = false;
-                    conf.icons.optimizations = false;
-                    conf.icons.revision = false;
-                    conf.styles.vendor.cache = true;
-                    conf.styles.import = ['local'];
-                    conf.assets.revision = false;
+                if (Config.serve.mode === "dev" || Config.serve.mode === "build") {
+                    Config.errors = false;
+                    Config.styles.revision = false;
+                    Config.styles.purge.enabled = false;
+                    Config.styles.optimizations = false;
+                    Config.scripts.revision = false;
+                    Config.scripts.optimizations = false;
+                    Config.scripts.legacy = false;
+                    Config.icons.optimizations = false;
+                    Config.icons.revision = false;
+                    Config.styles.vendor.cache = true;
+                    Config.styles.import = ['local'];
+                    Config.assets.revision = false;
                 }
             }
         }
 
         this.tasks();
 
-        return {Config: conf, Utils: new Utils()};
+        return {Config: Config, Utils: new Utils()};
     }
     tasks() {
-        if (!conf.vite) {
+        if (!Config.vite) {
             (Exists.assets || Exists.icons || Exists.styles || Exists.scripts || Exists.templates)
             && gulp.task("default", resolve => {
                 let tasks = [];
 
-                !conf.local && tasks.push("cleanup", "cdn");
+                !Config.local && tasks.push("cleanup", "cdn");
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
                 Exists.scripts && tasks.push("scripts:production")
                 Exists.templates && tasks.push("templates:production")
 
-                conf.errors = true
+                Config.errors = true
 
                 gulp.series(tasks)(resolve)
             });
@@ -2166,8 +2165,8 @@ export class Core {
                 Exists.scripts && tasks.push("scripts:production")
                 Exists.icons && tasks.push("icons:production")
 
-                conf.errors = true
-                conf.styles.purge.docs = true
+                Config.errors = true
+                Config.styles.purge.docs = true
 
                 gulp.series(tasks)(resolve)
             });
@@ -2187,10 +2186,10 @@ export class Core {
             gulp.task("serve", (resolve) => {
                 let tasks = [];
 
-                conf.serve.mode = "dev";
+                Config.serve.mode = "dev";
 
                 // TODO odebrat cdn až se opraví buildless styly
-                !conf.local && tasks.push("cleanup", "cdn")
+                !Config.local && tasks.push("cleanup", "cdn")
                 Exists.icons && tasks.push("icons")
                 Exists.styles && tasks.push("styles")
                 Exists.scripts && tasks.push("scripts")
@@ -2206,11 +2205,11 @@ export class Core {
             gulp.task("serve:build", (resolve) => {
                 let tasks = [];
 
-                if (conf.serve.mode === "") {
-                    conf.serve.mode = "build";
+                if (Config.serve.mode === "") {
+                    Config.serve.mode = "build";
                 }
 
-                !conf.local && tasks.push("cleanup", "cdn")
+                !Config.local && tasks.push("cleanup", "cdn")
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:build")
                 Exists.styles && tasks.push("styles:build")
@@ -2227,11 +2226,11 @@ export class Core {
             gulp.task("serve:production", (resolve) => {
                 let tasks = [];
 
-                if (conf.serve.mode === "") {
-                    conf.serve.mode = "production";
+                if (Config.serve.mode === "") {
+                    Config.serve.mode = "production";
                 }
 
-                !conf.local && tasks.push("cleanup", "cdn")
+                !Config.local && tasks.push("cleanup", "cdn")
                 Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
@@ -2260,7 +2259,7 @@ export class Core {
         }
 
         if (Exists.scripts) {
-            if (!conf.vite) {
+            if (!Config.vite) {
                 gulp.task("scripts", (resolve) => {
                     gulp.series(new Utils().importMap, new Scripts().importResolution)(resolve)
                 })
@@ -2287,7 +2286,7 @@ export class Core {
                 gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
             })
 
-            if (!conf.vite) {
+            if (!Config.vite) {
                 gulp.task("styles:build", (resolve) => {
                     gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
                 })
@@ -2312,12 +2311,12 @@ export class Core {
             gulp.task("assets", async () => {
                 const revision = (await import("gulp-rev")).default;
 
-                return gulp.src(`${root + conf.paths.input.assets}/**`)
-                    .pipe(gulpif(conf.assets.revision, revision()))
+                return gulp.src(`${root + Config.paths.input.assets}/**`)
+                    .pipe(gulpif(Config.assets.revision, revision()))
                     .pipe(Functions.revUpdate(true))
-                    .pipe(gulp.dest(root + conf.paths.output.assets))
+                    .pipe(gulp.dest(root + Config.paths.output.assets))
                     .pipe(revision.manifest())
-                    .pipe(gulp.dest(root + conf.paths.output.assets))
+                    .pipe(gulp.dest(root + Config.paths.output.assets))
             })
         }
 
@@ -2335,7 +2334,7 @@ export class Core {
             new Watch().dev();
         })
 
-        if (!conf.vite) {
+        if (!Config.vite) {
             gulp.task("watch:build", () => {
                 new Watch().build("build");
             })
@@ -2354,7 +2353,7 @@ export class Core {
             })
         }
 
-        if (!conf.vite) {
+        if (!Config.vite) {
             gulp.task("cms:install", () => {
                 return new Cms().install()
             })

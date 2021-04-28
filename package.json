@@ -40,7 +40,6 @@
     "postcss-custom-media": "^8.0.0",
     "postcss-custom-selectors": "^6.0.0",
     "postcss-import": "^14.0.1",
-    "postcss-mixins": "^7.0.3",
     "postcss-nesting": "^8.0.0",
     "rollup": "^2.45.2",
     "rollup-plugin-import-map": "^2.2.2",
