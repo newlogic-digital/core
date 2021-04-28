@@ -1606,9 +1606,9 @@ export class Serve {
                     fs.writeFileSync(`${root + Config.paths.temp}/wds.config.mjs`,`
                         import rollupStyles from 'rollup-plugin-styles';
                         import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
-                        import core from "../gulpfile.js";
+                        import Config from "../gulpfile.js";
+                        import {Utils} from "newlogic-core";
                         
-                        const Config = core.Config;
                         const styles = fromRollup(rollupStyles);
                         
                         export default {
@@ -1625,7 +1625,7 @@ export class Serve {
                                 '${Config.paths.input.root}/**/*.css': 'js',
                                 '${Config.paths.input.root}/**/*.less': 'js'
                             },
-                            plugins: [styles({ plugins: core.Utils.postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
+                            plugins: [styles({ plugins: Utils.postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
                         }
                     `)
                 }
@@ -1642,13 +1642,14 @@ export class Serve {
                     config = Config.paths.configs.vite;
                 } else {
                     fs.writeFileSync(`${root + Config.paths.temp}/vite.config.js`,`
-                        import core from "../gulpfile.js";
+                        import Config from "../gulpfile.js";
+                        import {Utils} from "newlogic-core";
                         
                         export default {
                             server: {open: "${Config.serve.index}"},
                             css: {
                                 postcss: {
-                                    plugins: core.Utils.postcssConfig(core.Config.styles.postcss, [])
+                                    plugins: Utils.postcssConfig(Config.styles.postcss, [])
                                 }
                             }
                         }
@@ -1922,7 +1923,7 @@ export class Core {
 
         this.tasks();
 
-        return {Config: Config, Utils: new Utils()};
+        return Config;
     }
     tasks() {
         if (!Config.vite) {
