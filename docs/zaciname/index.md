@@ -2,21 +2,31 @@
 
 ## Základní princip
 
-Newlogic Core je sada nástrojů, které lze použít pro tvorbu moderních webových aplikací. A to opravdu moderních, použití moderního javascriptu a CSS, ES moduly, dynamické importy atd.
+Newlogic Core je sada nástrojů, které lze použít pro tvorbu moderních webových aplikací. Použití moderního Javascriptu, CSS, ES moduly, dynamické importy apod.
 
-Zdrojové soubory se nachází ve složce `src` a svých určených složkách. Žádné složité nastavování, do `src/scripts` si hodíte klidně 10 javascript souborů a ty se hezky vyplivnou do `dist/assets/js`. 
+Obsahuje integrované PostCSS se základnímy pluginy a [TailwindCSS](https://tailwindcss.com/) pro utility třídy.
 
-Je jednou jestli používáte Nette, Symfony nebo Laravel - strukturu lze libovolně upravit dle potřeby. Např. `resources` a `public`, `src` a `dist` nebo `app/assets` a `www`. 
+Zdrojové soubory se nachází ve složce `src` a svých určených složkách. Žádné složité nastavování, do `src/scripts` se vloží libovolný počet javascript souborů a ty se zkompilují do `dist/assets/js`. 
 
-Všechny [cesty](http://localhost:3000/dokumentace/#cesty) jsou konfigurovatelné v `gulpfile.js`.
+Hlavní zaměření je především pro PHP frameworky a je jedno jestli používáte Nette, Symfony nebo Laravel - strukturu lze libovolně upravit dle potřeby. Např. `resources` a `public`, `src` a `dist` nebo `app/assets` a `www`. Všechny [cesty](http://localhost:3000/dokumentace/#cesty) jsou libovolně konfigurovatelné v `gulpfile.js`.
 
-Zdrojové soubory se dělí podle modulů - styly, scripty, šablony, iconfont, emaily, assety. Je volitelné které moduly chcete pro projekt použít. Chcete z celého setu použít např. jen generování emailů? Není problém. V `src/` se bude nacházet jen složka `emails` a všechny ostatní tasky se deaktivují. Používáte opravdu jen to co chcete používat.
+### Modulárnost
 
-Lze tak použít např. jen styly a scripty a šablony řešit přímo v PHP. Hlavně jelikož se javacript a css píše v moderním formátu, tak není potřeba nic kompilovat a při vývoji můžeme načítat soubory přímo ze zdrojových souborů.
+Zdrojové soubory se dělí podle modulů - styly, scripty, šablony, iconfont, emaily, assety. Je volitelné které moduly chcete pro projekt použít. Používáte opravdu jen to co chcete používat.
 
-V případě SPA aplikace je možné integrovat Vue pomocí Vite, nebo jakýhokoliv jiný SPA framework. Z Newlogic Core pak lze využít jen dodatečné fukcionality jako auto generování importů do souborů v rámci složek, iconfont apod. Nebo si zautomatizovat některé procesy napsaním nových tasků v `gulpfile.js`.
+Chcete z celého setu použít např. jen generování emailů? Není problém, v `src/` se bude nacházet jen složka `emails` a všechny ostatní tasky se deaktivují.
+
+Lze tak použít např. jen styly a scripty a šablony řešit přímo v PHP.
+
+### Bez kompilace
+
+Jelikož se Javacript a CSS píše v moderním formátu, tak není potřeba nic kompilovat a při vývoji můžeme načítat soubory přímo ze zdrojových souborů.
 
 Základem tasků pro jednotlivé moduly je [Gulp](https://gulpjs.com/), při použití PhpStormu se pak automaticky zobrazí tasky které lze použít a to dynamicky podle dostupnosti jednotlivých modulů.
+
+
+### Single Page Apps
+V případě SPA aplikací je možné integrovat Vue (nebo jakýhokoliv jiný SPA framework) pomocí Vite. Z Newlogic Core pak lze využít jen dodatečné fukcionality jako auto generování importů do souborů v rámci složek, iconfont apod. Nebo si zautomatizovat některé procesy napsaním nových tasků v `gulpfile.js`.
 
 ## Instalace
 
@@ -43,7 +53,7 @@ Po instalaci je v projektu nutné vytvořit `gulpfile.js`, ve kterém lze dále 
 ```js
 import {Core} from  "newlogic-core";
 
-new Core().init({
+export default new Core().init({
     styles: {
         purge: {
             content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
@@ -51,7 +61,7 @@ new Core().init({
     }
 })
 ```
-
+Pro kompletní příklad použití Newlogic Core se všemi možnostmi lze využít [Starter šablonu](https://git.newlogic.cz/newlogic-dev/newlogic-core-starter/)
 
 ## Tasky
 
@@ -134,9 +144,22 @@ Zpracovává soubory javascriptu. Dělí se na `scripts`, `scripts:build` a `scr
 
 ### styles
 
-Zpracovává soubory stylů. Dělí se na `styles`, `styles:build` a `styles:production`. Styly se píšou v **PostCSS** a [postcss-preset-env](https://preset-env.cssdb.org/), takže je možné využít všechny možné moderní CSS vlastnosti. Zdrojový kód tak jednou bude možné načíst přímo v prohlížeči. 
+Zpracovává soubory stylů. Dělí se na `styles`, `styles:build` a `styles:production`. Styly se píšou v **PostCSS**, takže je možné využít všechny možné moderní CSS vlastnosti. Zdrojový kód tak jednou bude možné načíst přímo v prohlížeči. Používají se následující pluginy: 
 
-Alternativně lze použít i **.less**, v takovém případě je nutné doinstalovat `gulp-less` a `gulp-autoprefixer` do projektu. V případě pokud se používá výhradně less je doporučeno v configu nastavit `styles.format` na `"less""`.
+```json
+{
+    "devDependencies": {
+        "autoprefixer": "*",
+        "tailwindcss": "*",
+        "postcss-custom-media": "*",
+        "postcss-custom-selectors": "*",
+        "postcss-import": "*",
+        "postcss-nesting": "*",
+    }
+}
+```
+
+Alternativně lze použít i **.less**, v takovém případě je nutné doinstalovat `gulp-less` a `gulp-autoprefixer` do projektu. V případě pokud se používá výhradně less je doporučeno v configu nastavit `styles.format` na `"less"`.
 
 * **styles** - Generuje automatické importy souborů a tailwind jednorázově do složky temp
 * **styles:build** - To samé jako styles, ale navíc s kompilací souborů
@@ -146,9 +169,9 @@ Alternativně lze použít i **.less**, v takovém případě je nutné doinstal
 
 Zpracovává soubory šablon. Dělí se na `templates` a `templates:production`. Pro šablony lze využít `twig` nebo `html`, twig má integrované helpery na práci s generovanými assety. Psaní šablon ve twigu je pak vhodné taky pro následnou implementaci do [Symfony](https://symfony.com/doc/current/templates.html) nebo [Nette](https://twig2latte.nette.org/).
 
-Alternativně lze použít i **.hbs**, v takovém případě je nutné doinstalovat `gulp-hb` do projektu. V případě pokud se používá výhradně hbs je doporučeno v configu nastavit `templates.format` na `"hbs""`. Pozor při změně šablnovacího systému je důležité nastavit správně obsaho pro PurgeCSS v `styles.purge.content`.
+Alternativně lze použít i **.hbs**, v takovém případě je nutné doinstalovat `gulp-hb` do projektu. V případě pokud se používá výhradně hbs je doporučeno v configu nastavit `templates.format` na `"hbs"`. Pozor při změně šablnovacího systému je důležité nastavit správně obsah pro PurgeCSS v `styles.purge.content`.
 
-Výhoda psaní šablon bokem mimo PHP aplikaci je v tom mít zdrojové data na další případné využití šablon. Šablony lze samozřejmě psát rovnou v PHP framworku a integrovaný šablonovací systém není nutné používat.
+Výhoda psaní šablon bokem mimo PHP aplikaci je mít čisté zdrojové data na další případné využití šablon. Šablony lze samozřejmě psát rovnou v PHP framworku a integrovaný šablonovací systém není nutné vůbec používat.
 
 * **templates** - Kompiluje šablony do html, bez minifikace
 * **templates:production** - Kompiluje šablony do html, s minifikací

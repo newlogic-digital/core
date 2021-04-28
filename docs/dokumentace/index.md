@@ -12,7 +12,7 @@ Příklad základního nastavení:
 // gulpfile.js
 import {Core} from  "newlogic-core";
 
-new Core().init({
+export default new Core().init({
   styles: {
     purge: {
       content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
@@ -25,23 +25,17 @@ Newlogic Core používá moderní zápis ES modulů, v package.json je nutné m�
 
 Do `gulpfile.js` lze psát i vlastní Gulp tasky. Lze taky přímo využít interní třídy a to `Utils`, `Scripts`, `Styles`, `Templates`, `Icons`, `Emails`, `Cms`, `Serve`, `Watch` a `Core`. 
 
-K instanci configu lze přistupovat pomocí `new Core().config`.
+K instanci configu lze přistupovat pomocí `new Core().init`.
 
 ## Hlavní nastavení
 
-### lang
+[comment]: <> (### local &#40;momentálně nefunguje&#41;)
 
-- **Type:** `string`
-- **Default:** `"cs"`
+[comment]: <> (- **Type:** `boolean`)
 
-  Výchozí jazyk aplikace
+[comment]: <> (- **Default:** `false`)
 
-### local (momentálně nefunguje)
-
-- **Type:** `boolean`
-- **Default:** `false`
-
-  Povolení lokálního módu, může se hodit pokud není k dispozici internet. V takovém případě se všechny stažené cdn odkazy budou načítat lokálně.
+[comment]: <> (  Povolení lokálního módu, může se hodit pokud není k dispozici internet. V takovém případě se všechny stažené cdn odkazy budou načítat lokálně.)
 
 ### errors
 
@@ -56,6 +50,8 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 - **Default:** `false`
 
   Povolení použití [Vite](/vite), zejména vhodné pro SPA aplikace ve Vue. Při tomto nastavení se většina tasků Newlogic Core deaktivuje a buildovací proces se plně přenechává Vite. 
+  
+  (je nutné doinstalovat do package.json) 
 
 ### serve.index
 
@@ -74,14 +70,16 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 - **Type:** `boolean`
 - **Default:** `true`
 
-  Zda se má obsah načítat relativně ve složce dist, např. routování cesty z `/dist/assets/main.css` na `/assets/main.css`
+  Zda se má obsah načítat relativně ve složce dist, např. routování cesty z `/public/assets/main.css` na `/assets/main.css`
 
 ### serve.server
 
 - **Type:** `string`
 - **Default:** `"wds"`
 
-  Typ serveru který se používá, ve výchozím stavu se používá [Web Dev Server](https://modern-web.dev/docs/dev-server/overview/), pro serve lze použít i [Vite](https://vitejs.dev/) nastavením hodnoty `"vite"`. Vite umí navíc např. načítat ES moduly přímo z node_modules.  
+  Typ serveru který se používá, ve výchozím stavu se používá [Web Dev Server](https://modern-web.dev/docs/dev-server/overview/), pro serve lze použít i [Vite](https://vitejs.dev/) nastavením hodnoty `"vite"`. Vite umí navíc např. načítat ES moduly přímo z node_modules.
+
+  (je nutné doinstalovat do package.json)
 
 ### modules
 
@@ -90,7 +88,7 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
   Dodatečné moduly kterými lze rozšířit funkcionalitu. V současné chvíli lze rozšířit funkcionality .hbs šablon.
 
   ```js
-    import hbs from "./src/gulp.hbs.js";
+    import hbs from "./src/module.hbs.js";
     
     export default {
         modules: {hbs}
@@ -260,6 +258,21 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 
   Cesta ke komponentám v Newlogic CMS
 
+### paths.configs
+
+- **Type:** `object`
+
+  Cesty pro využití configů ostatních nástrojů
+
+```js
+configs: {
+    postcss: "postcss.config.js",
+    tailwind: "tailwind.config.js",
+    vite: "vite.config.js",
+    wds: "wds.config.mjs"
+}
+```
+
 ## Ikony
 
 ### icons.format
@@ -309,6 +322,12 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 - **Default:** `true`
 
   Zda se má zkompilovaný soubor optimalizovat a minifikovat
+
+### icons.postcss
+
+- **Type:** `object`
+
+  Lze vložit vlastní postcss pluginy (jako pole), nebo rozšířit současné přidáním `postcss.extend`
 
 ## Scripty
 
@@ -499,6 +518,38 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 
   Jakým způsobem [CleanCSS](https://github.com/jakubpawlowicz/clean-css) zpracovává importy souborů, ve výchozím nastavení se všechny importy zpracovávají přímo a ve výsledým buildu nejsou tak žádné importy
 
+### styles.ratio
+
+- **Type:** `string[]`
+- **Default:** `["main.css"]`
+
+  Název css souboru do kterého se mají generovat data-ratio styly
+
+### styles.join
+
+- **Type:** `object`
+- **Default:** `{"main.css": ["temp/tailwind.css"]}`
+
+  Spojování css souborů dohromady, např. pro tailwind
+
+### styles.tailwind
+
+- **Type:** `object`
+```js
+tailwind: {
+  cache: true,
+  postcss: {},
+  basename: "tailwind.css"
+}
+```
+Další konfigurace pro tailwind, do postcss lze vložit vlastní postcss pluginy (jako pole), nebo rozšířit současné přidáním `postcss.extend`
+
+### styles.postcss
+
+- **Type:** `object`
+
+  Lze vložit vlastní postcss pluginy (jako pole), nebo rozšířit současné přidáním `postcss.extend`
+
 ## Šablony
 
 ### templates.format
@@ -558,6 +609,12 @@ K instanci configu lze přistupovat pomocí `new Core().config`.
 - **Default:** `["email"]`
 
   Z kterých emailů vytvořit zip, uvádí se prefix jakým mají názvy zkompilovaných šablon začínat
+
+### emails.postcss
+
+- **Type:** `object`
+
+  Lze vložit vlastní postcss pluginy (jako pole), nebo rozšířit současné přidáním `postcss.extend`
 
 ## Assety
 
