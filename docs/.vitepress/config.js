@@ -8,6 +8,7 @@ module.exports = {
   description: 'Moderní řešení pro tvorbu webových aplikací',
   head: [['link', { rel: 'icon', type: 'image/png', href: '/logo.png' }]],
   themeConfig: {
+    repo: 'newlogic-digital/core',
     docsDir: 'docs',
     docsBranch: 'main',
     editLinks: false,
@@ -25,13 +26,9 @@ module.exports = {
             link: 'https://ui.newlogic.cz'
           },
           {
-            text: 'GitLab',
-            link: 'https://git.newlogic.cz/newlogic-dev/newlogic-ui'
-          },
-          {
-            text: 'Changelog',
+            text: 'Newlogic Digital',
             link:
-              'https://git.newlogic.cz/newlogic-dev/newlogic-ui/-/blob/master/CHANGELOG'
+              'https://www.newlogic.cz'
           }
         ]
       }

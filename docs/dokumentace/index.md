@@ -10,12 +10,12 @@ Příklad základního nastavení:
 
 ```js
 // gulpfile.js
-import {Core} from  "newlogic-core";
+import {Core} from  "@newlogic-digital/core";
 
 export default new Core().init({
   styles: {
     purge: {
-      content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
+      content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte', 'temp/cdn/*.js']
     }
   }
 })
@@ -49,7 +49,7 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
 - **Type:** `boolean`
 - **Default:** `false`
 
-  Povolení použití [Vite](/vite), zejména vhodné pro SPA aplikace ve Vue. Při tomto nastavení se většina tasků Newlogic Core deaktivuje a buildovací proces se plně přenechává Vite. 
+  Povolení použití [Vite](/vite/), zejména vhodné pro SPA aplikace ve Vue. Při tomto nastavení se většina tasků Newlogic Core deaktivuje a buildovací proces se plně přenechává Vite. 
   
   (je nutné doinstalovat do package.json) 
 
