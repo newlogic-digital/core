@@ -93,7 +93,7 @@ let Config = {
         importMap: {
             build: true,
             cdn: "esm.sh",
-            version: "",
+            version: "v41",
             target: "es2020",
             trailingSlashes: "",
             shortUrl: false,
@@ -892,7 +892,9 @@ export class Styles {
                             let contents = file.contents.toString();
 
                             Config.styles.join[joinFile].forEach(targetFile => {
-                                contents += fs.readFileSync(root + targetFile).toString();
+                                if (fs.existsSync(root + targetFile)) {
+                                    contents += fs.readFileSync(root + targetFile).toString();
+                                }
                             })
 
                             file.contents = Buffer.from(contents);
@@ -1597,7 +1599,7 @@ export class Serve {
                         import rollupStyles from 'rollup-plugin-styles';
                         import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
                         import Config from "../gulpfile.js";
-                        import {Utils} from "newlogic-core";
+                        import {Utils} from "@newlogic-digital/core";
                         
                         const styles = fromRollup(rollupStyles);
                         
@@ -1615,7 +1617,7 @@ export class Serve {
                                 '${Config.paths.input.root}/**/*.css': 'js',
                                 '${Config.paths.input.root}/**/*.less': 'js'
                             },
-                            plugins: [styles({ plugins: Utils.postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
+                            plugins: [styles({ plugins: new Utils().postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
                         }
                     `)
                 }
@@ -1633,13 +1635,13 @@ export class Serve {
                 } else {
                     fs.writeFileSync(`${root + Config.paths.temp}/vite.config.js`,`
                         import Config from "../gulpfile.js";
-                        import {Utils} from "newlogic-core";
+                        import {Utils} from "@newlogic-digital/core";
                         
                         export default {
                             server: {open: "${Config.serve.index}"},
                             css: {
                                 postcss: {
-                                    plugins: Utils.postcssConfig(Config.styles.postcss, [])
+                                    plugins: new Utils().postcssConfig(Config.styles.postcss, [])
                                 }
                             }
                         }
