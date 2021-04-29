@@ -11,7 +11,6 @@ import minifier from "html-minifier";
 import lodash from "lodash";
 import https from "https";
 import glob from "glob";
-import {fileURLToPath} from "url";
 
 import twig from "gulp-twig2html";
 import autoprefixer from "autoprefixer";
@@ -41,14 +40,6 @@ let Config = {
         server: "wds"
     },
     modules: {},
-    cms: {
-        branch: "dev",
-        full: false,
-        sectionsDir: "Sections",
-        format: {
-            templates: "tpl"
-        }
-    },
     paths: {
         temp: "temp",
         cdn: "temp/cdn",
@@ -69,12 +60,8 @@ let Config = {
             icons: "public/assets/css",
             emails: "public",
             emailsImg: "public/img",
+            emailsWww: "www/emails",
             assets: "public/assets"
-        },
-        cms: {
-            temp: "temp/cms",
-            templates: "www/templates",
-            components: "www/components"
         },
         configs: {
             postcss: "postcss.config.js",
@@ -138,7 +125,10 @@ let Config = {
         },
         import: ['all'],
         themePath: "",
-        ratio: ["main.css"],
+        ratio: {
+            content: [],
+            files: ["main.css"]
+        },
         join: {"main.css": ["temp/tailwind.css"]},
         tailwind: {
             cache: true,
@@ -841,7 +831,7 @@ export class Styles {
             });
 
             return through.obj((file, enc, cb) => {
-                if (!Config.styles.ratio.includes(file.basename)) {
+                if (!Config.styles.ratio.files.includes(file.basename)) {
                     cb(null, file);
                     return false;
                 }
@@ -945,7 +935,7 @@ export class Styles {
         return new Promise(resolve => {
             gulp.src([`${root + Config.paths.input.styles}/*.{css,less}`, `!${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`, `!${root + Config.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
-                .pipe(ratio([`${root + Config.paths.input.templates}/**/*.{hbs,html,twig}`, `${root + Config.paths.cms.templates}/**/*.{tpl,twig}`]))
+                .pipe(ratio(Config.styles.ratio.content))
                 .pipe(vendor())
                 .pipe(build())
                 .pipe(gulpif(Config.styles.purge.enabled, purge()))
@@ -1541,7 +1531,7 @@ export class Emails {
                         .pipe(inlineCss(inlineCssOpt))
                         .pipe(gulpif(Config.emails.removeClasses,replace(/class="([A-Za-z0-9 _]*)"/g, '')))
                         .pipe(gulpif(("*.html"), gulp.dest(root + Config.paths.output.emails)))
-                        .pipe(gulpif("*.{latte,tpl}", gulp.dest(root + Config.paths.cms.emails)))
+                        .pipe(gulpif("*.{latte,tpl}", gulp.dest(root + Config.paths.output.emailsWww)))
                 }
             )(resolve)
         })
@@ -1921,6 +1911,17 @@ export class Core {
             }
         }
 
+        if (Config.styles.ratio.content === 0 && Exists.templates) {
+            Config.styles.ratio.content.push(`${root + Config.paths.input.templates}/**/*.{hbs,html,twig}`);
+        }
+
+        if (Config.styles.purge.content === 0 && Exists.styles) {
+            Exists.scripts && Config.styles.purge.content.push(`${Config.paths.input.scripts}/**/*.js`);
+            Exists.templates && Config.styles.purge.content.push(`${Config.paths.input.templates}/**/*.twig`);
+
+            Config.styles.purge.content.push(`${Config.paths.cdn}/*.js`)
+        }
+
         this.tasks();
 
         return Config;
@@ -2140,7 +2141,7 @@ export class Core {
             })
         }
 
-        if (!Config.vite) {
+        if (!Config.vite && typeof Config.modules.Cms !== "undefined") {
             gulp.task("cms:install", () => {
                 return new Config.modules.Cms().install()
             })
