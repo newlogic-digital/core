@@ -4,8 +4,8 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://npmjs.com/package/@newlogic/core"><img src="https://img.shields.io/npm/v/@newlogic/core.svg" alt="npm package"></a>
-  <a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/@newlogic/core.svg" alt="node compatility"></a>
+  <a href="https://npmjs.com/package/@newlogic-digital/core"><img src="https://img.shields.io/npm/v/@newlogic-digital/core.svg" alt="npm package"></a>
+  <a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/@newlogic-digital/core.svg" alt="node compatility"></a>
 </p>
 
 # Newlogic Core 🛠️
@@ -66,7 +66,7 @@ For single page applications, it is possible to integrate [Vite](https://vitejs.
 ## Instalation
 
 ```sh
-npm install @newlogic-digital/core
+npm i @newlogic-digital/core --save-dev
 ```
 
 ### Requirements

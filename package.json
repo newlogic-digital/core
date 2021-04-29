@@ -1,9 +1,10 @@
 {
   "name": "@newlogic-digital/core",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "type": "module",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
+  "description": "Set of tools that can be used to create modern web applications",
   "license": "GNU GPLv3",
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -53,5 +54,17 @@
   },
   "devDependencies": {
     "vitepress": "^0.13.0"
+  },
+  "files": [
+    "index.js", "packages"
+  ],
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=7.10.0",
+    "yarn": ">=2.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/newlogic-digital/core.git"
   }
 }

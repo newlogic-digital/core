@@ -35,13 +35,13 @@ V případě SPA aplikací je možné integrovat Vue (nebo jakýhokoliv jiný SP
 Přes NPM 7+:
 
 ```bash
-$ npm i git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --save-dev
+$ npm i @newlogic-digital/core --save-dev
 ```
 
 Přes Yarn 2+:
 
 ```bash
-$ yarn add git+ssh://git@git.newlogic.cz/newlogic-dev/newlogic-core.git --dev
+$ yarn add @newlogic-digital/core --dev
 ```
 
 ::: warning UPOZORNĚNÍ
