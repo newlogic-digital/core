@@ -66,7 +66,7 @@ For single page applications, it is possible to integrate [Vite](https://vitejs.
 ## Instalation
 
 ```sh
-npm install @newlogic/core
+npm install @newlogic-digital/core
 ```
 
 ### Requirements
@@ -79,7 +79,7 @@ npm install @newlogic/core
 Each Newlogic Core project has to have config via `gulpfile.js`
 
 ```js
-import {Core} from  "newlogic-core";
+import {Core} from  "@newlogic-digital/core";
 
 // minimum configuration example
 export default new Core().init({
