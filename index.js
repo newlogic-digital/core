@@ -806,7 +806,7 @@ export class Styles {
 
         const clean = lazypipe().pipe(cleanCSS, {
             inline: Config.styles.import,
-            level: {1: {specialComments: 0}, 2: {all: true}}
+            level: {1: {specialComments: 0}, 2: {all: true, removeUnusedAtRules: false}}
         });
 
         const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
