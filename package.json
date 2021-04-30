@@ -1,6 +1,6 @@
 {
   "name": "@newlogic-digital/core",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",

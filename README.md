@@ -8,13 +8,13 @@
   <a href="https://nodejs.org/en/about/releases/"><img src="https://img.shields.io/node/v/@newlogic-digital/core.svg" alt="node compatility"></a>
 </p>
 
-# Newlogic Core 🛠️
+# ⚙️ Newlogic Core
 
 > Still in very early development.
 
-Modern solutions for creating web applications
+Modern solution for creating web applications
 
-- 💡 Modern solutions
+- 💡 Modern solution
 - ⚡️ Fast development
 - 🛠️ Integrated tools
 - 📦 Modular structure
@@ -23,7 +23,7 @@ Modern solutions for creating web applications
 
 Newlogic Core is a set of tools that can be used to create modern web applications. Use of modern Javascript, CSS, ES modules, dynamic imports, etc.
 
-## Integrated tools
+## 🛠️ Integrated tools
 * **[PostCSS](https://postcss.org/)** with basic plugins and [Tailwind CSS](https://tailwindcss.com/) for utility classes.
 * **[Rollup](https://rollupjs.org/)** for javascript build and minification
 * **[Importmaps](https://github.com/WICG/import-maps)** generator for javascript buildless development
@@ -32,7 +32,7 @@ Newlogic Core is a set of tools that can be used to create modern web applicatio
 * **[TwigJS](https://purgecss.com/)** as template engine
 * **[Web Dev Server](https://modern-web.dev/guides/dev-server/getting-started/)** for local webserver
 
-### Basic principle
+### 💡 Basic principle
 
 Most of today build tools are hard to configure and not focused primary on PHP server side applications. 
 
@@ -42,7 +42,7 @@ It doesn't matter if you use Nette, Symfony or Laravel - the structure can be fr
 
 It's up to you - all paths are freely configurable in `gulpfile.js` config
 
-### Modularity
+### 📦 Modularity
 
 Newlogic Core uses [Gulp](https://gulpjs.com/) as smart task system, tasks are generated automatically depending on which modules you use.
 
@@ -50,7 +50,7 @@ Source files are divided by modules inside `src` directory - styles, scripts, te
 
 If you use [PhpStorm](https://www.jetbrains.com/phpstorm/) tasks will load for you automatically and dynamically according to the availability of individual modules.
 
-### Without compilation - no building and bundling
+### ⚡ Without compilation - no building and bundling
 
 Lets face the facts. PHP programmers **hate javascript compilation**.
 
@@ -60,10 +60,10 @@ Javascript sources are executable in browsers via modern solutions like **[Impor
 
 CSS sources still need to be compiled, because most of standardized features are not yet ready in browsers, but it's getting there.
 
-### Single Page Apps
+### 🧬 Single Page Apps
 For single page applications, it is possible to integrate [Vite](https://vitejs.dev/) and use any SPA framework you want. From Newlogic Core, you can only use additional functionalities such as auto-generation of imports into files within folders, iconfont, etc. Or automate some processes by writing new tasks in `gulpfile.js`.
 
-## Instalation
+## 🪄 Instalation
 
 ```sh
 npm i @newlogic-digital/core --save-dev
