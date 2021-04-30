@@ -36,7 +36,7 @@ Newlogic Core is a set of tools that can be used to create modern web applicatio
 
 Most of today build tools are hard to configure and not focused primary on PHP server side applications. 
 
-Programmers often don't want to configure anything, basic idea is to add as many files you want to `src` and get output in `public/assets` - without worrying about anything.
+PHP programmers often **don't want to configure anything**, basic idea is to add as many files you want to `src` and get output in `public/assets` - without worrying about anything.
 
 It doesn't matter if you use Nette, Symfony or Laravel - the structure can be freely adjusted as needed - `resources` and` public`, `src` and` dist` or `app/assets` and` www` 
 
@@ -44,7 +44,7 @@ It's up to you - all paths are freely configurable in `gulpfile.js` config
 
 ### 📦 Modularity
 
-Newlogic Core uses [Gulp](https://gulpjs.com/) as smart task system, tasks are generated automatically depending on which modules you use.
+Newlogic Core uses currently [Gulp](https://gulpjs.com/) as smart task system, tasks are generated automatically depending on which modules you use.
 
 Source files are divided by modules inside `src` directory - styles, scripts, templates, icons, emails, assets. It is optional which modules you want to use for the project, simple delete the directory. You really only use what you want to use.
 
@@ -90,6 +90,13 @@ export default new Core().init({
   }
 })
 ```
+
+## 📌 Future plans
+- translating docs to english
+- using vite as main dev server
+- rewrite everything 😂
+- concept is good, but realization could be way better
+- future rewrite could drop gulp completely and use esbuild for css, js build and vite for dev server
 
 ## Licence
 GNU GPLv3
