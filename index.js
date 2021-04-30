@@ -807,6 +807,7 @@ export class Styles {
         const clean = lazypipe().pipe(cleanCSS, {
             inline: Config.styles.import,
             level: {1: {specialComments: 0}, 2: {all: true, removeUnusedAtRules: false}}
+            level: {1: {specialComments: 0}, 2: {all: true}}
         });
 
         const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
@@ -1277,7 +1278,7 @@ export class Templates {
         }
 
         const context = {
-            Config: Config,
+            config: Config,
             lang: Config.lang,
             outputPath: "/" + Config.paths.output.root,
             inputPath: "/" + Config.paths.input.root,
@@ -1757,7 +1758,7 @@ export class Core {
         Exists = {
             scripts: fs.existsSync(root + Config.paths.input.scripts),
             styles: fs.existsSync(root + Config.paths.input.styles),
-            icons: fs.existsSync(root + Config.paths.input.icons) && Config.icons.id !== "",
+            icons: fs.existsSync(root + Config.paths.input.icons),
             emails: fs.existsSync(root + Config.paths.input.emails),
             assets: fs.existsSync(root + Config.paths.input.assets),
             templates: fs.existsSync(root + Config.paths.input.templates) && !Config.vite
@@ -2036,11 +2037,19 @@ export class Core {
         if (Exists.icons) {
             gulp.task("icons", (resolve) => {
                 // TODO tady jen fetch
-                gulp.series(new Icons().fetch, new Icons().build)(resolve)
+                if (Config.icons.id !== "") {
+                    gulp.series(new Icons().fetch, new Icons().build)(resolve)
+                } else {
+                    return new Icons().build()
+                }
             })
 
             gulp.task("icons:build", (resolve) => {
-                gulp.series(new Icons().fetch, new Icons().build)(resolve)
+                if (Config.icons.id !== "") {
+                    gulp.series(new Icons().fetch, new Icons().build)(resolve)
+                } else {
+                    return new Icons().build()
+                }
             })
 
             gulp.task("icons:production", () => {
