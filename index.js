@@ -407,8 +407,8 @@ export class Utils {
             return {config: root}
         } else if (typeof config.extend !== "undefined") {
             plugins = plugins.concat(config.extend)
-        } else if (typeof config.plugins !== "undefined") {
-            plugins = config;
+        } else if (config.length !== 0) {
+            return config;
         }
 
         return plugins.concat(after);
