@@ -407,7 +407,7 @@ export class Utils {
             return {config: root}
         } else if (typeof config.extend !== "undefined") {
             plugins = plugins.concat(config.extend)
-        } else if (config.length !== 0) {
+        } else if (Array.isArray(config) && config.length !== 0) {
             return config;
         }
 
@@ -804,7 +804,7 @@ export class Styles {
 
         const clean = lazypipe().pipe(cleanCSS, {
             inline: Config.styles.import,
-            level: {1: {specialComments: 0}, 2: {all: true}}
+            level: {1: {specialComments: 0}, 2: {all: false}}
         });
 
         const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
@@ -1121,15 +1121,14 @@ export class Templates {
                     output = data
                 }
 
-                if (Config.serve.mode !== "dev" && output.indexOf(`/${Config.paths.input.root}`) === 0) {
-                    if (Config.paths.output.rewrite) {
-                        output = output.replace(`/${Config.paths.input.root}`, `/${Config.paths.output.root}`)
-                    } else {
-                        output = output.replace(`/${Config.paths.input.root}`, "")
-                    }
+                if (Config.serve.mode !== "dev") {
+                    output = output
+                        .replace(`/${Config.paths.input.styles}`, `/${Config.paths.output.styles}`)
+                        .replace(`/${Config.paths.input.scripts}`, `/${Config.paths.output.scripts}`)
+                        .replace(`/${Config.paths.input.assets}`, `/${Config.paths.output.assets}`)
                 }
 
-                if (Config.templates.output.rewrite && output.indexOf(`/${Config.paths.output.root}`) === 0) {
+                if (Config.paths.output.rewrite && output.indexOf(`/${Config.paths.output.root}`) === 0) {
                     output = output.replace(`/${Config.paths.output.root}`, "")
                 }
 
@@ -1279,7 +1278,7 @@ export class Templates {
             lang: Config.lang,
             outputPath: "/" + Config.paths.output.root,
             inputPath: "/" + Config.paths.input.root,
-            resolvePath: Config.serve.mode === "dev" ? "/" + root + Config.paths.input.root : outputDir,
+            resolvePath: Config.serve.mode === "dev" ? "" : outputDir,
         }
 
         const build = lazypipe().pipe(() => gulpif("*.twig", twig({
