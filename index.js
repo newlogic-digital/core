@@ -16,13 +16,13 @@ import twig from "gulp-twig2html";
 import autoprefixer from "autoprefixer";
 import postcss from "gulp-postcss";
 import postcssImport from "postcss-import";
-import postcssNesting from "postcss-nesting/dist/index.mjs";
+import postcssNesting from "postcss-nesting";
 import postcssCustomSelectors from "postcss-custom-selectors";
 import postcssCustomMedia from "postcss-custom-media";
 
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
-const root = process.cwd() + "/"
+const root = process.cwd() + "/";
 
 let Exists;
 let Modules;
@@ -34,10 +34,8 @@ let Config = {
     errors: true,
     vite: false,
     serve: {
-        index: "",
-        mode: "",
-        rewriteOutput: true,
-        server: "wds"
+        index: "/index.html",
+        mode: ""
     },
     modules: {},
     paths: {
@@ -54,6 +52,7 @@ let Config = {
             assets: "src/assets"
         },
         output: {
+            rewrite: true,
             root: "public",
             scripts: "public/assets/js",
             styles: "public/assets/css",
@@ -62,12 +61,6 @@ let Config = {
             emailsImg: "public/img",
             emailsWww: "www/emails",
             assets: "public/assets"
-        },
-        configs: {
-            postcss: "postcss.config.js",
-            tailwind: "tailwind.config.js",
-            vite: "vite.config.js",
-            wds: "wds.config.mjs"
         }
     },
     icons: {
@@ -82,7 +75,7 @@ let Config = {
     scripts: {
         optimizations: true,
         revision: true,
-        legacy: true,
+        legacy: false,
         polyfillUrls: [],
         polyfillFeatures: "default",
         importResolution: {
@@ -157,8 +150,6 @@ let Config = {
     },
     tailwind: {}
 }
-
-let postcssPlugins = [postcssImport, postcssNesting, postcssCustomMedia, postcssCustomSelectors];
 
 export class Utils {
     cleanup() {
@@ -409,10 +400,11 @@ export class Utils {
             }
         }
     }
-    postcssConfig(config, after) {
-        let plugins = postcssPlugins;
+    postcssPlugins(config, after) {
+        let plugins = [postcssImport, postcssNesting, postcssCustomMedia, postcssCustomSelectors];
 
-        if (fs.existsSync(root + Config.paths.configs.postcss)) {
+        if (Exists.postcssConfig) {
+            return {config: root}
         } else if (typeof config.extend !== "undefined") {
             plugins = plugins.concat(config.extend)
         } else if (typeof config.plugins !== "undefined") {
@@ -456,12 +448,10 @@ export class Scripts {
                         }
                     });
 
-                    if (fs.existsSync(`${directory}/${Config.scripts.importResolution.filename}`)) {
-                        if (fs.readFileSync(`${directory}/${Config.scripts.importResolution.filename}`).toString() !== imports) {
-                            fs.writeFileSync(`${directory}/${Config.scripts.importResolution.filename}`, imports);
-                        }
-                    } else {
-                        fs.writeFileSync(`${directory}/${Config.scripts.importResolution.filename}`, imports);
+                    let path = `${directory}/${Config.scripts.importResolution.filename}`;
+
+                    if (fs.existsSync(path) && fs.readFileSync(path).toString() !== imports || !fs.existsSync(path)) {
+                        fs.writeFileSync(path, imports);
                     }
                 }
 
@@ -728,12 +718,14 @@ export class Styles {
                         }
                     });
 
-                    if (fs.existsSync(`${directory}/${Config.styles.importResolution.filename}`)) {
-                        if (fs.readFileSync(`${directory}/${Config.styles.importResolution.filename}`).toString() !== imports) {
-                            fs.writeFileSync(`${directory}/${Config.styles.importResolution.filename}`, imports);
+                    let path = `${directory}/${Config.styles.importResolution.filename}`;
+
+                    if (imports.length !== 0) {
+                        if (fs.existsSync(path) && fs.readFileSync(path).toString() !== imports || !fs.existsSync(path)) {
+                            fs.writeFileSync(path, imports);
                         }
-                    } else {
-                        fs.writeFileSync(`${directory}/${Config.styles.importResolution.filename}`, imports);
+                    } else if (fs.readFileSync(path).toString() !== "/* empty */") {
+                        fs.writeFileSync(path, "/* empty */");
                     }
                 }
 
@@ -785,13 +777,19 @@ export class Styles {
                 extractors: [
                     {
                         extractor: content => content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [],
-                        extensions: ['html', 'js', 'hbs', 'tpl', 'latte']
+                        extensions: ['html', 'js', 'hbs', 'tpl', 'latte', 'twig']
                     }
                 ]
             }, Config.styles.purge.tailwind));
 
+            let tailwindcssConfig = {};
+
+            if (!Exists.tailwindConfig) {
+                tailwindcssConfig = { config: Config.tailwind }
+            }
+
             gulp.src(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)
-                .pipe(postcss(new Utils().postcssConfig(Config.styles.tailwind.postcss, [postcssNesting, tailwindcss({ config: Config.tailwind }), autoprefixer])))
+                .pipe(postcss(new Utils().postcssPlugins(Config.styles.tailwind.postcss, [tailwindcss(tailwindcssConfig), autoprefixer])))
                 .pipe(gulpif(Config.styles.purge.enabled, purge()))
                 .pipe(gulpif(Config.styles.optimizations, clean()))
                 .pipe(gulp.dest(root + Config.paths.temp))
@@ -806,7 +804,6 @@ export class Styles {
 
         const clean = lazypipe().pipe(cleanCSS, {
             inline: Config.styles.import,
-            level: {1: {specialComments: 0}, 2: {all: true, removeUnusedAtRules: false}}
             level: {1: {specialComments: 0}, 2: {all: true}}
         });
 
@@ -932,7 +929,7 @@ export class Styles {
 
         aspectRatio.postcss = true;
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.styles.postcss, [autoprefixer, aspectRatio])))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.styles.postcss, [autoprefixer, aspectRatio])))
         ).pipe(() => gulpif("*.less", Modules.less.module()));
 
         return new Promise(resolve => {
@@ -1125,14 +1122,14 @@ export class Templates {
                 }
 
                 if (Config.serve.mode !== "dev" && output.indexOf(`/${Config.paths.input.root}`) === 0) {
-                    if (Config.serve.rewriteOutput) {
+                    if (Config.paths.output.rewrite) {
                         output = output.replace(`/${Config.paths.input.root}`, `/${Config.paths.output.root}`)
                     } else {
                         output = output.replace(`/${Config.paths.input.root}`, "")
                     }
                 }
 
-                if (Config.serve.rewriteOutput && output.indexOf(`/${Config.paths.output.root}`) === 0) {
+                if (Config.templates.output.rewrite && output.indexOf(`/${Config.paths.output.root}`) === 0) {
                     output = output.replace(`/${Config.paths.output.root}`, "")
                 }
 
@@ -1465,7 +1462,7 @@ export class Icons {
 
         const clean = lazypipe().pipe(cleanCSS);
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.icons.postcss, [autoprefixer])))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.icons.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return gulp.src(`${root + Config.paths.input.icons}/style.{css,less}`)
@@ -1500,7 +1497,7 @@ export class Emails {
             removeStyleTags: Config.emails.inlineOnly
         }
 
-        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssConfig(Config.emails.postcss, [autoprefixer])))
+        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.emails.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return new Promise(resolve => {
@@ -1588,90 +1585,47 @@ export class Emails {
 }
 
 export class Serve {
-    async init() {
-        return new Promise(resolve => {
-            if (Config.serve.server === "wds") {
-                let config = `${Config.paths.temp}/wds.config.mjs`;
+    init() {
+        return new Promise(async (resolve) => {
+            const { createServer } = (await import('vite'));
+            const tailwindcss = (await import("tailwindcss")).default;
 
-                if (fs.existsSync(root + Config.paths.configs.wds)) {
-                    config = Config.paths.configs.wds;
-                } else {
-                    fs.writeFileSync(`${root + Config.paths.temp}/wds.config.mjs`,`
-                        import rollupStyles from 'rollup-plugin-styles';
-                        import { fromRollup, rollupAdapter } from '@web/dev-server-rollup';
-                        import Config from "../gulpfile.js";
-                        import {Utils} from "@newlogic-digital/core";
-                        
-                        const styles = fromRollup(rollupStyles);
-                        
-                        export default {
-                            middleware: [
-                                function rewriteIndex(context, next) {
-                                    if (${Config.serve.rewriteOutput} && !context.url.startsWith("/${Config.paths.input.root}") && !context.url.startsWith("/node_modules") && !context.url.startsWith("/temp") && !context.url.startsWith("/__")) {
-                                        context.url = '/${Config.paths.output.root}/' + context.url;
-                                    }
-                                    
-                                    return next();
-                                },
-                            ],
-                            mimeTypes: {
-                                '${Config.paths.input.root}/**/*.css': 'js',
-                                '${Config.paths.input.root}/**/*.less': 'js'
-                            },
-                            plugins: [styles({ plugins: new Utils().postcssConfig(Config.styles.postcss, []), include: ['${Config.paths.input.root}/**/*.css', '${Config.paths.input.root}/**/*.less'], mode: ["inject", {prepend: true}] })],
-                        }
-                    `)
-                }
+            let config = {
+                server: {
+                    open: Config.serve.index,
+                    watch: {
+                        ignored: ['**/node_modules/**', '**/.git/**', '**/src/templates/**', '**/src/main.json']
+                    }
+                },
+                root: process.cwd(),
+            };
 
-                nodeCmd.exec(`npx wds --watch --open ${Config.serve.index} --config ${config}`, err => err && console.log(err));
+            let tailwindcssConfig = {}
 
-                console.log("\x1b[34m", "[Web Dev Server] running at localhost","\x1b[0m");
+            if (!Exists.tailwindConfig) {
+                tailwindcssConfig = { config: Config.tailwind }
             }
 
-            if (Config.serve.server === "vite") {
-                let config = `${Config.paths.temp}/vite.config.js`;
-
-                if (fs.existsSync(root + Config.paths.configs.vite)) {
-                    config = Config.paths.configs.vite;
-                } else {
-                    fs.writeFileSync(`${root + Config.paths.temp}/vite.config.js`,`
-                        import Config from "../gulpfile.js";
-                        import {Utils} from "@newlogic-digital/core";
-                        
-                        export default {
-                            server: {open: "${Config.serve.index}"},
-                            css: {
-                                postcss: {
-                                    plugins: new Utils().postcssConfig(Config.styles.postcss, [])
-                                }
-                            }
-                        }
-                    `)
+            let css = {
+                css: {
+                    postcss: {
+                        plugins: new Utils().postcssPlugins(Config.styles.postcss, [tailwindcss(tailwindcssConfig), autoprefixer])
+                    }
                 }
-
-                nodeCmd.exec(`npx vite --config ${config}`, err => err && console.log(err));
-
-                console.log("\x1b[34m", "[Vite] running at localhost","\x1b[0m");
             }
+
+            if (!Exists.postcssConfig && Config.serve.mode === "dev") {
+                config = lodash.merge(config, css)
+            }
+
+            const server = await createServer(config)
+
+            await server.listen()
+
+            console.log(" ");
 
             resolve();
         })
-
-        // const postcss = fromRollup(rollupPostcss);
-        //
-        // return startDevServer({
-        //     config: {
-        //         appIndex: `${root + Config.paths.output.root}/${Config.serve.index}`,
-        //         watch: true,
-        //         open: true,
-        //         mimeTypes: {
-        //             'src/**/*.css': 'js',
-        //         },
-        //         plugins: [postcss({ plugins: [importCSS, postcssPresetEnv({ stage: 0 })], include: ['src/**/*.css'] })],
-        //     },
-        //     logStartMessage: false,
-        //     readFileConfig: false,
-        // });
     }
 }
 
@@ -1761,7 +1715,9 @@ export class Core {
             icons: fs.existsSync(root + Config.paths.input.icons),
             emails: fs.existsSync(root + Config.paths.input.emails),
             assets: fs.existsSync(root + Config.paths.input.assets),
-            templates: fs.existsSync(root + Config.paths.input.templates) && !Config.vite
+            templates: fs.existsSync(root + Config.paths.input.templates) && !Config.vite,
+            postcssConfig: fs.existsSync(root + "postcss.config.cjs") || fs.existsSync(root + "postcss.config.js"),
+            tailwindConfig: fs.existsSync(root + "tailwind.config.cjs") || fs.existsSync(root + "tailwind.config.js")
         }
 
         Modules = {
@@ -1979,8 +1935,7 @@ export class Core {
 
                 Config.serve.mode = "dev";
 
-                // TODO odebrat cdn až se opraví buildless styly
-                !Config.local && tasks.push("cleanup", "cdn")
+                !Config.local && tasks.push("cleanup")
                 Exists.icons && tasks.push("icons")
                 Exists.styles && tasks.push("styles")
                 Exists.scripts && tasks.push("scripts")
@@ -2036,9 +1991,8 @@ export class Core {
 
         if (Exists.icons) {
             gulp.task("icons", (resolve) => {
-                // TODO tady jen fetch
                 if (Config.icons.id !== "") {
-                    gulp.series(new Icons().fetch, new Icons().build)(resolve)
+                    gulp.series(new Icons().fetch)(resolve)
                 } else {
                     return new Icons().build()
                 }
@@ -2081,8 +2035,7 @@ export class Core {
 
         if (Exists.styles) {
             gulp.task("styles", (resolve) => {
-                // TODO odebrat build až se opraví buildless styly
-                gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
+                gulp.series(new Styles().importResolution)(resolve)
             })
 
             if (!Config.vite) {
