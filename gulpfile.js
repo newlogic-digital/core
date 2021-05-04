@@ -1,6 +1,6 @@
-import {Core} from "./index.js";
+import {defineConfig} from "./index.js";
 
-export default new Core().init({
+export default defineConfig({
     styles: {
         purge: {
             content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte', 'temp/cdn/*.js']
@@ -8,5 +8,8 @@ export default new Core().init({
         ratio: {
             content: [`src/templates/**/*.{hbs,html,twig}`, 'app/Presenters/templates/**/*.latte']
         }
+    },
+    templates: {
+        layout: "layout/main.twig"
     }
 });
