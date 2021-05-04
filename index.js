@@ -1907,11 +1907,11 @@ export class Core {
             }
         }
 
-        if (Config.styles.ratio.content === 0 && Exists.templates) {
+        if (Config.styles.ratio.content.length === 0 && Exists.templates) {
             Config.styles.ratio.content.push(`${root + Config.paths.input.templates}/**/*.{hbs,html,twig}`);
         }
 
-        if (Config.styles.purge.content === 0 && Exists.styles) {
+        if (Config.styles.purge.content.length === 0 && Exists.styles) {
             Exists.scripts && Config.styles.purge.content.push(`${Config.paths.input.scripts}/**/*.js`);
             Exists.templates && Config.styles.purge.content.push(`${Config.paths.input.templates}/**/*.twig`);
 
