@@ -294,24 +294,26 @@ export class Utils {
             if (fs.existsSync(`${root + Config.paths.input.main}`)) {
                 const main = fs.readFileSync(root + Config.paths.input.main).toString();
 
-                let urls = JSON.parse(main)["assets"]["js"];
-                let files = []
+                if (typeof JSON.parse(main)["assets"] !== "undefined" && typeof JSON.parse(main)["assets"]["js"] !== "undefined") {
+                    let urls = JSON.parse(main)["assets"]["js"];
+                    let files = []
 
-                Object.keys(urls).forEach((name) => {
-                    if (Array.isArray(urls[name])) {
-                        urls[name].forEach(async (url) => {
-                            if (url.includes("http")) {
-                                files.push(downloadFiles(url))
+                    Object.keys(urls).forEach((name) => {
+                        if (Array.isArray(urls[name])) {
+                            urls[name].forEach(async (url) => {
+                                if (url.includes("http")) {
+                                    files.push(downloadFiles(url))
+                                }
+                            })
+                        } else {
+                            if (urls[name].includes("http") && !urls[name].includes("?")) {
+                                files.push(downloadFiles(urls[name]))
                             }
-                        })
-                    } else {
-                        if (urls[name].includes("http") && !urls[name].includes("?")) {
-                            files.push(downloadFiles(urls[name]))
                         }
-                    }
-                })
+                    })
 
-                await Promise.all(files);
+                    await Promise.all(files);
+                }
             }
 
             if (!fs.existsSync(root + Config.paths.output.root)) {
@@ -691,6 +693,42 @@ export class Styles {
             }
         }
     }
+    ratio(source, file) {
+        let sourceFiles = [],
+            ratios = [];
+
+        source.forEach((pathPattern) => {
+            let files = glob.sync(pathPattern);
+            sourceFiles = sourceFiles.concat(files);
+        });
+
+        sourceFiles.forEach((path) => {
+            let data = fs.readFileSync(path);
+            if (data.toString().indexOf('data-ratio') >= 0) {
+                ratios = ratios.concat(data.toString().match(/data-ratio="([0-9-/ _]*)"/g));
+            }
+        });
+
+        let ratiosFinal = Array.from(new Set(ratios)),
+            ratiosStyles = [];
+
+        const ratio = (val) => {
+            let value = `[${val}]{aspect-ratio: ${val.match(/\d+/g)[0]} / ${val.match(/\d+/g)[1]}}`;
+
+            if (typeof file !== "undefined" && file.extname === ".less") {
+                let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[1]) * 100;
+                value = `[${val}]:before{padding-bottom: ${calc}%}`
+            }
+
+            return value;
+        }
+
+        ratiosFinal.forEach((val) => {
+            ratiosStyles.push(ratio(val));
+        });
+
+        return ratiosStyles.join("\n");
+    }
     importResolution() {
         return new Promise(resolve => {
             Config.styles.importResolution.directories.map(directory => {
@@ -832,21 +870,6 @@ export class Styles {
         }
 
         const ratio = (source) => {
-            let sourceFiles = [],
-                ratios = [];
-
-            source.forEach((pathPattern) => {
-                let files = glob.sync(pathPattern);
-                sourceFiles = sourceFiles.concat(files);
-            });
-
-            sourceFiles.forEach((path) => {
-                let data = fs.readFileSync(path);
-                if (data.toString().indexOf('data-ratio') >= 0) {
-                    ratios = ratios.concat(data.toString().match(/data-ratio="([0-9-/ _]*)"/g));
-                }
-            });
-
             return through.obj((file, enc, cb) => {
                 if (!Config.styles.ratio.files.includes(file.basename)) {
                     cb(null, file);
@@ -858,25 +881,7 @@ export class Styles {
                 }
 
                 if (file.isBuffer()) {
-                    let ratiosFinal = Array.from(new Set(ratios)),
-                        ratiosStyles = [];
-
-                    const ratio = (val) => {
-                        let value = `[${val}]{aspect-ratio: ${val.match(/\d+/g)[0]} / ${val.match(/\d+/g)[1]}}`;
-
-                        if (file.extname === ".less") {
-                            let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[1]) * 100;
-                            value = `[${val}]:before{padding-bottom: ${calc}%}`
-                        }
-
-                        return value;
-                    }
-
-                    ratiosFinal.forEach((val) => {
-                        ratiosStyles.push(ratio(val));
-                    });
-
-                    file.contents = Buffer.from(file.contents.toString() + "\n" + ratiosStyles.join("\n"));
+                    file.contents = Buffer.from(file.contents.toString() + "\n" + new Styles().ratio(source, file));
                     cb(null, file);
                 }
             });
@@ -1314,7 +1319,11 @@ export class Templates {
 
             let fileName = path.basename(file.path);
             let filePath = `${root + Config.paths.input.templates}/${fileName.replace(`.${Config.templates.format}`,'.json')}`;
-            let main = lodash.merge({layout: {template: Config.templates.layout}}, JSON.parse(fs.readFileSync(root + Config.paths.input.main).toString()));
+            let main = {};
+
+            if (fs.existsSync(root + Config.paths.input.main)) {
+                main = lodash.merge({layout: {template: Config.templates.layout}}, JSON.parse(fs.readFileSync(root + Config.paths.input.main).toString()));
+            }
 
             if (fs.existsSync(filePath)) {
                 return lodash.merge(main, JSON.parse(fs.readFileSync(filePath).toString()));
@@ -1608,7 +1617,17 @@ export class Serve {
             const { createServer } = (await import('vite'));
             const tailwindcss = (await import("tailwindcss")).default;
 
+            const ratio = () => {
+                return {
+                    name: 'ratio',
+                    transformIndexHtml(html) {
+                        return html.replace("</head>", `<style>${new Styles().ratio(Config.styles.ratio.content)}</style></head>`)
+                    }
+                }
+            }
+
             let config = {
+                plugins: Config.serve.mode === "dev" ? [ratio()] : [],
                 server: {
                     open: Config.serve.index,
                     watch: {
