@@ -6,6 +6,7 @@ import twig from "gulp-twig2html";
 import lodash from "lodash";
 import gulp from "gulp";
 import plumber from "gulp-plumber";
+import minifier from "html-minifier";
 import {Config, Exists, Functions, Modules, root} from "./Core.js";
 
 export class Templates {

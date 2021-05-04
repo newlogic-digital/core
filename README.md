@@ -12,9 +12,9 @@
 
 > Still in very early development.
 
-Modern solution for creating web applications
+Modern principles for creating web applications
 
-- 💡 Modern solution
+- 💡 Modern principles
 - ⚡️ Fast development
 - 🛠️ Integrated tools
 - 📦 Modular structure
@@ -30,7 +30,7 @@ Newlogic Core is a set of tools that can be used to create modern web applicatio
 * **[CleanCSS](https://github.com/jakubpawlowicz/clean-css)** for css optimization and minification
 * **[PurgeCSS](https://purgecss.com/)** for removing unused CSS
 * **[TwigJS](https://purgecss.com/)** as template engine
-* **[Web Dev Server](https://modern-web.dev/guides/dev-server/getting-started/)** for local webserver
+* **[Vite](https://vitejs.dev)** for local webserver
 
 ### 💡 Basic principle
 
@@ -61,7 +61,7 @@ Javascript sources are executable in browsers via modern solutions like **[Impor
 CSS sources still need to be compiled, because most of standardized features are not yet ready in browsers, but it's getting there.
 
 ### 🧬 Single Page Apps
-For single page applications, it is possible to integrate [Vite](https://vitejs.dev/) and use any SPA framework you want. From Newlogic Core, you can only use additional functionalities such as auto-generation of imports into files within folders, iconfont, etc. Or automate some processes by writing new tasks in `gulpfile.js`.
+For single page applications, [Vite](https://vitejs.dev/) is integrated, and you can use any SPA framework you want. From Newlogic Core, you can only use additional functionalities such as auto-generation of imports into files within folders, iconfont, etc. Or automate some processes by writing new tasks in `gulpfile.js`.
 
 ## 🪄 Instalation
 
@@ -79,10 +79,10 @@ npm i @newlogic-digital/core --save-dev
 Each Newlogic Core project has to have config via `gulpfile.js`
 
 ```js
-import {Core} from  "@newlogic-digital/core";
+import {defineConfig} from  "@newlogic-digital/core";
 
 // minimum configuration example
-export default new Core().init({
+export default defineConfig({
   styles: {
     purge: {
       content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte', 'temp/cdn/*.js']
@@ -93,8 +93,7 @@ export default new Core().init({
 
 ## 📌 Future plans
 - translating docs to english
-- using vite as main dev server
-- rewrite everything 😂
+- refactor or rewrite everything 😂
 - concept is good, but realization could be way better
 - future rewrite could drop gulp completely and use esbuild for css, js build and vite for dev server
 
