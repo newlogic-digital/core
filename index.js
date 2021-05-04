@@ -34,7 +34,7 @@ let Config = {
     errors: true,
     vite: false,
     serve: {
-        index: "/index.html",
+        index: "/public/index.html",
         mode: ""
     },
     modules: {},
@@ -537,7 +537,8 @@ export class Scripts {
                                 replace({
                                     preventAssignment: true,
                                     values: Object.assign({
-                                        'process.env.NODE_ENV': JSON.stringify('production')
+                                        'process.env.NODE_ENV': JSON.stringify('production'),
+                                        [Config.paths.input.assets]: `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`
                                     }, assetsManifest)
                                 }),
                                 Config.scripts.optimizations && terser(),
@@ -812,6 +813,24 @@ export class Styles {
         const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true)
                     .pipe(revRewrite, {manifest: fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`) : ""});
 
+        const revRewriteOutput = () => {
+            return through.obj((file, enc, cb) => {
+                if (file.isNull()) {
+                    cb(null, file);
+                }
+                if (file.isBuffer()) {
+                    let contents = file.contents.toString();
+
+                    contents = contents.replace(new RegExp(`${Config.paths.input.assets}`, 'g'),
+                        `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`)
+
+                    file.contents = Buffer.from(contents);
+
+                    cb(null, file);
+                }
+            });
+        }
+
         const ratio = (source) => {
             let sourceFiles = [],
                 ratios = [];
@@ -935,6 +954,7 @@ export class Styles {
         return new Promise(resolve => {
             gulp.src([`${root + Config.paths.input.styles}/*.{css,less}`, `!${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`, `!${root + Config.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
+                .pipe(revRewriteOutput())
                 .pipe(ratio(Config.styles.ratio.content))
                 .pipe(vendor())
                 .pipe(build())
@@ -1085,54 +1105,50 @@ export class Templates {
     }
     get filters() {
         return {
-            "asset": (data) => {
-                let output = "";
-                let path = data.substr(0, data.lastIndexOf("/"));
+            "asset": (url) => {
+                let directoryPath = "";
 
-                if (Config.serve.mode === "dev" && path.indexOf("/" + Config.paths.input.root) === 0) {
-                    return data;
+                if (Config.serve.mode === "dev" && url.indexOf("/" + Config.paths.input.root) === 0 || url.includes("https://") || url.includes("http://")) {
+                    return url;
                 }
 
-                if (path.indexOf("/") === 0) {
-                    path = path.slice(1);
-                }
-
-                if (fs.existsSync(`${path}/rev-manifest.json`)) {
-                    let rev = JSON.parse(fs.readFileSync(root + path + '/rev-manifest.json', 'utf8').toString());
-
-                    Object.keys(rev).forEach(function eachKey(key) {
-                        if (data.indexOf(key) > -1) {
-                            output = data.replace(key,rev[key]);
-                        }
-                    })
-                } else if (path.indexOf(Config.paths.output.assets) !== -1 && fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`)) {
-                    let rev = JSON.parse(fs.readFileSync(root + Config.paths.output.assets + '/rev-manifest.json', 'utf8').toString());
-
-                    Object.keys(rev).forEach(function eachKey(key) {
-                        if (data.indexOf(key) > -1) {
-                            output = data.replace(key,rev[key]);
-                        }
-                    })
-                } else {
-                    output = data;
-                }
-
-                if (output === "") {
-                    output = data
-                }
-
-                if (Config.serve.mode !== "dev") {
-                    output = output
+                if (Config.serve.mode !== "dev" && url.indexOf("/" + Config.paths.input.root) === 0) {
+                    url = url
                         .replace(`/${Config.paths.input.styles}`, `/${Config.paths.output.styles}`)
                         .replace(`/${Config.paths.input.scripts}`, `/${Config.paths.output.scripts}`)
                         .replace(`/${Config.paths.input.assets}`, `/${Config.paths.output.assets}`)
+                        .replace(`/${Config.paths.input.icons}`, `/${Config.paths.output.icons}`)
                 }
 
-                if (Config.paths.output.rewrite && output.indexOf(`/${Config.paths.output.root}`) === 0) {
-                    output = output.replace(`/${Config.paths.output.root}`, "")
+                directoryPath = url.substr(0, url.lastIndexOf("/"));
+
+                if (directoryPath.indexOf("/") === 0) {
+                    directoryPath = directoryPath.slice(1);
                 }
 
-                return output;
+                if (fs.existsSync(root + `${directoryPath}/rev-manifest.json`)) {
+                    let rev = JSON.parse(fs.readFileSync(root + `${directoryPath}/rev-manifest.json`, 'utf8').toString());
+
+                    Object.keys(rev).forEach(function eachKey(key) {
+                        if (url.indexOf(key) > -1) {
+                            url = url.replace(key,rev[key]);
+                        }
+                    })
+                } else if (directoryPath.indexOf(Config.paths.output.assets) !== -1 && fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`)) {
+                    let rev = JSON.parse(fs.readFileSync(root + Config.paths.output.assets + '/rev-manifest.json', 'utf8').toString());
+
+                    Object.keys(rev).forEach(function eachKey(key) {
+                        if (url.indexOf(key) > -1) {
+                            url = url.replace(key,rev[key]);
+                        }
+                    })
+                }
+
+                if (Config.paths.output.rewrite && url.indexOf(`/${Config.paths.output.root}`) === 0) {
+                    url = url.replace(`/${Config.paths.output.root}`, "")
+                }
+
+                return url;
             },
             "rem": (value) => {
                 return `${value/16}rem`;
@@ -1267,7 +1283,7 @@ export class Templates {
         const renameJson = lazypipe().pipe(rename, { extname: '.json' });
         const renameHtml = lazypipe().pipe(rename, { extname: '.html' }).pipe(htmlmin,opts);
 
-        let outputDir = "/" + root + Config.paths.output.root;
+        let outputDir = "/" + Config.paths.output.root;
 
         if (Config.paths.output.root === Config.paths.output.assets) {
             outputDir = ""
@@ -1415,10 +1431,13 @@ export class Icons {
                                     if (name === "style.less") {
                                         body = body.replace(`@import "variables";`, `@import "variables.css";`)
 
-                                        fs.writeFile(`${root + Config.paths.input.icons}/style.css`, body, resolveFile)
+                                        fs.writeFile(`${root + Config.paths.input.icons}/iconfont.css`, body, resolveFile)
                                     }
                                 });
 
+                            } else if (name === "style.less" && Config.icons.format === "less") {
+                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/iconfont.css`));
+                                resolveFile();
                             } else {
                                 response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/${name}`));
                                 resolveFile();
@@ -1431,15 +1450,15 @@ export class Icons {
                 })
             })).then(result => {
                 if (result[0].status !== "rejected") {
-                    if (fs.existsSync(`${root + Config.paths.input.icons}/style.css`)) {
-                        let file = fs.readFileSync(`${root + Config.paths.input.icons}/style.css`).toString();
+                    if (fs.existsSync(`${root + Config.paths.input.icons}/iconfont.css`)) {
+                        let file = fs.readFileSync(`${root + Config.paths.input.icons}/iconfont.css`).toString();
 
                         Object.keys(variables).map(variable => {
                             file = file.replace(new RegExp(`@{${variable}}`, 'g'), `${variables[variable]}`)
                             file = file.replace(`@${variable}`, `var(--${variable})`)
                         })
 
-                        fs.writeFileSync(`${root + Config.paths.input.icons}/style.css`, file);
+                        fs.writeFileSync(`${root + Config.paths.input.icons}/iconfont.css`, file);
                     }
 
                     console.log("\x1b[34m", `Icomoon demo - https://i.icomoon.io/public/reference.html#/${Config.icons.id}/${Config.icons.name}/`, "\x1b[0m");
@@ -1464,7 +1483,7 @@ export class Icons {
         const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.icons.postcss, [autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
-        return gulp.src(`${root + Config.paths.input.icons}/style.{css,less}`)
+        return gulp.src(`${root + Config.paths.input.icons}/iconfont.{css,less}`)
             .pipe(plumber(Functions.plumber))
             .pipe(rename(function(path){
                 path.basename = Config.icons.filename;
