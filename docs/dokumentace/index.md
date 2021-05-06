@@ -10,9 +10,9 @@ Příklad základního nastavení:
 
 ```js
 // gulpfile.js
-import {Core} from  "@newlogic-digital/core";
+import {defineConfig} from  "@newlogic-digital/core";
 
-export default new Core().init({
+export default defineConfig({
   styles: {
     purge: {
       content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte', 'temp/cdn/*.js']
@@ -25,7 +25,14 @@ Newlogic Core používá moderní zápis ES modulů, v package.json je nutné m�
 
 Do `gulpfile.js` lze psát i vlastní Gulp tasky. Lze taky přímo využít interní třídy a to `Utils`, `Scripts`, `Styles`, `Templates`, `Icons`, `Emails`, `Cms`, `Serve`, `Watch` a `Core`. 
 
-K instanci configu lze přistupovat pomocí `new Core().init`.
+K instanci configu lze přistupovat pomocí `Config`.
+
+Pro použití vlastních configů k ostatním nástrojům lze přidat následující configy
+
+- `postcss.config.cjs` (lze definovat i v `gulpfile.js` pro jednotlivé moduly, nebo rozšířit)
+- `tailwind.config.js` (lze definovat i v `gulpfile.js`)
+- `vite.config.js` (kompletně nahradí interní vite config)
+
 
 ## Hlavní nastavení
 
@@ -49,43 +56,32 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
 - **Type:** `boolean`
 - **Default:** `false`
 
-  Povolení použití [Vite](/vite/), zejména vhodné pro SPA aplikace ve Vue. Při tomto nastavení se většina tasků Newlogic Core deaktivuje a buildovací proces se plně přenechává Vite. 
-  
-  (je nutné doinstalovat do package.json) 
+  Přepnutí do [Vite](/vite/) módu, zejména vhodné pro SPA aplikace ve Vue. Při tomto nastavení se většina tasků Newlogic Core deaktivuje a buildovací proces se plně přenechává Vite.
+
+  Při tomto použití je nutné používat vlastní config `vite.config.js`
 
 ### serve.index
 
 - **Type:** `string`
+- **Default:** `/public/index.html`
 
-  Výchozí stránka která se má otevřít při zapnutí serveru, např. `login.html`, ve výchozím stavu se otvírá vždycky `index.html`
+  Výchozí stránka která se má otevřít při zapnutí serveru, např. `login.html`, ve výchozím stavu se otvírá vždycky `/public/index.html`
+
+  (v cestě musí být i public, je to workaround protože Vite má [bug](https://github.com/vitejs/vite/issues/3233) kdy při otevření rovnou na /index.html nefunguje reload při watchi)
 
 ### serve.mode
 
 - **Type:** `string`
-
+  
   Možnost natvrdo nastavit mód serveru, lze nastavit `dev`, `build` a `production`. Ve výchozím stavu se nastavuje automaticky podle tasků `serve`, `serve:build`, `serve:production`
 
-### serve.rewriteDist
-
-- **Type:** `boolean`
-- **Default:** `true`
-
-  Zda se má obsah načítat relativně ve složce dist, např. routování cesty z `/public/assets/main.css` na `/assets/main.css`
-
-### serve.server
-
-- **Type:** `string`
-- **Default:** `"wds"`
-
-  Typ serveru který se používá, ve výchozím stavu se používá [Web Dev Server](https://modern-web.dev/docs/dev-server/overview/), pro serve lze použít i [Vite](https://vitejs.dev/) nastavením hodnoty `"vite"`. Vite umí navíc např. načítat ES moduly přímo z node_modules.
-
-  (je nutné doinstalovat do package.json)
+  (dev a build používají vždy `dev`)
 
 ### modules
 
 - **Type:** `object`
 
-  Dodatečné moduly kterými lze rozšířit funkcionalitu. V současné chvíli lze rozšířit funkcionality .hbs šablon.
+  Dodatečné moduly kterými lze rozšířit funkcionalitu. V současné chvíli lze rozšířit funkcionality .hbs šablon. Ale lze sem naimportovat cokoliv a pak se k instanci dostat přes config a vytvořit si třeba vlastní tasky.
 
   ```js
     import hbs from "./src/module.hbs.js";
@@ -95,26 +91,29 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
     }
   ```
 
-### cms.branch
+[comment]: <> (### cms.branch)
 
-- **Type:** `string`
-- **Default:** `"dev"`
+[comment]: <> (- **Type:** `string`)
 
-  Nastavení jaká větev se má použít pro stažení Newlogic CMS
+[comment]: <> (- **Default:** `"dev"`)
 
-### cms.full
+[comment]: <> (  Nastavení jaká větev se má použít pro stažení Newlogic CMS)
 
-- **Type:** `boolean`
-- **Default:** `false`
+[comment]: <> (### cms.full)
 
-  Zda se má Newlogic CMS stáhnout kompletně, včetně všech potřebných souborů pro lokální vývoj (pozor tyto soubory jsou v .gitignore)
+[comment]: <> (- **Type:** `boolean`)
 
-### cms.format.templates
+[comment]: <> (- **Default:** `false`)
 
-- **Type:** `string`
-- **Default:** `"tpl"`
+[comment]: <> (  Zda se má Newlogic CMS stáhnout kompletně, včetně všech potřebných souborů pro lokální vývoj &#40;pozor tyto soubory jsou v .gitignore&#41;)
 
-  Nastavení formátu šablon který se v Newlogic CMS používá
+[comment]: <> (### cms.format.templates)
+
+[comment]: <> (- **Type:** `string`)
+
+[comment]: <> (- **Default:** `"tpl"`)
+
+[comment]: <> (  Nastavení formátu šablon který se v Newlogic CMS používá)
 
 ## Cesty
 
@@ -188,6 +187,13 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
 
   Cesta k kde se nachází další soubory jako obrázky, písma apod.
 
+### serve.output.rewrite
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+  Zda se má obsah načítat relativně ve složce public, např. routování cesty z `/public/assets/main.css` na `/assets/main.css`
+
 ### paths.output.root
 
 - **Type:** `string`
@@ -221,7 +227,14 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
 - **Type:** `string`
 - **Default:** `"dist"`
 
-  Cesta k kde se nachází zkompilované emaily
+  Cesta kde se nachází zkompilované emaily
+
+### paths.output.emailsWww
+
+- **Type:** `string`
+- **Default:** `"dist/img"`
+
+  Alternativní složka pro zkompilované emaily, vhodné pro šablony do PHP
 
 ### paths.output.emailsImg
 
@@ -237,41 +250,29 @@ K instanci configu lze přistupovat pomocí `new Core().init`.
 
   Cesta kam se kopírují soubory ze `input.assets` s vlastním hashem v názvu
 
-### paths.cms.temp
+[comment]: <> (### paths.cms.temp)
 
-- **Type:** `string`
-- **Default:** `"temp/cms"`
+[comment]: <> (- **Type:** `string`)
 
-  Zde se stahují dočasné soubory Newlogic CMS při instalaci
+[comment]: <> (- **Default:** `"temp/cms"`)
 
-### paths.cms.templates
+[comment]: <> (  Zde se stahují dočasné soubory Newlogic CMS při instalaci)
 
-- **Type:** `string`
-- **Default:** `"www/templates"`
+[comment]: <> (### paths.cms.templates)
 
-  Cesta k šablonám v Newlogic CMS
+[comment]: <> (- **Type:** `string`)
 
-### paths.cms.components
+[comment]: <> (- **Default:** `"www/templates"`)
 
-- **Type:** `string`
-- **Default:** `"www/components"`
+[comment]: <> (  Cesta k šablonám v Newlogic CMS)
 
-  Cesta ke komponentám v Newlogic CMS
+[comment]: <> (### paths.cms.components)
 
-### paths.configs
+[comment]: <> (- **Type:** `string`)
 
-- **Type:** `object`
+[comment]: <> (- **Default:** `"www/components"`)
 
-  Cesty pro využití configů ostatních nástrojů
-
-```js
-configs: {
-    postcss: "postcss.config.js",
-    tailwind: "tailwind.config.js",
-    vite: "vite.config.js",
-    wds: "wds.config.mjs"
-}
-```
+[comment]: <> (  Cesta ke komponentám v Newlogic CMS)
 
 ## Ikony
 
@@ -425,7 +426,7 @@ configs: {
 - **Type:** `boolean`
 - **Default:** `false`
 
-  Zda se mají soubory z cdn lokálně stáhnout do temp složky
+  Zda se mají soubory z cdn lokálně stáhnout do `temp/cdn` složky
 
 ## Styly
 
@@ -476,6 +477,22 @@ configs: {
 
   Další nastavení [PurgeCSS](https://tailwindcss.com/docs/optimizing-for-production#removing-unused-keyframes) pro Tailwind
 
+### styles.ratio.content
+
+- **Type:** `string[]`
+- **Default:** `["main.css"]`
+
+  Které soubory se mají kontrolovat pro výpočet aspect ratia, např. `['src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte']`
+
+  Kontroluje se atribut `data-ratio="4/3"`, při taskách styles a serve se potom přidají třídy s vlastnostmi `aspect-ratio`. Při produkčním buildu se použije `padding-bottom`
+
+### styles.ratio.files
+
+- **Type:** `string[]`
+- **Default:** `["main.css"]`
+
+  Název css souboru do kterého se mají generovat data-ratio styly
+
 ### styles.vendor.cache
 
 - **Type:** `boolean`
@@ -517,13 +534,6 @@ configs: {
 - **Default:** `["all"]`
 
   Jakým způsobem [CleanCSS](https://github.com/jakubpawlowicz/clean-css) zpracovává importy souborů, ve výchozím nastavení se všechny importy zpracovávají přímo a ve výsledým buildu nejsou tak žádné importy
-
-### styles.ratio
-
-- **Type:** `string[]`
-- **Default:** `["main.css"]`
-
-  Název css souboru do kterého se mají generovat data-ratio styly
 
 ### styles.join
 

@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /logo.png
+heroImage: /core.gif
 actionText: Začínáme
 actionLink: /zaciname/
 

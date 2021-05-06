@@ -1,6 +1,9 @@
 .home-hero .image {
   width: 200px;
   height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
 .nav-bar .logo {

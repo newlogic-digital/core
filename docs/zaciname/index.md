@@ -53,15 +53,15 @@ Po instalaci je v projektu nutné vytvořit `gulpfile.js`, ve kterém lze dále 
 ```js
 import {Core} from  "newlogic-core";
 
-export default new Core().init({
+export default defineConfig({
     styles: {
         purge: {
-            content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'www/templates/**/*.tpl', 'temp/cdn/*.js']
+            content: ['src/scripts/**/*.js', 'src/templates/**/*.twig', 'app/Presenters/templates/**/*.latte', 'temp/cdn/*.js']
         }
     }
 })
 ```
-Pro kompletní příklad použití Newlogic Core se všemi možnostmi lze využít [Starter šablonu](https://git.newlogic.cz/newlogic-dev/newlogic-core-starter/)
+Pro kompletní příklad použití Newlogic Core se všemi možnostmi lze využít [Starter šablonu](https://github.com/newlogic-digital/core-starter)
 
 ## Tasky
 
@@ -163,7 +163,7 @@ Alternativně lze použít i **.less**, v takovém případě je nutné doinstal
 
 * **styles** - Generuje automatické importy souborů a tailwind jednorázově do složky temp
 * **styles:build** - To samé jako styles, ale navíc s kompilací souborů
-* **styles:production** - Při tomto režimu se kompiluje verze i pro legacy prohlížeče
+* **styles:production** - Při tomto režimu se kompiluje verze i pro legacy prohlížeče (not yet)
 
 ### templates
 
@@ -178,7 +178,7 @@ Výhoda psaní šablon bokem mimo PHP aplikaci je mít čisté zdrojové data na
 
 #### Twig
 
-Jednotlivé stránky šablon se vytváří v `src/templates/` pomocí `.json` souborů. V těch pak můžeme proměnou propsat jakou šablonu použít v rámci layoutu.
+Jednotlivé stránky šablon se vytváří v `src/templates/` pomocí `.json` souborů. V těch pak můžeme proměnou propsat jakou šablonu použít v rámci layoutu. Lze využít i samostatné soubory, bez jsonu. 
 
 index.json
 ```json
@@ -207,7 +207,7 @@ Pokud jméno souboru začíná na dialog nebo json (v souboru je potřeba použ�
 Ve twigu i hbs jsou dostupné následující proměnné, filtry a funkce. Pokud chcete využít vlastní PHP šablnovací systém tak je doporučeno využít stejné vlastnosti.
 
 ##### proměnné
-* **conf** - data z `gulpfile.js`, včetně výchozích hodnot
+* **config** - data z `gulpfile.js`, včetně výchozích hodnot
 * **distPath** - cesta k výstupním souborům (např. `src`)
 * **srcPath** - cesta k zdrojovým souborům (např. `dist`)
 * **resolvePath** - dynamická cesta ke zdrojovým souborům nebo vstupním souborům, mění se podle produkčního módu - zejména důležité pokud načítáme zdrojové soubory bez kompilace (např. obrázky), v takovém případě je chceme načítat přímo ze zdrojové složky protože počas vývoje nejsou kompilovány
@@ -218,13 +218,13 @@ Další globální proměnné se potom propisují ze `src/main.json` a proměnn�
 Proměnné se slučují dohromady od přednastavených, globálních až po stránky.
 
 ##### funkce
-* **color**(color, theme) - vytáhne definovanou barvu ze stylů v hex, je nutné aby byla nastavená cesta `styles.themePath`
+* **color**(color, theme) - vytáhne definovanou barvu ze stylů v hex, je nutné aby byla nastavená cesta `styles.themePath` (depricated)
 * **fetch**(path) - inlinuje kód z url adresy a to buď lokální nebo externí https, externí se načítá z `temp/cdn` pokud existuje
 * **randomColor** - vygeneruje náhodou barvu v hex
 * **placeholder**(width, height, picsum, colors) - vygeneruje url placeholder obrázku, při použití picsum lze zadat konkrétní id fotky a u klasického placeholderu lze nastavit barvu v hex
 * **lazy**(width, height) - vygeneruje zástupný prázdný obrázek v base64, pro použití při lazyloadování obrázků
 * **ratio**(width, height) - vypočítá ratio fotky, např. při zadání 1920, 1080 vrátí 56.25
-* **webfont**(data) - zpracovává [WebFontConfig](https://github.com/typekit/webfontloader) data z json a na základě toho generuje URL
+* **webfont**(data) - zpracovává [WebFontConfig](https://github.com/typekit/webfontloader) data z json a na základě toho generuje URL  (depricated)
     ```json
         "fonts": {
           "google": {
@@ -302,6 +302,6 @@ Tasky které se vztahují k Newlogic CMS. Dělí se na `cms:install` a `cms:prep
 * **cms:install** stáhne cms do projektu, ve výchozím stavu z větve `dev` - toto lze upravit v configu `cms.branch`
 * **cms:prepare** kopíruje šablony z `paths.input.templates` do `paths.cms.templates` a vytvoří PHP soubory sekcí šablon do `paths.cms.components`
 
-### package.json
+### další tasky
 
-Další tasky lze definovat do `package.json` v `scripts`
+Další tasky lze definovat do  `package.json` jako npm scripty (`scripts`) nebo definovat přímo v `gulpfile.js`

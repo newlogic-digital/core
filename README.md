@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://core.devlogic.cz/" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="https://core.devlogic.cz/logo.png" alt="Logo">
+  <a href="https://core.newlogic.cz/" target="_blank" rel="noopener noreferrer">
+    <img width="180" src="https://core.newlogic.cz/logo.png" alt="Logo">
   </a>
 </p>
 <p align="center">
