@@ -2,11 +2,12 @@ import fs from "fs";
 import path from "path";
 import lazypipe from "lazypipe";
 import gulpif from "gulp-if";
-import twig from "gulp-twig2html";
+import twig from "../packages/gulp-twig2html/index.js";
 import lodash from "lodash";
 import gulp from "gulp";
 import plumber from "gulp-plumber";
 import minifier from "html-minifier";
+import through from "through2";
 import {Config, Exists, Functions, Modules, root} from "./Core.js";
 
 export class Templates {
@@ -309,22 +310,13 @@ export class Templates {
             minifyJS: true
         }
 
-        const fileJSON = (file) => {
-            if (path.basename(file.path).indexOf("json") > -1 || path.basename(file.path).indexOf("dialog") > -1) {
-                return true;
-            }
-        }
-
-        const renameJson = lazypipe().pipe(rename, { extname: '.json' });
-        const renameHtml = lazypipe().pipe(rename, { extname: '.html' }).pipe(htmlmin,opts);
-
         let outputDir = "/" + Config.paths.output.root;
 
         if (Config.paths.output.root === Config.paths.output.assets) {
             outputDir = ""
         }
 
-        const context = {
+        const contextParams = {
             config: Config,
             lang: Config.lang,
             outputPath: "/" + Config.paths.output.root,
@@ -332,88 +324,103 @@ export class Templates {
             resolvePath: Config.serve.mode === "dev" ? "" : outputDir,
         }
 
-        const build = lazypipe().pipe(() => gulpif("*.twig", twig({
+        const twigParams = {
             functions: this.functions,
             filters: this.filters,
             extensions: this.tags,
-            context: lodash.merge(context, {
+            context: lodash.merge(contextParams, {
                 layout: {template: Config.templates.layout.replace(".twig","") + ".twig"}
             }),
             globals: root + Config.paths.input.main
-        })))
-            .pipe(data, (file) => {
+        }
 
-                if (file.extname !== ".hbs") {
-                    return false;
-                }
-
-                let fileName = path.basename(file.path);
-                let filePath = `${root + Config.paths.input.templates}/${fileName.replace(`.${Config.templates.format}`,'.json')}`;
-                let main = {};
-
-                if (fs.existsSync(root + Config.paths.input.main)) {
-                    main = lodash.merge({layout: {template: Config.templates.layout}}, JSON.parse(fs.readFileSync(root + Config.paths.input.main).toString()));
-                }
-
-                if (fs.existsSync(filePath)) {
-                    return lodash.merge(main, JSON.parse(fs.readFileSync(filePath).toString()));
-                } else {
-                    return main;
-                }
-            })
-            .pipe(() => gulpif("*.hbs", Modules.hbs.module(`${root + Config.paths.input.templates}/**/*.hbs`, Modules.hbs.helpers(Object.assign(this.filters, this.functions)), context)))
-
-        return new Promise(resolve => {
-            gulp.series(
-                function init(resolve) {
-                    let pagesPath = `${root + Config.paths.input.templates}/`;
-                    let templatesPath = `${root + Config.paths.input.templates}/`;
-                    let pages = fs.readdirSync(pagesPath);
-                    let items = pages.length;
-                    let content = "";
-
-                    if (Config.templates.format === "twig") {
-                        content = `{% include layout.template %}`
+        const clearFile = () => {
+            return through.obj((file, enc, cb) => {
+                if (file.isBuffer()) {
+                    if (file.extname === ".json") {
+                        file = null;
                     }
 
-                    if (Config.templates.format === "hbs") {
-                        content = `{{> (lookup layout 'template')}}`
-                    }
-
-                    for (let i = 0; i < items; i++) {
-                        if (!fs.existsSync(templatesPath + pages[i].replace('.json',`.${Config.templates.format}`))) {
-                            fs.writeFileSync(templatesPath + pages[i].replace('.json',`.${Config.templates.format}`), content);
-                        }
-                    }
-
-                    resolve();
-                },
-                function core() {
-                    return gulp.src([`${root + Config.paths.input.templates}/*.{hbs,html,twig}`])
-                        .pipe(plumber(Functions.plumber))
-                        .pipe(build())
-                        .pipe(gulpif(fileJSON, renameJson(), renameHtml()))
-                        .pipe(gulp.dest(root + Config.paths.output.root));
-                },
-                function cleanup(resolve) {
-                    let pages = fs.readdirSync(root + Config.paths.input.templates),
-                        items = pages.length;
-
-                    for (let i = 0; i < items; i++) {
-                        if (!fs.statSync(`${root + Config.paths.input.templates}/${pages[i]}`).isDirectory()) {
-                            if (pages[i].indexOf("json") === -1 && pages[i].indexOf("dialog") === -1) {
-                                let file = fs.readFileSync(`${root + Config.paths.input.templates}/${pages[i]}`).toString();
-
-                                if (file === `{% include layout.template %}` || file === `{{> (lookup layout 'template')}}`) {
-                                    fs.unlinkSync(`${root + Config.paths.input.templates}/${pages[i]}`);
-                                }
-                            }
-                        }
-                    }
-
-                    resolve();
+                    cb(null, file);
                 }
-            )(resolve);
-        })
+            });
+        };
+
+        const fileJSON = (file) => {
+            if (path.basename(file.path).indexOf("json") > -1 || path.basename(file.path).indexOf("dialog") > -1) {
+                return true;
+            }
+        }
+
+        const fileTemplate = (file) => {
+            if (fs.existsSync(file.path.replace('.json',`.${Config.templates.format}`))) {
+                return true;
+            }
+        }
+
+        const hbsData = (file) => {
+            if (file.extname !== ".hbs") {
+                return false;
+            }
+
+            let fileName = path.basename(file.path);
+            let filePath = `${root + Config.paths.input.templates}/${fileName.replace(`.${Config.templates.format}`,'.json')}`;
+            let main = {};
+
+            if (fs.existsSync(root + Config.paths.input.main)) {
+                main = lodash.merge({layout: {template: Config.templates.layout}}, JSON.parse(fs.readFileSync(root + Config.paths.input.main).toString()));
+            }
+
+            if (fs.existsSync(filePath)) {
+                return lodash.merge(main, JSON.parse(fs.readFileSync(filePath).toString()));
+            } else {
+                return main;
+            }
+        }
+
+        const hbsLayout = () => {
+            return through.obj((file, enc, cb) => {
+                if (file.isBuffer()) {
+
+                    file.contents = Buffer.from("{{> (lookup layout 'template')}}");
+
+                    cb(null, file);
+                }
+            });
+        }
+
+        const hbsPartials = `${root + Config.paths.input.templates}/**/*.hbs`;
+        const hbsHelpers = Modules.hbs.helpers(Object.assign(this.filters, this.functions));
+
+        const renameJson = lazypipe().pipe(rename, { extname: '.json' });
+        const renameHtml = lazypipe().pipe(rename, { extname: '.html' }).pipe(htmlmin,opts);
+
+        const buildLayoutClear = lazypipe().pipe(() => gulpif(fileTemplate, clearFile()));
+        const buildLayoutTwig = lazypipe().pipe(() => gulpif(Config.templates.format === "twig", twig(lodash.merge(twigParams, {data: "{% include layout.template %}"}))));
+        const buildLayoutHbs = lazypipe()
+            .pipe(() => gulpif(Config.templates.format === "hbs", hbsLayout()))
+            .pipe(() => gulpif(Config.templates.format === "hbs", data((file) => hbsData(file))))
+            .pipe(() => gulpif(Config.templates.format === "hbs", Modules.hbs.module(hbsPartials, hbsHelpers, contextParams)));
+        const buildClassic = lazypipe()
+            .pipe(() => gulpif("*.twig", twig(twigParams)))
+            .pipe(() => gulpif("*.hbs", data((file) => hbsData(file))))
+            .pipe(() => gulpif("*.hbs", Modules.hbs.module(hbsPartials, hbsHelpers, contextParams)));
+
+        return Promise.all([
+            new Promise(resolve => gulp.src([`${root + Config.paths.input.templates}/*.{hbs,html,twig}`])
+                .pipe(plumber(Functions.plumber))
+                .pipe(buildClassic())
+                .pipe(gulpif(fileJSON, renameJson(), renameHtml()))
+                .pipe(gulp.dest(root + Config.paths.output.root))
+                .on("end", resolve)),
+            new Promise(resolve => gulp.src([`${root + Config.paths.input.templates}/*.json`])
+                .pipe(plumber(Functions.plumber))
+                .pipe(buildLayoutClear())
+                .pipe(buildLayoutTwig())
+                .pipe(buildLayoutHbs())
+                .pipe(rename({ extname: `.html` }))
+                .pipe(gulp.dest(root + Config.paths.output.root))
+                .on("end", resolve))
+        ])
     }
 }
