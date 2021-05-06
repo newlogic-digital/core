@@ -329,7 +329,7 @@ export class Templates {
             filters: this.filters,
             extensions: this.tags,
             context: lodash.merge(contextParams, {
-                layout: {template: Config.templates.layout.replace(".twig","") + ".twig"}
+                layout: {template: Config.templates.layout}
             }),
             globals: root + Config.paths.input.main
         }
@@ -359,10 +359,6 @@ export class Templates {
         }
 
         const hbsData = (file) => {
-            if (file.extname !== ".hbs") {
-                return false;
-            }
-
             let fileName = path.basename(file.path);
             let filePath = `${root + Config.paths.input.templates}/${fileName.replace(`.${Config.templates.format}`,'.json')}`;
             let main = {};
@@ -401,6 +397,7 @@ export class Templates {
             .pipe(() => gulpif(Config.templates.format === "hbs", hbsLayout()))
             .pipe(() => gulpif(Config.templates.format === "hbs", data((file) => hbsData(file))))
             .pipe(() => gulpif(Config.templates.format === "hbs", Modules.hbs.module(hbsPartials, hbsHelpers, contextParams)));
+
         const buildClassic = lazypipe()
             .pipe(() => gulpif("*.twig", twig(twigParams)))
             .pipe(() => gulpif("*.hbs", data((file) => hbsData(file))))

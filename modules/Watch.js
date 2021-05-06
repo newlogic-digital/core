@@ -6,7 +6,7 @@ export class Watch {
         return {
             scripts: [`${Config.paths.input.scripts}/**`, `!${Config.paths.input.scripts}/**/\\${Config.scripts.importResolution.filename}`],
             styles: [`${Config.paths.input.styles}/**`, `!${Config.paths.input.styles}/**/\\${Config.styles.importResolution.filename}`],
-            templates: [`${Config.paths.input.templates}/**`, Config.paths.input.main, `!${Config.paths.input.templates}/*.${Config.templates.format}`]
+            templates: [`${Config.paths.input.templates}/**`, Config.paths.input.main]
         }
     }
     dev() {
