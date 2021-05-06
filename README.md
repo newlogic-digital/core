@@ -15,11 +15,11 @@
 Modern principles for creating web applications
 
 - 💡 Modern principles
-- ⚡️ Fast development
+- 🚀️ Fast development
 - 🛠️ Integrated tools
 - 📦 Modular structure
 - ✉️ Email templates
-- 🖥 Local server
+- ⚡ Vite as webserver
 
 Newlogic Core is a set of tools that can be used to create modern web applications. Use of modern Javascript, CSS, ES modules, dynamic imports, etc.
 
@@ -90,6 +90,8 @@ export default defineConfig({
   }
 })
 ```
+
+You can also try minimal example project [core-starter](https://github.com/newlogic-digital/core-starter)
 
 ## 📌 Future plans
 - translating docs to english
