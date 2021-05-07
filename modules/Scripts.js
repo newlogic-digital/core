@@ -118,6 +118,13 @@ export class Scripts {
                             context: 'window',
                             preserveEntrySignatures: true,
                             plugins: [
+                                replace({
+                                    preventAssignment: true,
+                                    values: {
+                                        '/* @vite-ignore */': ''
+                                    },
+                                    delimiters: ['', '']
+                                }),
                                 (Config.scripts.importMap.build && typeof importMapFile["imports"] !== "undefined") && rollupImportMapPlugin(importMapFile),
                                 !Config.scripts.importMap.build && nodeResolve(),
                                 !Config.scripts.importMap.build && commonjs(),
@@ -157,6 +164,13 @@ export class Scripts {
                             context: 'window',
                             preserveEntrySignatures: false,
                             plugins: [
+                                replace({
+                                    preventAssignment: true,
+                                    values: {
+                                        '/* @vite-ignore */': ''
+                                    },
+                                    delimiters: ['', '']
+                                }),
                                 nodeResolve(),
                                 commonjs(),
                                 replace({
