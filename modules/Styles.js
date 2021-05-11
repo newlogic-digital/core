@@ -1,3 +1,4 @@
+import lodash from "lodash";
 import fs from "fs";
 import lazypipe from "lazypipe";
 import gulp from "gulp";
