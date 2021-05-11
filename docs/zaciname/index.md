@@ -261,7 +261,7 @@ Alternativně lze použít i **.less**, v takovém případě je nutné doinstal
 
 Generuje emailové šablony. Dělí se na `emails:build` a `emails:zip`. Šablony lze psát v šablonách `twig`, `hbs`, `latte` nebo `tpl`. A pro styly lze použít `PostCSS` nebo `less`. 
 
-Ve výchozím stavu se zpracovává jenom twig zápis, všechen ostatní zápis zůstane tak jak je. To je vhodné pokud chceme předgenerovat styly pro emaily u latte nebo tpl šablon pro PHP. Zde lze pak nastavit kam se takové soubory mají generovat `paths.cms.emails`.
+Ve výchozím stavu se zpracovává jenom twig zápis, všechen ostatní zápis zůstane tak jak je. To je vhodné pokud chceme předgenerovat styly pro emaily u latte nebo tpl šablon pro PHP. Zde lze pak nastavit kam se takové soubory mají generovat `paths.output.emailsWww`.
 
 Alternativně lze použít hbs nastavením `email.format` na `"hbs"`, potom se v latte a tpl souborech generuje hbs zápis. Těmito zápisy je vhodné načítat styly nebo includovat soubory.
 
@@ -295,12 +295,13 @@ Stahuje cdn odkazy ze všech modulů do `temp/cdn` pro případné použití off
 
 Vyčistí složku `temp` od dočasných souborů
 
-### cms
+[comment]: <> (### cms)
 
-Tasky které se vztahují k Newlogic CMS. Dělí se na `cms:install` a `cms:prepare`.
+[comment]: <> (Tasky které se vztahují k Newlogic CMS. Dělí se na `cms:install` a `cms:prepare`.)
 
-* **cms:install** stáhne cms do projektu, ve výchozím stavu z větve `dev` - toto lze upravit v configu `cms.branch`
-* **cms:prepare** kopíruje šablony z `paths.input.templates` do `paths.cms.templates` a vytvoří PHP soubory sekcí šablon do `paths.cms.components`
+[comment]: <> (* **cms:install** stáhne cms do projektu, ve výchozím stavu z větve `dev` - toto lze upravit v configu `cms.branch`)
+
+[comment]: <> (* **cms:prepare** kopíruje šablony z `paths.input.templates` do `paths.cms.templates` a vytvoří PHP soubory sekcí šablon do `paths.cms.components`)
 
 ### další tasky
 

@@ -449,7 +449,13 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 - **Type:** `object`
 - **Default:** `{}`
 
-  Možnost rozšířit nastavení CleanCSS
+  Možnost rozšířit další nastavení CleanCSS
+
+  ```js
+      {
+          level: {1: {specialComments: 0}, 2: {all: false}}
+      }
+  ```
 
 ### styles.purge.enabled
 

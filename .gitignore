@@ -4,3 +4,4 @@ node_modules
 public
 src
 temp
+docs/.vitepress/dist
