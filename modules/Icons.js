@@ -105,7 +105,7 @@ export class Icons {
         const rename = (await import('gulp-rename')).default;
         const revision = (await import("gulp-rev")).default;
 
-        const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true);
+        const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true, "icons");
 
         const clean = lazypipe().pipe(cleanCSS);
 

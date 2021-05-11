@@ -48,7 +48,7 @@ export class Scripts {
             resolve();
         });
     }
-    async build(type) {
+    async build() {
         const {rollup} = await import('rollup');
         const {nodeResolve} = await import('@rollup/plugin-node-resolve');
         const commonjs = (await import('@rollup/plugin-commonjs')).default;
@@ -156,7 +156,7 @@ export class Scripts {
                         await bundle.close();
                     })();
 
-                    type === "production" && Config.scripts.legacy && await (async() => {
+                    Config.scripts.legacy && await (async() => {
 
                         const {getBabelOutputPlugin} = await import('@rollup/plugin-babel');
 
@@ -215,7 +215,7 @@ export class Scripts {
                     })();
                 }
             })).then(async () => {
-                type === "production" && Config.scripts.legacy && await (async() => {
+                Config.scripts.legacy && await (async() => {
                     let polyfills = "";
 
                     if (typeof Config.scripts.polyfillUrls !== "undefined") {

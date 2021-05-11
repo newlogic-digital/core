@@ -140,7 +140,7 @@ Zpracovává soubory javascriptu. Dělí se na `scripts`, `scripts:build` a `scr
 
 * **scripts** - Generuje importmapy a automatické importy souborů
 * **scripts:build** - To samé jako scripts, ale navíc s kompilací souborů
-* **scripts:production** - Při tomto režimu se kompiluje verze i pro legacy prohlížeče
+* **scripts:production** - Při tomto režimu se kompiluje optimalizovaná verze s manifestem
 
 ### styles
 
@@ -163,7 +163,7 @@ Alternativně lze použít i **.less**, v takovém případě je nutné doinstal
 
 * **styles** - Generuje automatické importy souborů a tailwind jednorázově do složky temp
 * **styles:build** - To samé jako styles, ale navíc s kompilací souborů
-* **styles:production** - Při tomto režimu se kompiluje verze i pro legacy prohlížeče (not yet)
+* **styles:production** - Při tomto režimu se kompiluje optimalizovaná verze s manifestem
 
 ### templates
 

@@ -154,9 +154,13 @@ export class Styles {
                 return false;
             }
 
-            const clean = lazypipe().pipe(cleanCSS, {
+            const clean = lazypipe().pipe(cleanCSS, lodash.merge({
                 inline: Config.styles.import,
                 level: {1: {specialComments: 0}, 2: {all: false}}
+            }, Config.styles.clean), (details) => {
+                if (details.warnings.length > 0) {
+                    details.warnings.map(warning => console.log("\x1b[32m", warning, "\x1b[0m"))
+                }
             });
 
             const purge = lazypipe().pipe(purgeCSS, Object.assign({
@@ -188,15 +192,20 @@ export class Styles {
         const purgeCSS = (await import("gulp-purgecss")).default;
         const revision = (await import("gulp-rev")).default;
         const revRewrite = (await import("gulp-rev-rewrite")).default;
+        const inset = (await import("../packages/postcss-inset/index.es.mjs")).default;
 
-        const clean = lazypipe().pipe(cleanCSS, {
+        const clean = lazypipe().pipe(cleanCSS, lodash.merge({
             inline: Config.styles.import,
-            level: {1: {specialComments: 0}, 2: {all: false}}
+            level: {1: {specialComments: 0}, 2: {removeEmpty: false}}
+        }, Config.styles.clean), (details) => {
+            if (details.warnings.length > 0) {
+                details.warnings.map(warning => console.log("\x1b[32m", warning, "\x1b[0m"))
+            }
         });
 
         const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
 
-        const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true)
+        const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true, "styles")
             .pipe(revRewrite, {manifest: fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`) : ""});
 
         const revRewriteOutput = () => {
@@ -301,7 +310,7 @@ export class Styles {
 
         aspectRatio.postcss = true;
 
-        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.styles.postcss, [autoprefixer, aspectRatio])))
+        const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.styles.postcss, [autoprefixer, aspectRatio, inset])))
         ).pipe(() => gulpif("*.less", Modules.less.module()));
 
         return new Promise(resolve => {

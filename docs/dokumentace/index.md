@@ -437,6 +437,20 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 
   Výchozí formát souborů stylů, lze nastavit `"css"` a `"less"`. Soubory lze kombinovat, ale pro úplné použití je doporučeno nastavit výchozí formát.
 
+### styles.optimizations
+
+- **Type:** `boolean`
+- **Default:** `true`
+
+  Zda se má zkompilovaný soubor optimalizovat a minifikovat
+
+### styles.clean
+
+- **Type:** `object`
+- **Default:** `{}`
+
+  Možnost rozšířit nastavení CleanCSS
+
 ### styles.purge.enabled
 
 - **Type:** `boolean`

@@ -93,10 +93,12 @@ let Config = {
         format: "css",
         revision: true,
         optimizations: true,
+        clean: {},
         purge: {
             enabled: true,
             content: [],
             docs: false,
+            clean: {},
             options: {},
             nodeResolve: true,
             tailwind: {
@@ -249,14 +251,14 @@ class Core {
                     }
                 }
             },
-            revUpdate: (cleanup) => {
+            revUpdate: (cleanup, cleanupDir) => {
                 return through.obj((file, enc, cb) => {
                     if (typeof file.revOrigPath === "undefined") {
                         cb(null, file);
                         return false;
                     }
 
-                    let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(root + Config.paths.input.root, root + Config.paths.output.root)
+                    let directory = path.parse(path.relative(process.cwd(), file.path)).dir.replace(Config.paths.input[cleanupDir], Config.paths.output[cleanupDir])
 
                     if (cleanup) {
                         let fileName = path.basename(file.revOrigPath).replace(path.extname(file.revOrigPath),"");
@@ -297,22 +299,6 @@ class Core {
                         }
                     });
                 })
-            },
-            devBuild() {
-                if (Config.serve.mode === "dev" || Config.serve.mode === "build") {
-                    Config.errors = false;
-                    Config.styles.revision = false;
-                    Config.styles.purge.enabled = false;
-                    Config.styles.optimizations = false;
-                    Config.scripts.revision = false;
-                    Config.scripts.optimizations = false;
-                    Config.scripts.legacy = false;
-                    Config.icons.optimizations = false;
-                    Config.icons.revision = false;
-                    Config.styles.vendor.cache = true;
-                    Config.styles.import = ['local'];
-                    Config.assets.revision = false;
-                }
             }
         }
 
@@ -380,14 +366,13 @@ class Core {
                 let tasks = [];
 
                 Config.serve.mode = "dev";
+                Config.errors = false;
 
                 !Config.local && tasks.push("cleanup")
                 Exists.icons && tasks.push("icons")
                 Exists.styles && tasks.push("styles")
                 Exists.scripts && tasks.push("scripts")
                 Exists.templates && tasks.push("templates")
-
-                Functions.devBuild();
 
                 tasks.push(new Serve().init, "watch")
 
@@ -398,17 +383,16 @@ class Core {
                 let tasks = [];
 
                 if (Config.serve.mode === "") {
+                    Config.errors = false;
                     Config.serve.mode = "build";
                 }
 
                 !Config.local && tasks.push("cleanup", "cdn")
-                Exists.assets && tasks.push("assets")
+                Exists.assets && tasks.push("assets:build")
                 Exists.icons && tasks.push("icons:build")
                 Exists.styles && tasks.push("styles:build")
                 Exists.scripts && tasks.push("scripts:build")
                 Exists.templates && tasks.push("templates")
-
-                Functions.devBuild()
 
                 tasks.push(new Serve().init, "watch:build")
 
@@ -445,6 +429,9 @@ class Core {
             })
 
             gulp.task("icons:build", (resolve) => {
+                Config.icons.optimizations = false;
+                Config.icons.revision = false;
+
                 if (Config.icons.id !== "") {
                     gulp.series(new Icons().fetch, new Icons().build)(resolve)
                 } else {
@@ -464,13 +451,15 @@ class Core {
                 })
 
                 gulp.task("scripts:build", (resolve) => {
+                    Config.scripts.revision = false;
+                    Config.scripts.optimizations = false;
+                    Config.scripts.legacy = false;
+
                     gulp.series(new Utils().importMap, new Scripts().importResolution, new Scripts().build)(resolve)
                 })
 
                 gulp.task("scripts:production", (resolve) => {
-                    const build = () => new Scripts().build("production");
-
-                    gulp.series(new Utils().importMap, new Scripts().importResolution, build)(resolve)
+                    gulp.series(new Utils().importMap, new Scripts().importResolution, new Scripts().build)(resolve)
                 })
             } else {
                 gulp.task("scripts", (resolve) => {
@@ -486,6 +475,12 @@ class Core {
 
             if (!Config.vite) {
                 gulp.task("styles:build", (resolve) => {
+                    Config.styles.revision = false;
+                    Config.styles.purge.enabled = false;
+                    Config.styles.optimizations = false;
+                    Config.styles.vendor.cache = true;
+                    Config.styles.import = ['local'];
+
                     gulp.series(new Styles().importResolution, new Styles().tailwind, new Styles().build)(resolve)
                 })
 
@@ -506,12 +501,17 @@ class Core {
         }
 
         if (Exists.assets) {
+            gulp.task("assets:build", async () => {
+                return gulp.src(`${root + Config.paths.input.assets}/**`)
+                    .pipe(gulp.dest(root + Config.paths.output.assets))
+            })
+
             gulp.task("assets", async () => {
                 const revision = (await import("gulp-rev")).default;
 
                 return gulp.src(`${root + Config.paths.input.assets}/**`)
                     .pipe(gulpif(Config.assets.revision, revision()))
-                    .pipe(Functions.revUpdate(true))
+                    .pipe(Functions.revUpdate(true, "assets"))
                     .pipe(gulp.dest(root + Config.paths.output.assets))
                     .pipe(revision.manifest())
                     .pipe(gulp.dest(root + Config.paths.output.assets))

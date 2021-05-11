@@ -12,6 +12,7 @@ export class Emails {
         const inlineCss = (await import('gulp-inline-css')).default;
         const replace = (await import('gulp-replace')).default;
         const rename = (await import('gulp-rename')).default;
+        const postcssCustomProperties = (await import('postcss-custom-properties')).default;
 
         const inlineCssOpt = {
             applyStyleTags: true,
@@ -19,7 +20,9 @@ export class Emails {
             removeStyleTags: Config.emails.inlineOnly
         }
 
-        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.emails.postcss, [autoprefixer])))
+        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.emails.postcss, [postcssCustomProperties({
+            preserve: false
+        }), autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
 
         return new Promise(resolve => {
