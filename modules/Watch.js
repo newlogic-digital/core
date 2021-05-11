@@ -27,11 +27,12 @@ export class Watch {
         }
 
         if (Exists.emails) {
-            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails"))
         }
     }
     build(type) {
         let templates = type !== "production" ? "templates" : "templates:production";
+        let assets = type !== "production" ? "assets" : "assets:production";
 
         gulp.watch("package.json", Exists.templates ? gulp.series("importmap", templates) : gulp.series("importmap"))
 
@@ -63,12 +64,12 @@ export class Watch {
             gulp.watch(`${Config.paths.output.icons}/${Config.icons.filename}*`, gulp.series(templates));
         }
 
-        if (Exists.assets && type === "production") {
-            gulp.watch(`${Config.paths.input.assets}/**`, gulp.series("assets"))
+        if (Exists.assets) {
+            gulp.watch(`${Config.paths.input.assets}/**`, gulp.series(assets))
         }
 
         if (Exists.emails) {
-            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails:build"))
+            gulp.watch(`${Config.paths.input.emails}/**`, gulp.series("emails"))
         }
     }
 }

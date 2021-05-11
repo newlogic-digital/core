@@ -501,12 +501,12 @@ class Core {
         }
 
         if (Exists.assets) {
-            gulp.task("assets:build", async () => {
+            gulp.task("assets", async () => {
                 return gulp.src(`${root + Config.paths.input.assets}/**`)
                     .pipe(gulp.dest(root + Config.paths.output.assets))
             })
 
-            gulp.task("assets", async () => {
+            gulp.task("assets:production", async () => {
                 const revision = (await import("gulp-rev")).default;
 
                 return gulp.src(`${root + Config.paths.input.assets}/**`)
@@ -519,7 +519,7 @@ class Core {
         }
 
         if (Exists.emails) {
-            gulp.task("emails:build", () => {
+            gulp.task("emails", () => {
                 return new Emails().build()
             })
 
