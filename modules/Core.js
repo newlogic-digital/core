@@ -388,7 +388,7 @@ class Core {
                 }
 
                 !Config.local && tasks.push("cleanup", "cdn")
-                Exists.assets && tasks.push("assets:build")
+                Exists.assets && tasks.push("assets")
                 Exists.icons && tasks.push("icons:build")
                 Exists.styles && tasks.push("styles:build")
                 Exists.scripts && tasks.push("scripts:build")
@@ -407,7 +407,7 @@ class Core {
                 }
 
                 !Config.local && tasks.push("cleanup", "cdn")
-                Exists.assets && tasks.push("assets")
+                Exists.assets && tasks.push("assets:production")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
                 Exists.scripts && tasks.push("scripts:production")
