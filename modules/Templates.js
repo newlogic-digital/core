@@ -154,6 +154,7 @@ export class Templates {
                         .replace(`/${Config.paths.input.scripts}`, `/${Config.paths.output.scripts}`)
                         .replace(`/${Config.paths.input.assets}`, `/${Config.paths.output.assets}`)
                         .replace(`/${Config.paths.input.icons}`, `/${Config.paths.output.icons}`)
+                        .replace(".less", ".css")
                 }
 
                 directoryPath = url.substr(0, url.lastIndexOf("/"));

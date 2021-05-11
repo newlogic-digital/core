@@ -65,7 +65,7 @@ export class Icons {
                                 });
 
                             } else if (name === "style.less" && Config.icons.format === "less") {
-                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/iconfont.css`));
+                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/iconfont.less`));
                                 resolveFile();
                             } else {
                                 response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/${name}`));
