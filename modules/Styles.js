@@ -129,23 +129,6 @@ export class Styles {
         const purgeCSS = (await import("gulp-purgecss")).default;
 
         if (!fs.existsSync(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)) {
-            Config.styles.format === "less" && await new Promise(resolve => {
-                if (fs.readdirSync(root + Config.paths.temp).toString().includes("-modifiers") && Config.styles.tailwind.cache) {
-                    resolve();
-                    return false;
-                }
-
-                const purge = lazypipe().pipe(purgeCSS, new Styles().purge.config());
-
-                gulp.src([`${root + Config.paths.input.styles}/*-modifiers.less`])
-                    .pipe(plumber(Functions.plumber))
-                    .pipe(Modules.less.module())
-                    .pipe(gulpif(Config.styles.purge.enabled, purge()))
-                    .pipe(Modules.autoprefixer.pipe())
-                    .pipe(gulp.dest(root + Config.paths.temp))
-                    .on("end", resolve)
-            })
-
             return new Promise(resolve => resolve())
         }
 

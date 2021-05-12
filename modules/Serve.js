@@ -19,6 +19,7 @@ export class Serve {
 
             let config = {
                 plugins: Config.serve.mode === "dev" ? [ratio()] : [],
+                publicDir: `${Config.paths.output.root}`,
                 server: {
                     open: Config.serve.index,
                     watch: {
