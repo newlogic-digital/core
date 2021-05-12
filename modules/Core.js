@@ -551,13 +551,13 @@ class Core {
             })
         }
 
-        if (!Config.vite && typeof Config.modules.Cms !== "undefined") {
+        if (!Config.vite && typeof Config.modules.cms !== "undefined") {
             gulp.task("cms:install", () => {
-                return new Config.modules.Cms().install()
+                return new Config.modules.cms().install()
             })
 
             gulp.task("cms:prepare", (done) => {
-                return new Config.modules.Cms().prepare(done)
+                return new Config.modules.cms().prepare(done)
             })
         }
     }
