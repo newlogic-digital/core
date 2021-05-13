@@ -324,7 +324,7 @@ class Core {
                 let tasks = [];
 
                 !Config.local && tasks.push("cleanup", "cdn");
-                Exists.assets && tasks.push("assets")
+                Exists.assets && tasks.push("assets:production")
                 Exists.icons && tasks.push("icons:production")
                 Exists.styles && tasks.push("styles:production")
                 Exists.scripts && tasks.push("scripts:production")
