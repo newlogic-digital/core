@@ -17,11 +17,35 @@ export class Serve {
                 }
             }
 
+            const middleware = () => {
+                return {
+                    name: 'middleware',
+                    apply: 'serve',
+                    configureServer(viteDevServer) {
+                        return () => {
+                            viteDevServer.middlewares.use(async (context, res, next) => {
+                                if (!context.originalUrl.endsWith(".html") && context.originalUrl !== "/") {
+                                    context.url = `/${Config.paths.output.root}/` + context.originalUrl + ".html";
+                                } else if (context.url === "/index.html") {
+                                    context.url = `/${Config.paths.output.root}/` + context.url;
+                                }
+
+                                next();
+                            });
+                        };
+                    }
+                }
+            }
+
             let config = {
-                plugins: Config.serve.mode === "dev" ? [ratio()] : [],
+                plugins: Config.serve.mode === "dev" ? [middleware(), ratio()] : [middleware()],
                 publicDir: `${Config.paths.output.root}`,
                 server: {
                     open: Config.serve.index,
+                    host: true,
+                    fsServe: {
+                        strict: false
+                    },
                     watch: {
                         ignored: ['**/node_modules/**', '**/.git/**', '**/src/templates/**', '**/src/main.json']
                     }
