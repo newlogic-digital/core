@@ -65,7 +65,7 @@ export class Styles {
             let value = `[${val}]{aspect-ratio: ${val.match(/\d+/g)[0]} / ${val.match(/\d+/g)[1]}}`;
 
             if (typeof file !== "undefined" && file.extname === ".less") {
-                let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[1]) * 100;
+                let calc = (val.match(/\d+/g)[1] / val.match(/\d+/g)[0]) * 100;
                 value = `[${val}]:before{padding-bottom: ${calc}%}`
             }
 
