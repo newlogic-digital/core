@@ -25,9 +25,9 @@ export class Serve {
                         return () => {
                             viteDevServer.middlewares.use(async (context, res, next) => {
                                 if (!context.originalUrl.endsWith(".html") && context.originalUrl !== "/") {
-                                    context.url = `/${Config.paths.output.root}/` + context.originalUrl + ".html";
+                                    context.url = `/${Config.paths.output.root}` + context.originalUrl + ".html";
                                 } else if (context.url === "/index.html") {
-                                    context.url = `/${Config.paths.output.root}/` + context.url;
+                                    context.url = `/${Config.paths.output.root}` + context.url;
                                 }
 
                                 next();

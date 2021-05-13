@@ -30,7 +30,7 @@ let Config = {
     errors: true,
     vite: false,
     serve: {
-        index: "/public/index.html",
+        index: "/",
         mode: ""
     },
     modules: {},
