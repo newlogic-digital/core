@@ -339,7 +339,7 @@ class Core {
             && gulp.task("production", resolve => {
                 let tasks = [];
 
-                Exists.assets && tasks.push("assets")
+                Exists.assets && tasks.push("assets:production")
                 Exists.styles && tasks.push("styles:production")
                 Exists.scripts && tasks.push("scripts:production")
                 Exists.icons && tasks.push("icons:production")
@@ -506,15 +506,18 @@ class Core {
                     .pipe(gulp.dest(root + Config.paths.output.assets))
             })
 
-            gulp.task("assets:production", async () => {
-                const revision = (await import("gulp-rev")).default;
+            gulp.task("assets:production", () => {
+                return new Promise(async (resolve) => {
+                    const revision = (await import("gulp-rev")).default;
 
-                return gulp.src(`${root + Config.paths.input.assets}/**`)
-                    .pipe(gulpif(Config.assets.revision, revision()))
-                    .pipe(Functions.revUpdate(true, "assets"))
-                    .pipe(gulp.dest(root + Config.paths.output.assets))
-                    .pipe(revision.manifest())
-                    .pipe(gulp.dest(root + Config.paths.output.assets))
+                    gulp.src(`${root + Config.paths.input.assets}/**`)
+                        .pipe(gulpif(Config.assets.revision, revision()))
+                        .pipe(Functions.revUpdate(true, "assets"))
+                        .pipe(gulp.dest(root + Config.paths.output.assets))
+                        .pipe(revision.manifest())
+                        .pipe(gulp.dest(root + Config.paths.output.assets))
+                        .on("end", resolve)
+                })
             })
         }
 
