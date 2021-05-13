@@ -424,7 +424,7 @@ class Core {
                 if (Config.icons.id !== "") {
                     gulp.series(new Icons().fetch)(resolve)
                 } else {
-                    return new Icons().build()
+                    resolve()
                 }
             })
 
