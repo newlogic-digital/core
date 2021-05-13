@@ -300,10 +300,10 @@ export class Styles {
         return new Promise(resolve => {
             gulp.src([`${root + Config.paths.input.styles}/*.{css,less}`, `!${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`, `!${root + Config.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
-                .pipe(revRewriteOutput())
                 .pipe(ratio(Config.styles.ratio.content))
                 .pipe(vendor())
                 .pipe(build())
+                .pipe(revRewriteOutput())
                 .pipe(gulpif(Config.styles.purge.enabled, purge()))
                 .pipe(Modules.autoprefixer.pipe())
                 .pipe(gulpif(Config.styles.optimizations, clean()))
