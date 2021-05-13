@@ -8,8 +8,5 @@ export default defineConfig({
         ratio: {
             content: [`src/templates/**/*.{hbs,html,twig}`, 'app/Presenters/templates/**/*.latte']
         }
-    },
-    templates: {
-        layout: "layout/main.twig"
     }
 });

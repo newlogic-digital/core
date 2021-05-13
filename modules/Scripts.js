@@ -118,7 +118,7 @@ export class Scripts {
                             context: 'window',
                             preserveEntrySignatures: true,
                             plugins: [
-                                Config.serve.mode === "" && replace({
+                                Config.serve.mode === "" || Config.paths.output.rewrite && replace({
                                     preventAssignment: true,
                                     values: {
                                         '/* @vite-ignore */': ''
@@ -164,7 +164,7 @@ export class Scripts {
                             context: 'window',
                             preserveEntrySignatures: false,
                             plugins: [
-                                Config.serve.mode === "" && replace({
+                                Config.serve.mode === "" || Config.paths.output.rewrite && replace({
                                     preventAssignment: true,
                                     values: {
                                         '/* @vite-ignore */': ''
