@@ -73,6 +73,7 @@ let Config = {
         optimizations: true,
         revision: true,
         legacy: false,
+        concat: false,
         polyfillUrls: [],
         polyfillFeatures: "default",
         importResolution: {
@@ -304,6 +305,33 @@ class Core {
                         }
                     });
                 })
+            },
+            revRewriteOutput: () => {
+                return through.obj((file, enc, cb) => {
+                    if (file.isNull()) {
+                        cb(null, file);
+                    }
+                    if (file.isBuffer()) {
+                        let contents = file.contents.toString();
+
+                        contents = contents.replace(new RegExp(`${Config.paths.input.assets}`, 'g'),
+                            `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`)
+
+                        file.contents = Buffer.from(contents);
+
+                        cb(null, file);
+                    }
+                });
+            },
+            module: (name, options = {}) => {
+                let module = through.obj((file, enc, cb) => {
+                    console.error("\x1b[31m", `Module ${name} is missing, ${file.basename} won't be compiled.`, "\x1b[0m");
+                    cb(null, file);
+                });
+
+                try {module = require(name)(options)} catch {}
+
+                return module;
             }
         }
 

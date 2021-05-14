@@ -192,24 +192,6 @@ export class Styles {
         const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true, "styles")
             .pipe(revRewrite, {manifest: fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`) : ""});
 
-        const revRewriteOutput = () => {
-            return through.obj((file, enc, cb) => {
-                if (file.isNull()) {
-                    cb(null, file);
-                }
-                if (file.isBuffer()) {
-                    let contents = file.contents.toString();
-
-                    contents = contents.replace(new RegExp(`${Config.paths.input.assets}`, 'g'),
-                        `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`)
-
-                    file.contents = Buffer.from(contents);
-
-                    cb(null, file);
-                }
-            });
-        }
-
         const ratio = (source) => {
             return through.obj((file, enc, cb) => {
                 if (!Config.styles.ratio.files.includes(file.basename)) {
@@ -303,7 +285,7 @@ export class Styles {
                 .pipe(ratio(Config.styles.ratio.content))
                 .pipe(vendor())
                 .pipe(build())
-                .pipe(revRewriteOutput())
+                .pipe(Functions.revRewriteOutput())
                 .pipe(gulpif(Config.styles.purge.enabled, purge()))
                 .pipe(Modules.autoprefixer.pipe())
                 .pipe(gulpif(Config.styles.optimizations, clean()))
