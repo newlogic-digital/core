@@ -107,11 +107,6 @@ export class Scripts {
         const replace = (await import('@rollup/plugin-replace')).default;
 
         return new Promise(resolve => {
-            if (Config.scripts.concat) {
-                new Scripts().concat(resolve);
-                return false;
-            }
-
             fse.removeSync(root + Config.paths.output.scripts);
 
             const hashManifest = function(opts = {}) {
