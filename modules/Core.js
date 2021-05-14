@@ -29,6 +29,7 @@ let Config = {
     local: false,
     errors: true,
     vite: false,
+    config: false,
     serve: {
         index: "/",
         mode: ""
@@ -152,6 +153,10 @@ let Config = {
 class Core {
     init(ExtendConfig = {}) {
         Config = lodash.merge(Config, ExtendConfig);
+
+        if (Config.config) {
+            fs.writeFileSync(`${root + Config.paths.output.root}/config.json`, JSON.stringify(Config));
+        }
 
         if (!fs.existsSync(root + Config.paths.temp)){
             fs.mkdirSync(root + Config.paths.temp);
