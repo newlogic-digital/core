@@ -1,6 +1,7 @@
 import fs from "fs";
 import fse from "fs-extra";
-import {Config, Functions, Modules, root} from "./Core.js";
+import lodash from "lodash";
+import {Config, Functions, root} from "./Core.js";
 
 export class Scripts {
     importResolution() {
@@ -48,7 +49,7 @@ export class Scripts {
             resolve();
         });
     }
-    async concat(resolve) {
+    async concat() {
         const gulp = (await import("gulp")).default;
         const plumber = (await import("gulp-plumber")).default;
         const lazypipe = (await import("lazypipe")).default;
@@ -75,25 +76,27 @@ export class Scripts {
         const rev = lazypipe().pipe(revision).pipe(Functions.revUpdate, true, "scripts")
             .pipe(revRewrite, {manifest: fs.existsSync(`${root + Config.paths.output.assets}/rev-manifest.json`) ? fs.readFileSync(`${root + Config.paths.output.assets}/rev-manifest.json`) : ""});
 
-        gulp.src(`${root + Config.paths.input.scripts}/*.js`)
-            .pipe(plumber(Functions.plumber))
-            .pipe(Functions.module("gulp-js-import-file", {
-                hideConsole: true,
-                importStack: false,
-                es6import: true
-            }))
-            .pipe(Functions.revRewriteOutput())
-            .pipe(gulpif(Config.scripts.legacy, Functions.module("gulp-babel")))
-            .pipe(gulpif(Config.scripts.optimizations, minify()))
-            .pipe(gulpif(Config.scripts.revision, rev()))
-            .pipe(gulp.dest(root + Config.paths.output.scripts))
-            .pipe(revision.manifest(root + Config.paths.output.scripts + "/rev-manifest.json",{
-                merge: true,
-                base: root + Config.paths.output.scripts
-            }))
-            .pipe(gulp.dest(root + Config.paths.output.scripts))
-            .on('error', Functions.plumber.errorHandler)
-            .on('end', resolve);
+        return new Promise(resolve => {
+            gulp.src(Config.scripts.concat)
+                .pipe(plumber(Functions.plumber))
+                .pipe(Functions.module("gulp-js-import-file", {
+                    hideConsole: true,
+                    importStack: false,
+                    es6import: true
+                }))
+                .pipe(Functions.revRewriteOutput())
+                .pipe(gulpif(Config.scripts.legacy, Functions.module("gulp-babel")))
+                .pipe(gulpif(Config.scripts.optimizations, minify()))
+                .pipe(gulpif(Config.scripts.revision, rev()))
+                .pipe(gulp.dest(root + Config.paths.output.scripts))
+                .pipe(revision.manifest(root + Config.paths.output.scripts + "/rev-manifest.json",{
+                    merge: true,
+                    base: root + Config.paths.output.scripts
+                }))
+                .pipe(gulp.dest(root + Config.paths.output.scripts))
+                .on('error', Functions.plumber.errorHandler)
+                .on('end', resolve);
+        })
     }
     async build() {
         const {rollup} = await import('rollup');
@@ -161,6 +164,8 @@ export class Scripts {
             if (!fs.existsSync(root + Config.paths.output.scripts)){
                 fs.mkdirSync(root + Config.paths.output.scripts);
             }
+
+            Config.scripts.concat.map(file => lodash.pull(files, file.substr(file.lastIndexOf("/") + 1, file.length)))
 
             Promise.all(files.map(async file => {
                 if (!fs.statSync(`${root + Config.paths.input.scripts}/${file}`).isDirectory()) {
@@ -305,6 +310,10 @@ export class Scripts {
 
                     await bundle.close();
                 })();
+
+                if (Config.scripts.concat.length > 0) {
+                    await new Scripts().concat();
+                }
 
                 resolve();
             });

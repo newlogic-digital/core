@@ -73,7 +73,7 @@ let Config = {
         optimizations: true,
         revision: true,
         legacy: false,
-        concat: false,
+        concat: [],
         polyfillUrls: [],
         polyfillFeatures: "default",
         importResolution: {

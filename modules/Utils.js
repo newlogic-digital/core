@@ -13,6 +13,7 @@ export class Utils {
         return new Promise(resolve => {
             if (fs.existsSync(root + Config.paths.temp)) {
                 fse.emptyDirSync(root + Config.paths.temp);
+                fs.writeFileSync(root + Config.paths.temp + "/.gitkeep", "");
             }
 
             if (fs.existsSync(root + Config.paths.output.assets) && Config.paths.output.assets !== Config.paths.output.root) {

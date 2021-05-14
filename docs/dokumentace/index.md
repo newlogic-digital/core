@@ -60,6 +60,13 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 
   Při tomto použití je nutné používat vlastní config `vite.config.js`
 
+### config
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+  Vygeneruje config z gulpfile.js v json formátu do `paths.output.root`
+
 ### serve.index
 
 - **Type:** `string`
@@ -232,9 +239,9 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 ### paths.output.emailsWww
 
 - **Type:** `string`
-- **Default:** `"dist/img"`
+- **Default:** `"www/emails"`
 
-  Alternativní složka pro zkompilované emaily, vhodné pro šablony do PHP
+  Alternativní složka pro zkompilované emaily, vhodné pro šablony do PHP (kopírují se sem soubory s příponou .latte nebo .tpl)
 
 ### paths.output.emailsImg
 
@@ -345,6 +352,13 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 - **Default:** `true`
 
   Zda se má u zkompilovaného souboru doplnit do jména hash revize
+
+### scripts.contact
+
+- **Type:** `string[]`
+- **Default:** `[]`
+
+  Cesta k souborům které se mají kompilovat contact stylem, je potřeba mít doinstalované `gulp-js-import-file` a `gulp-babel` při použití s `scripts.legacy`
 
 ### scripts.legacy
 
