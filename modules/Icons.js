@@ -65,11 +65,9 @@ export class Icons {
                                 });
 
                             } else if (name === "style.less" && Config.icons.format === "less") {
-                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/iconfont.less`));
-                                resolveFile();
+                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/iconfont.less`)).on("close", resolveFile);
                             } else {
-                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/${name}`));
-                                resolveFile();
+                                response.pipe(fs.createWriteStream(`${root + Config.paths.input.icons}/${name}`)).on("close", resolveFile);
                             }
                         } else {
                             console.error("\x1b[31m", `Error: ${url} returns ${response.statusCode}`, "\x1b[0m");
