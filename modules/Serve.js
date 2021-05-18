@@ -36,7 +36,7 @@ export class Serve {
             const reload = {
                 name: 'reload',
                 handleHotUpdate({ file, server }) {
-                    if (file.includes(`/${Config.paths.output.root}/`)) {
+                    if (!file.includes('.json') && !file.includes('.html') && file.includes(`/${Config.paths.output.root}/`)) {
                         server.ws.send({
                             type: 'full-reload',
                             path: '*',
