@@ -11,14 +11,17 @@ import {Utils} from "./Utils.js";
 import {Templates} from "./Templates.js";
 import {Styles} from "./Styles.js";
 import {Scripts} from "./Scripts.js";
-import {Serve} from "./Serve.js";
+import {Serve as ModuleServe} from "./Serve.js";
 import {Icons} from "./Icons.js";
 import {Emails} from "./Emails.js";
 import {Watch} from "./Watch.js";
+import chalk from "chalk";
 
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
 const root = process.cwd() + "/";
+
+const Serve = new ModuleServe();
 
 let Exists;
 let Modules;
@@ -332,6 +335,18 @@ class Core {
                 try {module = require(name)(options)} catch {}
 
                 return module;
+            },
+            serverReload: () => {
+                if (typeof Serve.server !== "undefined") {
+                    Serve.server.ws.send({
+                        type: 'full-reload',
+                        path: '*',
+                    });
+                    Serve.server.config.logger.info(
+                        chalk.green(`page reload `) + chalk.dim(`${Config.paths.output.root}/*.html`),
+                        { clear: true, timestamp: true }
+                    )
+                }
             }
         }
 
@@ -407,7 +422,7 @@ class Core {
                 Exists.scripts && tasks.push("scripts")
                 Exists.templates && tasks.push("templates")
 
-                tasks.push(new Serve().init, "watch")
+                tasks.push(() => Serve.init(), "watch")
 
                 gulp.series(tasks)(resolve)
             });
@@ -427,7 +442,7 @@ class Core {
                 Exists.scripts && tasks.push("scripts:build")
                 Exists.templates && tasks.push("templates")
 
-                tasks.push(new Serve().init, "watch:build")
+                tasks.push(() => Serve.init(), "watch:build")
 
                 gulp.series(tasks)(resolve)
             })
@@ -446,7 +461,7 @@ class Core {
                 Exists.scripts && tasks.push("scripts:production")
                 Exists.templates && tasks.push("templates:production")
 
-                tasks.push(new Serve().init, "watch:production")
+                tasks.push(() => Serve.init(), "watch:production")
 
                 gulp.series(tasks)(resolve)
             })
@@ -525,11 +540,11 @@ class Core {
 
         if (Exists.templates) {
             gulp.task("templates", () => {
-                return new Templates().build("development");
+                return new Templates().build("development").then(Functions.serverReload);
             })
 
             gulp.task("templates:production", () => {
-                return new Templates().build("production");
+                return new Templates().build("production").then(Functions.serverReload);
             })
         }
 

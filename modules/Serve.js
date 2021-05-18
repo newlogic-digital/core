@@ -36,7 +36,7 @@ export class Serve {
             const reload = {
                 name: 'reload',
                 handleHotUpdate({ file, server }) {
-                    if (file.includes('.html') || file.includes(`/${Config.paths.output.root}/`)) {
+                    if (file.includes(`/${Config.paths.output.root}/`)) {
                         server.ws.send({
                             type: 'full-reload',
                             path: '*',
@@ -55,7 +55,7 @@ export class Serve {
                         strict: false
                     },
                     watch: {
-                        ignored: ['**/node_modules/**', '**/.git/**', '**/src/templates/**', '**/src/main.json']
+                        ignored: ['**/node_modules/**', '**/.git/**', '**/src/templates/**', '**/src/main.json', `**/${Config.paths.output.root}/*.html`]
                     }
                 },
                 root: process.cwd(),
@@ -79,9 +79,9 @@ export class Serve {
                 config = lodash.merge(config, css)
             }
 
-            const server = await createServer(config)
+            this.server = await createServer(config)
 
-            await server.listen()
+            await this.server.listen()
 
             console.log(" ");
 
