@@ -8,37 +8,45 @@ export class Serve {
             const { createServer } = (await import('vite'));
             const tailwindcss = (await import("tailwindcss")).default;
 
-            const ratio = () => {
-                return {
-                    name: 'ratio',
-                    transformIndexHtml(html) {
-                        return html.replace("</head>", `<style>${new Styles().ratio(Config.styles.ratio.content)}</style></head>`)
-                    }
+            const ratio = {
+                name: 'ratio',
+                transformIndexHtml(html) {
+                    return html.replace("</head>", `<style>${new Styles().ratio(Config.styles.ratio.content)}</style></head>`)
                 }
             }
 
-            const middleware = () => {
-                return {
-                    name: 'middleware',
-                    apply: 'serve',
-                    configureServer(viteDevServer) {
-                        return () => {
-                            viteDevServer.middlewares.use(async (context, res, next) => {
-                                if (!context.originalUrl.endsWith(".html") && context.originalUrl !== "/") {
-                                    context.url = `/${Config.paths.output.root}` + context.originalUrl + ".html";
-                                } else if (context.url === "/index.html") {
-                                    context.url = `/${Config.paths.output.root}` + context.url;
-                                }
+            const middleware = {
+                name: 'middleware',
+                apply: 'serve',
+                configureServer(viteDevServer) {
+                    return () => {
+                        viteDevServer.middlewares.use(async (context, res, next) => {
+                            if (!context.originalUrl.endsWith(".html") && context.originalUrl !== "/") {
+                                context.url = `/${Config.paths.output.root}` + context.originalUrl + ".html";
+                            } else if (context.url === "/index.html") {
+                                context.url = `/${Config.paths.output.root}` + context.url;
+                            }
 
-                                next();
-                            });
-                        };
+                            next();
+                        });
+                    };
+                }
+            }
+
+            const reload = {
+                name: 'reload',
+                handleHotUpdate({ file, server }) {
+                    if (file.includes('.html') || file.includes(`/${Config.paths.output.root}/`)) {
+                        server.ws.send({
+                            type: 'full-reload',
+                            path: '*',
+                        });
                     }
                 }
             }
 
             let config = {
-                plugins: Config.serve.mode === "dev" ? [middleware(), ratio()] : [middleware()],
+                plugins: Config.serve.mode === "dev" ? [middleware, ratio, reload] : [middleware, reload],
                 publicDir: `${Config.paths.output.root}`,
                 server: {
                     open: Config.serve.index,
