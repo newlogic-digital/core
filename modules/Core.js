@@ -11,7 +11,7 @@ import {Utils} from "./Utils.js";
 import {Templates} from "./Templates.js";
 import {Styles} from "./Styles.js";
 import {Scripts} from "./Scripts.js";
-import {Serve as ModuleServe} from "./Serve.js";
+import {Serve} from "./Serve.js";
 import {Icons} from "./Icons.js";
 import {Emails} from "./Emails.js";
 import {Watch} from "./Watch.js";
@@ -20,8 +20,6 @@ import chalk from "chalk";
 import {createRequire} from "module";
 const require = createRequire(import.meta.url);
 const root = process.cwd() + "/";
-
-const Serve = new ModuleServe();
 
 let Exists;
 let Modules;

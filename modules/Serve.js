@@ -2,7 +2,7 @@ import autoprefixer from "autoprefixer";
 import lodash from "lodash";
 import {Config, Exists, Styles, Utils} from "./Core.js";
 
-export class Serve {
+export const Serve = new class {
     init() {
         return new Promise(async (resolve) => {
             const { createServer } = (await import('vite'));
