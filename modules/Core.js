@@ -33,7 +33,8 @@ let Config = {
     config: false,
     serve: {
         index: "/",
-        mode: ""
+        mode: "",
+        reload: (file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')
     },
     modules: {},
     paths: {

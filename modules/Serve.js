@@ -1,6 +1,9 @@
 import autoprefixer from "autoprefixer";
 import lodash from "lodash";
 import {Config, Exists, Styles, Utils} from "./Core.js";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 export const Serve = new class {
     init() {
@@ -36,7 +39,7 @@ export const Serve = new class {
             const reload = {
                 name: 'reload',
                 handleHotUpdate({ file, server }) {
-                    if (!file.includes('.json') && !file.includes('.html') && file.includes(`/${Config.paths.output.root}/`)) {
+                    if ((!file.includes('.json') && !file.includes('.html') && file.includes(`/${Config.paths.output.root}/`)) || Config.serve.reload(file)) {
                         server.ws.send({
                             type: 'full-reload',
                             path: '*',
@@ -60,6 +63,17 @@ export const Serve = new class {
                 },
                 root: process.cwd(),
             };
+
+            if (fs.existsSync(path.join(os.homedir(),'.ssh/localhost.pem'))) {
+                lodash.merge(config, {
+                    server: {
+                        https: {
+                            key: fs.readFileSync(path.join(os.homedir(),'.ssh/localhost-key.pem')),
+                            cert: fs.readFileSync(path.join(os.homedir(),'.ssh/localhost.pem')),
+                        }
+                    }
+                })
+            }
 
             let tailwindcssConfig = {}
 
