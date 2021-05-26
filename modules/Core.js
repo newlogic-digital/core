@@ -31,11 +31,13 @@ let Config = {
     errors: true,
     vite: false,
     config: false,
+    sri: false,
     serve: {
         index: "/",
         mode: "",
         https: false,
-        reload: (file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')
+        reload: (file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte'),
+        vite: {}
     },
     modules: {},
     paths: {
@@ -77,6 +79,7 @@ let Config = {
         revision: true,
         legacy: false,
         concat: [],
+        cdnPath: "Utils/cdn.js",
         polyfillUrls: [],
         polyfillFeatures: "default",
         importResolution: {

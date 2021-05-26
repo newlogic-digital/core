@@ -93,6 +93,8 @@ export const Serve = new class {
                 config = lodash.merge(config, css)
             }
 
+            lodash.merge(config, Config.serve.vite);
+
             this.server = await createServer(config)
 
             await this.server.listen()

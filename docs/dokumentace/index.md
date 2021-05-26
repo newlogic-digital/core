@@ -67,6 +67,13 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 
   Vygeneruje config z gulpfile.js v json formátu do `paths.output.root`
 
+### sri
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+  Vygeneruje sri integritu pro externí cdn scripty v json formátu do `paths.output.root`
+
 ### serve.index
 
 - **Type:** `string`
@@ -79,10 +86,31 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 ### serve.mode
 
 - **Type:** `string`
-  
+
   Možnost natvrdo nastavit mód serveru, lze nastavit `dev`, `build` a `production`. Ve výchozím stavu se nastavuje automaticky podle tasků `serve`, `serve:build`, `serve:production`
 
   (dev a build používají vždy `dev`)
+
+### serve.https
+
+- **Type:** `boolean`
+- **Default:** `false`
+
+  Zda pro Vite server použít https server, používá se certifikát v cestě `~/.ssh/localhost.pem` a `~/.ssh/localhost-key.pem`, toto je možné změnit v nastavení vite `serve.vite`
+
+### serve.vite
+
+- **Type:** `object`
+- **Default:** `{}`
+
+  Zde se dá vložit jakékoliv další nastavení pro Vite
+
+### serve.reload
+
+- **Type:** `function`
+- **Default:** `(file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')`
+
+  Jaké další soubory se mají reloadovat při změně
 
 ### modules
 
@@ -194,7 +222,7 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 
   Cesta k kde se nachází další soubory jako obrázky, písma apod.
 
-### serve.output.rewrite
+### paths.output.rewrite
 
 - **Type:** `boolean`
 - **Default:** `true`
@@ -359,6 +387,13 @@ Pro použití vlastních configů k ostatním nástrojům lze přidat následuj�
 - **Default:** `[]`
 
   Cesta k souborům které se mají kompilovat contact stylem, je potřeba mít doinstalované `gulp-js-import-file` a `gulp-babel` při použití s `scripts.legacy`
+
+### scripts.cdnPath
+
+- **Type:** `string`
+- **Default:** `"Utils/cdn.js"`
+
+  Cesta k souboru kde se uchovávají externí cdn odkazy používané v js
 
 ### scripts.legacy
 

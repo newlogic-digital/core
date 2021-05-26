@@ -143,7 +143,9 @@ export class Utils {
                 await Functions.download(url, dir + "/" + fileName);
             }
 
-            sri[url] = `sha256-${spawnCmd(`cat ${root + Config.paths.cdn}/${fileName} | openssl dgst -sha256 -binary | openssl base64 -A`)}`;
+            if (Config.sri) {
+                sri[url] = `sha256-${spawnCmd(`cat ${root + Config.paths.cdn}/${fileName} | openssl dgst -sha256 -binary | openssl base64 -A`)}`;
+            }
 
             cdnPaths.push(url.substring(0, urlName));
         }
@@ -193,8 +195,8 @@ export class Utils {
         }
 
         if (type === "scripts") {
-            if (fs.existsSync(`${root + Config.paths.input.scripts}/Utils/cdn.js`)) {
-                const urls = fs.readFileSync(`${root + Config.paths.input.scripts}/Utils/cdn.js`).toString().split(/\r?\n/g);
+            if (fs.existsSync(`${root + Config.paths.input.scripts}/${Config.scripts.cdnPath}`)) {
+                const urls = fs.readFileSync(`${root + Config.paths.input.scripts}/${Config.scripts.cdnPath}`).toString().split(/\r?\n/g);
 
                 let files = []
 
