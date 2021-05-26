@@ -64,7 +64,7 @@ export const Serve = new class {
                 root: process.cwd(),
             };
 
-            if (fs.existsSync(path.join(os.homedir(),'.ssh/localhost.pem'))) {
+            if (fs.existsSync(path.join(os.homedir(),'.ssh/localhost.pem')) && Config.serve.https) {
                 lodash.merge(config, {
                     server: {
                         https: {

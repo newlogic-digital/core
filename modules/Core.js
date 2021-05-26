@@ -34,6 +34,7 @@ let Config = {
     serve: {
         index: "/",
         mode: "",
+        https: false,
         reload: (file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')
     },
     modules: {},
