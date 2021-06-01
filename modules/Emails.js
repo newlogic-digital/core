@@ -2,7 +2,7 @@ import lazypipe from "lazypipe";
 import gulpif from "gulp-if";
 import postcss from "gulp-postcss";
 import autoprefixer from "autoprefixer";
-import twig from "gulp-twig2html";
+import twig from "../packages/gulp-twig2html/index.js";
 import gulp from "gulp";
 import fs from "fs";
 import {Config, Modules, Templates, Utils, root} from "./Core.js";
