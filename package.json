@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.5.28",
+  "version": "0.5.29",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.14.3",
-    "@babel/preset-env": "^7.14.2",
+    "@babel/preset-env": "^7.14.4",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
@@ -33,7 +33,6 @@
     "gulp-replace": "^1.1.3",
     "gulp-rev": "^9.0.0",
     "gulp-rev-rewrite": "^4.0.0",
-    "gulp-twig2html": "^2.2.0",
     "lazypipe": "^1.0.2",
     "lodash": "^4.17.21",
     "postcss-custom-media": "^8.0.0",
@@ -41,13 +40,13 @@
     "postcss-custom-selectors": "^6.0.0",
     "postcss-import": "^14.0.2",
     "postcss-nesting": "^8.0.1",
-    "rollup": "^2.50.0",
+    "rollup": "^2.50.5",
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-terser": "^7.0.2",
-    "vite": "~2.3.4"
+    "vite": "~2.3.5"
   },
   "peerDependencies": {
-    "autoprefixer": "^10.2.5",
+    "autoprefixer": "^10.2.6",
     "postcss": "^8.3.0",
     "tailwindcss": "^2.1.2"
   },
