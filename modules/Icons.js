@@ -85,6 +85,9 @@ export class Icons {
                             file = file.replace(`@${variable}`, `var(--${variable})`)
                         })
 
+                        file = file.replace(new RegExp('-"]', 'g'), '-"]:before')
+                        file = file.replace('!important;', ';')
+
                         fs.writeFileSync(`${root + Config.paths.input.icons}/iconfont.css`, file);
                     }
 
