@@ -91,6 +91,15 @@ export class Icons {
                         fs.writeFileSync(`${root + Config.paths.input.icons}/iconfont.css`, file);
                     }
 
+                    if (fs.existsSync(`${root + Config.paths.input.icons}/iconfont.less`)) {
+                        let file = fs.readFileSync(`${root + Config.paths.input.icons}/iconfont.less`).toString();
+
+                        file = file.replace(new RegExp('-"]', 'g'), '-"]:before')
+                        file = file.replace('!important;', ';')
+
+                        fs.writeFileSync(`${root + Config.paths.input.icons}/iconfont.less`, file);
+                    }
+
                     console.log("\x1b[34m", `Icomoon demo - https://i.icomoon.io/public/reference.html#/${Config.icons.id}/${Config.icons.name}/`, "\x1b[0m");
                     resolve();
                 } else {
