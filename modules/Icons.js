@@ -127,9 +127,6 @@ export class Icons {
             .pipe(rename(function(path){
                 path.basename = Config.icons.filename;
             }))
-            .pipe(replace('-"]', '-"]:before'))
-            .pipe(replace('!important;', ';'))
-            .pipe(replace('@font-face {', '@font-face { font-display: block;'))
             .pipe(build())
             .pipe(gulpif(Config.icons.revision, rev()))
             .pipe(gulpif(Config.icons.optimizations, clean()))
