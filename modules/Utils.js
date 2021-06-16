@@ -202,7 +202,7 @@ export class Utils {
 
                 Object.keys(urls).forEach(name => {
                     if (urls[name].includes("http") && !urls[name].includes("?")) {
-                        let url = urls[name].substring(urls[name].indexOf("http"), urls[name].lastIndexOf('"'));
+                        let url = urls[name].match(/(?<=(["']\b))(?:(?=(\\?))\2.)*?(?=\1)/)[0];
 
                         cdnPaths.push(url);
                         files.push(downloadFiles(url));
