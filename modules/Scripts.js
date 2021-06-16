@@ -23,14 +23,14 @@ export class Scripts {
                         if (fs.statSync(path).isFile()) {
                             if (path.includes(".js") && !path.includes(Config.scripts.importResolution.filename)) {
                                 if (fs.readFileSync(path).toString().includes("export default")) {
-                                    imports = imports + `export { default as ${item.replace(".js","")} } from './${item}';\r\n`
+                                    imports = imports + `export { default as ${item.replace(".js","")} } from './${item}'\r\n`
                                 } else {
-                                    imports = imports + `import './${item}';\r\n`
+                                    imports = imports + `import './${item}'\r\n`
                                 }
                             }
                         } else {
                             if (Config.scripts.importResolution.subDir) {
-                                imports = imports + `import "${item}/${Config.scripts.importResolution.filename}";\r\n`
+                                imports = imports + `import '${item}/${Config.scripts.importResolution.filename}'\r\n`
                             }
                             findPaths(fs.readdirSync(path), path);
                         }
