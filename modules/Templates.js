@@ -12,7 +12,7 @@ import {Config, Exists, Functions, Modules, root} from "./Core.js";
 
 export class Templates {
     get functions() {
-        return {
+        return Object.assign(Config.templates.functions, {
             "color": (color, theme) => {
                 if (typeof theme === "undefined") {
                     theme = "main"
@@ -137,10 +137,10 @@ export class Templates {
 
                 return urls;
             }
-        }
+        })
     }
     get filters() {
-        return {
+        return Object.assign(Config.templates.filters, {
             "asset": (url) => {
                 let directoryPath = "";
 
@@ -150,11 +150,11 @@ export class Templates {
 
                 if (Config.serve.mode !== "dev" && url.indexOf("/" + Config.paths.input.root) === 0) {
                     url = url
-                        .replace(`/${Config.paths.input.styles}`, `/${Config.paths.output.styles}`)
-                        .replace(`/${Config.paths.input.scripts}`, `/${Config.paths.output.scripts}`)
-                        .replace(`/${Config.paths.input.assets}`, `/${Config.paths.output.assets}`)
-                        .replace(`/${Config.paths.input.icons}`, `/${Config.paths.output.icons}`)
-                        .replace(".less", ".css")
+                      .replace(`/${Config.paths.input.styles}`, `/${Config.paths.output.styles}`)
+                      .replace(`/${Config.paths.input.scripts}`, `/${Config.paths.output.scripts}`)
+                      .replace(`/${Config.paths.input.assets}`, `/${Config.paths.output.assets}`)
+                      .replace(`/${Config.paths.input.icons}`, `/${Config.paths.output.icons}`)
+                      .replace(".less", ".css")
                 }
 
                 directoryPath = url.substr(0, url.lastIndexOf("/"));
@@ -205,10 +205,10 @@ export class Templates {
             "tel": (value) => {
                 return value.replace(/\s+/g, '').replace("(","").replace(")","");
             }
-        }
+        })
     }
     get tags() {
-        return [
+        return Config.templates.tags.concat([
             (Twig) => {
                 Twig.exports.extendTag({
                     type: "code",
@@ -297,7 +297,7 @@ export class Templates {
                     open: false
                 });
             }
-        ]
+        ])
     }
     async build(type) {
         const data = (await import('gulp-data')).default;

@@ -19,7 +19,9 @@ export class Styles {
 
                 if (typeof dependencies !== "undefined" && Config.styles.purge.nodeResolve) {
                     Object.keys(dependencies).map(lib => {
-                        purgeFiles.push(`node_modules/${lib}/**/*.js`)
+                        if (!Config.styles.purge.nodeResolveIgnore.includes(lib)) {
+                            purgeFiles.push(`node_modules/${lib}/**/*.js`)
+                        }
                     });
                 }
 

@@ -109,6 +109,7 @@ let Config = {
             clean: {},
             options: {},
             nodeResolve: true,
+            nodeResolveIgnore: [],
             tailwind: {
                 keyframes: true
             }
@@ -143,7 +144,10 @@ let Config = {
             webp: true,
             picsum: false,
             lorempixel: ""
-        }
+        },
+        filters: {},
+        functions: {},
+        tags: []
     },
     emails: {
         removeClasses: false,

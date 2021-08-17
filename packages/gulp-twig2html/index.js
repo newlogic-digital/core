@@ -19,7 +19,7 @@ module.exports = params => {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported');
         } else {
             twigRenderer.render(file.path).then(html => {
-                file.contents = new Buffer(html);
+                file.contents = Buffer.from(html);
                 this.push(file);
                 callback();
             }).catch(error => {
