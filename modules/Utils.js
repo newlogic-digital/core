@@ -86,6 +86,9 @@ export class Utils {
                 } else if (cdn === "jspm.dev") {
                     url = `https://jspm.dev/{DEPENDENCY}@{VERSION}`;
                     urlSub = "https://jspm.dev/{DEPENDENCY}@{VERSION}/";
+                } else if (cdn === "skypack.dev") {
+                    url = `https://cdn.skypack.dev/{DEPENDENCY}@{VERSION}`;
+                    urlSub = "https://cdn.skypack.dev/{DEPENDENCY}@{VERSION}/";
                 }
 
                 Object.keys(dependencies).forEach((dependency) => {
