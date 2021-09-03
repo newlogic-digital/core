@@ -51,7 +51,7 @@
   "peerDependencies": {
     "autoprefixer": "^10.3.4",
     "postcss": "^8.3.6",
-    "tailwindcss": "^2.2.9""
+    "tailwindcss": "^2.2.9"
   },
   "devDependencies": {
     "vitepress": "^0.13.2"
