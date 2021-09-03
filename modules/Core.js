@@ -36,7 +36,7 @@ let Config = {
         index: "/",
         mode: "",
         https: false,
-        reload: (file) => file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte'),
+        reload: (file) => (file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')) && !file.includes('temp/'),
         vite: {}
     },
     modules: {},
