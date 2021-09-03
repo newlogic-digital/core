@@ -122,6 +122,8 @@ export class Styles {
                 findPaths(items, `${root + Config.paths.input.styles}/${directory}`);
             });
 
+            fs.writeFileSync(`${root + Config.paths.temp}/ratio.css`, new Styles().ratio(Config.styles.ratio.content))
+
             resolve();
         })
     }
