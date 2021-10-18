@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -12,14 +12,14 @@
     "docs:serve": "vitepress serve docs"
   },
   "dependencies": {
-    "@babel/core": "^7.15.4",
-    "@babel/preset-env": "^7.15.4",
+    "@babel/core": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
     "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^20.0.0",
-    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@rollup/plugin-commonjs": "^21.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.5",
     "@rollup/plugin-replace": "^3.0.0",
-    "adm-zip": "^0.5.5",
-    "clean-css": "^5.1.5",
+    "adm-zip": "^0.5.9",
+    "clean-css": "^5.2.1",
     "fs-extra": "^10.0.0",
     "plugin-error": "^1.0.1",
     "through2": "^4.0.2",
@@ -39,19 +39,19 @@
     "lazypipe": "^1.0.2",
     "lodash": "^4.17.21",
     "postcss-custom-media": "^8.0.0",
-    "postcss-custom-properties": "^11.0.0",
+    "postcss-custom-properties": "^12.0.0",
     "postcss-custom-selectors": "^6.0.0",
     "postcss-import": "^14.0.2",
     "postcss-nesting": "^8.0.1",
-    "rollup": "^2.56.3",
+    "rollup": "^2.58.0",
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-terser": "^7.0.2",
-    "vite": "~2.5.3"
+    "vite": "~2.6.9"
   },
   "peerDependencies": {
-    "autoprefixer": "^10.3.4",
-    "postcss": "^8.3.6",
-    "tailwindcss": "^2.2.9"
+    "autoprefixer": "^10.3.7",
+    "postcss": "^8.3.9",
+    "tailwindcss": "^2.2.17"
   },
   "devDependencies": {
     "vitepress": "^0.13.2"

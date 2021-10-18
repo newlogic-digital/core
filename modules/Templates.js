@@ -332,6 +332,9 @@ export class Templates {
             context: lodash.merge(contextParams, {
                 layout: {template: Config.templates.layout}
             }),
+            namespaces: {
+                'src': Config.paths.input.root
+            },
             globals: root + Config.paths.input.main
         }
 
