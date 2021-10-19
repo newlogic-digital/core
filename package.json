@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -46,7 +46,7 @@
     "rollup": "^2.58.0",
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-terser": "^7.0.2",
-    "vite": "~2.6.9"
+    "vite": "~2.6.10"
   },
   "peerDependencies": {
     "autoprefixer": "^10.3.7",

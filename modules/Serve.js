@@ -4,6 +4,9 @@ import {Config, Exists, Styles, Utils} from "./Core.js";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import {createRequire} from "module";
+import chalk from "chalk";
+const require = createRequire(import.meta.url);
 
 export const Serve = new class {
     init() {
@@ -99,7 +102,8 @@ export const Serve = new class {
 
             await this.server.listen()
 
-            console.log(" ");
+            console.log(chalk.cyan(`\n  vite v${require('vite/package.json').version}`) + chalk.green(` dev server running at:\n`))
+            console.log(typeof this.server.printUrls() !== "undefined" ? this.server.printUrls() : "");
 
             resolve();
         })
