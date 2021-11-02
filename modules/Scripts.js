@@ -178,7 +178,9 @@ export class Scripts {
                                     delimiters: ['', '']
                                 }),
                                 (Config.scripts.importMap.build && typeof importMapFile["imports"] !== "undefined") && rollupImportMapPlugin(importMapFile),
-                                !Config.scripts.importMap.build && nodeResolve(),
+                                !Config.scripts.importMap.build && nodeResolve({
+                                    browser: true
+                                }),
                                 !Config.scripts.importMap.build && commonjs(),
                                 replace({
                                     preventAssignment: true,
@@ -223,7 +225,9 @@ export class Scripts {
                                     },
                                     delimiters: ['', '']
                                 }),
-                                nodeResolve(),
+                                nodeResolve({
+                                    browser: true
+                                }),
                                 commonjs(),
                                 replace({
                                     preventAssignment: true,
