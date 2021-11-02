@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -42,7 +42,7 @@
     "postcss-custom-properties": "^12.0.0",
     "postcss-custom-selectors": "^6.0.0",
     "postcss-import": "^14.0.2",
-    "postcss-nesting": "^9.0.0",
+    "postcss-nesting": "^8.0.1",
     "rollup": "^2.59.0",
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-terser": "^7.0.2",
