@@ -419,7 +419,7 @@ export class Templates {
                 .pipe(buildLayoutClear())
                 .pipe(buildLayoutTwig())
                 .pipe(buildLayoutHbs())
-                .pipe(rename({ extname: `.html` }))
+                .pipe(renameHtml())
                 .pipe(gulp.dest(root + Config.paths.output.root))
                 .on("end", resolve))
         ])
