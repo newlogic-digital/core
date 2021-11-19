@@ -184,7 +184,7 @@ export class Styles {
 
         const clean = lazypipe().pipe(cleanCSS, lodash.merge({
             inline: Config.styles.import,
-            level: {1: {specialComments: 0}, 2: {removeEmpty: false}}
+            level: {1: {specialComments: 0}, 2: {removeEmpty: true}}
         }, Config.styles.clean), (details) => {
             if (details.warnings.length > 0) {
                 details.warnings.map(warning => console.log("\x1b[32m", warning, "\x1b[0m"))
