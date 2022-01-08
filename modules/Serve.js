@@ -60,6 +60,9 @@ export const Serve = new class {
                     fsServe: {
                         strict: false
                     },
+                    hmr: {
+                        host: 'localhost'
+                    },
                     watch: {
                         ignored: ['**/node_modules/**', '**/.git/**', '**/src/templates/**', '**/src/main.json', `**/${Config.paths.output.root}/*.html`]
                     }
