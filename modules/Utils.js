@@ -266,9 +266,7 @@ export class Utils {
         }
     }
     postcssPlugins(config, after) {
-        let plugins = [postcssImport, postcssNesting({
-            noIsPseudoSelector: true
-        }), postcssCustomMedia, postcssCustomSelectors];
+        let plugins = [postcssImport, postcssNesting, postcssCustomMedia, postcssCustomSelectors];
 
         if (Exists.postcssConfig) {
             return {config: root}
