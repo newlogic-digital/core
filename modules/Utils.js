@@ -6,6 +6,7 @@ import postcssImport from "postcss-import";
 import postcssNesting from "postcss-nesting";
 import postcssCustomMedia from "postcss-custom-media";
 import postcssCustomSelectors from "postcss-custom-selectors";
+import tailwindcssNesting from "tailwindcss/nesting/index.js";
 import {Config, Exists, Functions, root} from "./Core.js";
 
 export class Utils {
@@ -266,7 +267,9 @@ export class Utils {
         }
     }
     postcssPlugins(config, after) {
-        let plugins = [postcssImport, postcssNesting, postcssCustomMedia, postcssCustomSelectors];
+        let plugins = [postcssImport, tailwindcssNesting(postcssNesting({
+            noIsPseudoSelector: true
+        })), postcssCustomMedia, postcssCustomSelectors];
 
         if (Exists.postcssConfig) {
             return {config: root}

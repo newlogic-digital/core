@@ -109,10 +109,7 @@ let Config = {
             clean: {},
             options: {},
             nodeResolve: true,
-            nodeResolveIgnore: [],
-            tailwind: {
-                keyframes: true
-            }
+            nodeResolveIgnore: []
         },
         vendor: {
             cache: false,

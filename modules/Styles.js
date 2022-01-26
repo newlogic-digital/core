@@ -153,16 +153,6 @@ export class Styles {
                 }
             });
 
-            const purge = lazypipe().pipe(purgeCSS, Object.assign({
-                content: Config.styles.purge.content,
-                extractors: [
-                    {
-                        extractor: content => content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || [],
-                        extensions: ['html', 'js', 'hbs', 'tpl', 'latte', 'twig']
-                    }
-                ]
-            }, Config.styles.purge.tailwind));
-
             let tailwindcssConfig = {};
 
             if (!Exists.tailwindConfig) {
@@ -171,7 +161,6 @@ export class Styles {
 
             gulp.src(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)
                 .pipe(postcss(new Utils().postcssPlugins(Config.styles.tailwind.postcss, [tailwindcss(tailwindcssConfig), autoprefixer])))
-                .pipe(gulpif(Config.styles.purge.enabled, purge()))
                 .pipe(gulpif(Config.styles.optimizations, clean()))
                 .pipe(gulp.dest(root + Config.paths.temp))
                 .on("end", resolve)

@@ -106,7 +106,10 @@ export const Serve = new class {
             await this.server.listen()
 
             console.log(chalk.cyan(`\n  vite v${require('vite/package.json').version}`) + chalk.green(` dev server running at:\n`))
-            console.log(typeof this.server.printUrls() !== "undefined" ? this.server.printUrls() : "");
+
+            this.server.printUrls()
+
+            console.log(" ");
 
             resolve();
         })
