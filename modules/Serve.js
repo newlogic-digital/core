@@ -52,7 +52,7 @@ export const Serve = new class {
             }
 
             let config = {
-                plugins: Config.serve.mode === "dev" ? [middleware, ratio, reload] : [middleware, reload],
+                plugins: (Config.serve.mode === "dev" && Config.styles.ratio.enabled) ? [middleware, ratio, reload] : [middleware, reload],
                 publicDir: `${Config.paths.output.root}`,
                 server: {
                     open: Config.serve.index,

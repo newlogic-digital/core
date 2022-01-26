@@ -122,7 +122,9 @@ export class Styles {
                 findPaths(items, `${root + Config.paths.input.styles}/${directory}`);
             });
 
-            fs.writeFileSync(`${root + Config.paths.temp}/ratio.css`, new Styles().ratio(Config.styles.ratio.content))
+            if (Config.styles.ratio.enabled) {
+                fs.writeFileSync(`${root + Config.paths.temp}/ratio.css`, new Styles().ratio(Config.styles.ratio.content))
+            }
 
             resolve();
         })
@@ -286,7 +288,7 @@ export class Styles {
         return new Promise(resolve => {
             gulp.src([`${root + Config.paths.input.styles}/*.{css,less}`, `!${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`, `!${root + Config.paths.input.styles}/*-modifiers.less`])
                 .pipe(plumber(Functions.plumber))
-                .pipe(ratio(Config.styles.ratio.content))
+                .pipe(gulpif(Config.styles.ratio.enabled, ratio(Config.styles.ratio.content)))
                 .pipe(vendor())
                 .pipe(build())
                 .pipe(Functions.revRewriteOutput())

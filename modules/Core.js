@@ -126,6 +126,7 @@ let Config = {
         import: ['all'],
         themePath: "",
         ratio: {
+            enabled: false,
             content: [],
             files: ["main.css"]
         },
@@ -357,7 +358,7 @@ class Core {
             }
         }
 
-        if (Config.styles.ratio.content.length === 0 && Exists.templates) {
+        if (Config.styles.ratio.enabled && Config.styles.ratio.content.length === 0 && Exists.templates) {
             Config.styles.ratio.content.push(`${root + Config.paths.input.templates}/**/*.{hbs,html,twig}`);
         }
 
