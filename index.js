@@ -15,7 +15,7 @@ import {
     root
 } from "./modules/Core.js";
 
-import { tailwindColors, tailwindVariables } from './modules/tailwind/index.js'
+import { tailwindColors, tailwindColorsRgba, tailwindVariables } from './modules/tailwind/index.js'
 
 const defineConfig = (config) => new Core().init(config);
 
@@ -23,6 +23,7 @@ export {
     defineConfig,
     tailwindColors,
     tailwindVariables,
+    tailwindColorsRgba,
     Core,
     Utils,
     Styles,

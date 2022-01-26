@@ -15,6 +15,22 @@ const tailwindColors = (colors = []) => {
   return colors
 };
 
+const tailwindColorsRgba = (colors = []) => {
+  colors.forEach(name => {
+    colors[name] = ({opacityVariable, opacityValue}) => {
+      if (opacityValue !== undefined) {
+        return `rgba(var(--color-${name}), ${opacityValue})`
+      }
+      if (opacityVariable !== undefined) {
+        return `rgba(var(--color-${name}), var(${opacityVariable}, 1))`
+      }
+      return `rgb(var(--color-${name}))`
+    };
+  });
+
+  return colors
+};
+
 const tailwindVariables = (type, variables = [], values = {}) => {
   variables.forEach(name => {
     values[name] = `var(--${type}-${name})`;
@@ -24,4 +40,5 @@ const tailwindVariables = (type, variables = [], values = {}) => {
 };
 
 exports.tailwindColors = tailwindColors;
+exports.tailwindColorsRgba = tailwindColorsRgba;
 exports.tailwindVariables = tailwindVariables;
