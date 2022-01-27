@@ -51,8 +51,15 @@ export const Serve = new class {
                 }
             }
 
+            const reloadTailwind = {
+                name: 'reload-tailwind',
+                transformIndexHtml(html) {
+                    return html.replace('tailwind.css', 'tailwind.css?v=' + new Date().getTime())
+                }
+            }
+
             let config = {
-                plugins: (Config.serve.mode === "dev" && Config.styles.ratio.enabled) ? [middleware, ratio, reload] : [middleware, reload],
+                plugins: (Config.serve.mode === "dev" && Config.styles.ratio.enabled) ? [middleware, ratio, reload, reloadTailwind] : [middleware, reload, reloadTailwind],
                 publicDir: `${Config.paths.output.root}`,
                 server: {
                     open: Config.serve.index,
