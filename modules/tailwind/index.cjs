@@ -31,6 +31,18 @@ const tailwindColorsRgba = (colors = []) => {
   return colors
 };
 
+const tailwindColorsAccent = (colors = []) => {
+  const result = {};
+
+  colors.forEach(color => {
+    result[`.accent-color-${color}`] = {
+      '--color-accent': `var(--color-${color})`
+    };
+  });
+
+  return result
+};
+
 const tailwindVariables = (type, variables = [], values = {}) => {
   variables.forEach(name => {
     values[name] = `var(--${type}-${name})`;
@@ -40,5 +52,6 @@ const tailwindVariables = (type, variables = [], values = {}) => {
 };
 
 exports.tailwindColors = tailwindColors;
+exports.tailwindColorsAccent = tailwindColorsAccent;
 exports.tailwindColorsRgba = tailwindColorsRgba;
 exports.tailwindVariables = tailwindVariables;
