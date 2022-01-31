@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",

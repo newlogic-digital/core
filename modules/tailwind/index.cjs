@@ -35,8 +35,21 @@ const tailwindColorsAccent = (colors = []) => {
   const result = {};
 
   colors.forEach(color => {
-    result[`.accent-color-${color}`] = {
-      '--color-accent': `var(--color-${color})`
+    result[`.accent-${color}`] = {
+      '--color-accent': `var(--color-${color})`,
+      'accent-color': 'rgb(var(--color-accent))'
+    };
+  });
+
+  return result
+};
+
+const tailwindColorsCurrent = (colors = []) => {
+  const result = {};
+
+  colors.forEach(color => {
+    result[`.text-${color}`] = {
+      '--color-current': `var(--color-${color})`
     };
   });
 
@@ -53,5 +66,6 @@ const tailwindVariables = (type, variables = [], values = {}) => {
 
 exports.tailwindColors = tailwindColors;
 exports.tailwindColorsAccent = tailwindColorsAccent;
+exports.tailwindColorsCurrent = tailwindColorsCurrent;
 exports.tailwindColorsRgba = tailwindColorsRgba;
 exports.tailwindVariables = tailwindVariables;
