@@ -60,4 +60,16 @@ const tailwindVariables = (type, variables = [], values = {}) => {
   return values
 }
 
-export { tailwindColors, tailwindVariables, tailwindColorsRgba, tailwindColorsAccent, tailwindColorsCurrent }
+const tailwindAnimations = (values) => {
+  const result = {};
+
+  values.forEach(value => {
+    result[`.animation-${value}`] = {
+      'animation-name': value
+    };
+  });
+
+  return result
+}
+
+export { tailwindColors, tailwindVariables, tailwindColorsRgba, tailwindColorsAccent, tailwindColorsCurrent, tailwindAnimations }

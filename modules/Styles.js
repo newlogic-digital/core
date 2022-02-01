@@ -10,6 +10,32 @@ import glob from "glob";
 import through from "through2";
 import {Config, Exists, Functions, Modules, Utils, root} from "./Core.js";
 
+const aspectRatio = () => {
+    return {
+        postcssPlugin: 'aspect-ratio',
+        Declaration: {
+            'aspect-ratio': (decl, {Rule, Declaration}) => {
+                const rule = decl.parent
+                const selector = rule.selector
+                const beforeRule = new Rule({selector: `${selector}:before`, raws: {after: rule.raws.after, semicolon: rule.raws.semicolon}})
+                const ratio = decl.value.replace(/['"]?((?:\d*\.?\d*)?)(?:\s*[:|\/]\s*)(\d*\.?\d*)['"]?/g, (match, width, height) => {
+                    return (height / width) * 100 + '%'
+                })
+
+                beforeRule.append([
+                    new Declaration({prop: 'padding-bottom', value: ratio}),
+                ])
+
+                rule.after(beforeRule)
+
+                rule.nodes.length === 1 ? rule.remove() : decl.remove()
+            },
+        }
+    }
+}
+
+aspectRatio.postcss = true;
+
 export class Styles {
     get purge() {
         return {
@@ -160,7 +186,7 @@ export class Styles {
             }
 
             gulp.src(`${root + Config.paths.input.styles}/${Config.styles.tailwind.basename}`)
-                .pipe(postcss(new Utils().postcssPlugins(Config.styles.tailwind.postcss, [tailwindcss(tailwindcssConfig), autoprefixer])))
+                .pipe(postcss(new Utils().postcssPlugins(Config.styles.tailwind.postcss, [tailwindcss(tailwindcssConfig), aspectRatio, autoprefixer])))
                 .pipe(gulpif(Config.styles.optimizations, clean()))
                 .pipe(gulp.dest(root + Config.paths.temp))
                 .on("end", resolve)
@@ -244,32 +270,6 @@ export class Styles {
                 }
             });
         }
-
-        const aspectRatio = () => {
-            return {
-                postcssPlugin: 'aspect-ratio',
-                Declaration: {
-                    'aspect-ratio': (decl, {Rule, Declaration}) => {
-                        const rule = decl.parent
-                        const selector = rule.selector
-                        const beforeRule = new Rule({selector: `${selector}:before`, raws: {after: rule.raws.after, semicolon: rule.raws.semicolon}})
-                        const ratio = decl.value.replace(/['"]?((?:\d*\.?\d*)?)(?:\s*[:|\/]\s*)(\d*\.?\d*)['"]?/g, (match, width, height) => {
-                            return (height / width) * 100 + '%'
-                        })
-
-                        beforeRule.append([
-                            new Declaration({prop: 'padding-bottom', value: ratio}),
-                        ])
-
-                        rule.after(beforeRule)
-
-                        rule.nodes.length === 1 ? rule.remove() : decl.remove()
-                    },
-                }
-            }
-        }
-
-        aspectRatio.postcss = true;
 
         const build = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.styles.postcss, [autoprefixer, aspectRatio, inset])))
         ).pipe(() => gulpif("*.less", Modules.less.module()));
