@@ -8,6 +8,9 @@ import gulp from "gulp";
 import plumber from "gulp-plumber";
 import minifier from "html-minifier";
 import through from "through2";
+import Prism from 'prismjs'
+import loadLanguages from 'prismjs/components/index.js'
+import NormalizeWhitespace from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js'
 import {Config, Exists, Functions, Modules, root} from "./Core.js";
 
 export class Templates {
@@ -236,16 +239,54 @@ export class Templates {
                             type = type.replace(":mirror", "")
                         }
 
+                        loadLanguages(['markup', 'css', 'javascript'])
+
+                        const Normalize = new NormalizeWhitespace({
+                            'remove-trailing': true,
+                            'remove-indent': true,
+                            'left-trim': true,
+                            'right-trim': true,
+                        });
+
+                        const wrap = (code, lang) => {
+                            return `<pre class="language-${lang}"><code>${code}</code></pre>`
+                        }
+
+                        const highlight = (str, lang) => {
+                            if (!lang) {
+                                return wrap(str, 'text')
+                            }
+                            lang = lang.toLowerCase()
+                            const rawLang = lang
+                            if (lang === 'vue' || lang === 'html') {
+                                lang = 'markup'
+                            }
+                            if (lang === 'md') {
+                                lang = 'markdown'
+                            }
+                            if (lang === 'ts') {
+                                lang = 'typescript'
+                            }
+                            if (lang === 'py') {
+                                lang = 'python'
+                            }
+                            if (!Prism.languages[lang]) {
+                                try {
+                                    loadLanguages([lang])
+                                } catch (e) {
+                                    console.warn(`Syntax highlight for language "${lang}" is not supported.`)
+                                }
+                            }
+                            if (Prism.languages[lang]) {
+                                const code = Prism.highlight(Normalize.normalize(str), Prism.languages[lang], lang)
+                                return wrap(code, rawLang)
+                            }
+                            return wrap(str, 'text')
+                        }
+
                         return {
                             chain: chain,
-                            output: `${mirror ? output : ""}
-                            <pre style="width: 100%">
-                                <code class="language-${type}">
-                                    <xmp>
-                                        ${output}
-                                    </xmp>
-                                </code>
-                            </pre>`
+                            output: `${mirror ? output : ""}${highlight(output, type)}`
                         };
                     }
                 });
