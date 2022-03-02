@@ -281,4 +281,19 @@ export class Utils {
 
         return plugins.concat(after);
     }
+    postcssPluginsEmails(config, after) {
+        let plugins = [postcssImport, postcssNesting({
+            noIsPseudoSelector: true
+        }), postcssCustomMedia, postcssCustomSelectors];
+
+        if (Exists.postcssConfig) {
+            return {config: root}
+        } else if (typeof config.extend !== "undefined") {
+            plugins = plugins.concat(config.extend)
+        } else if (Array.isArray(config) && config.length !== 0) {
+            return config;
+        }
+
+        return plugins.concat(after);
+    }
 }

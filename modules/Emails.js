@@ -20,7 +20,7 @@ export class Emails {
             removeStyleTags: Config.emails.inlineOnly
         }
 
-        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPlugins(Config.emails.postcss, [postcssCustomProperties({
+        const buildCss = lazypipe().pipe(() => gulpif("*.css", postcss(new Utils().postcssPluginsEmails(Config.emails.postcss, [postcssCustomProperties({
             preserve: false
         }), autoprefixer])))
         ).pipe(() => gulpif("*.less", Modules.less.module()))
