@@ -61,7 +61,7 @@ let Config = {
             icons: "public/assets/css",
             emails: "public",
             emailsImg: "public/img",
-            emailsWww: "www/emails",
+            emailsWww: "app/Presenters/emails",
             assets: "public/assets"
         }
     },
