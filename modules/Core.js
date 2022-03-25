@@ -151,7 +151,8 @@ let Config = {
         removeClasses: false,
         inlineOnly: false,
         zipPrefix: ["email"],
-        postcss: {}
+        postcss: {},
+        format: "twig"
     },
     assets: {
         revision: true
