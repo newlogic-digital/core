@@ -74,12 +74,12 @@ export const Serve = new class {
                 root: process.cwd(),
             };
 
-            if (fs.existsSync(path.join(os.homedir(),'.ssh/localhost.pem')) && Config.serve.https) {
+            if (fs.existsSync(path.join(os.homedir(),`.ssh/${Config.serve.cert}.pem`)) && Config.serve.https) {
                 lodash.merge(config, {
                     server: {
                         https: {
-                            key: fs.readFileSync(path.join(os.homedir(),'.ssh/localhost-key.pem')),
-                            cert: fs.readFileSync(path.join(os.homedir(),'.ssh/localhost.pem')),
+                            key: fs.readFileSync(path.join(os.homedir(),`.ssh/${Config.serve.cert}-key.pem`)),
+                            cert: fs.readFileSync(path.join(os.homedir(),`.ssh/${Config.serve.cert}.pem`)),
                         },
                         hmr: {
                             host: 'localhost'

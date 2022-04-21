@@ -36,6 +36,7 @@ let Config = {
         index: "/",
         mode: "",
         https: false,
+        cert: 'localhost',
         reload: (file) => (file.endsWith('.php') || file.endsWith('.tpl') || file.endsWith('.latte')) && !file.includes('temp/'),
         vite: {}
     },
