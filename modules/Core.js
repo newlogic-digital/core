@@ -43,6 +43,7 @@ let Config = {
     paths: {
         temp: "temp",
         cdn: "temp/cdn",
+        base: "",
         input: {
             root: "src",
             main: "src/main.json",
@@ -324,7 +325,7 @@ class Core {
                         let contents = file.contents.toString();
 
                         contents = contents.replace(new RegExp(`${Config.paths.input.assets}`, 'g'),
-                            `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`)
+                            `${Config.paths.output.assets.replace(Config.paths.output.root + "/", Config.paths.base.length > 0 ? Config.paths.base + "/" : "")}`)
 
                         file.contents = Buffer.from(contents);
 

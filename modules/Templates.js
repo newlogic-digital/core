@@ -185,7 +185,7 @@ export class Templates {
                 }
 
                 if (Config.paths.output.rewrite && url.indexOf(`/${Config.paths.output.root}`) === 0) {
-                    url = url.replace(`/${Config.paths.output.root}`, "")
+                    url = url.replace(`/${Config.paths.output.root}`, Config.paths.base.length > 0 ? `/${Config.paths.base}` : "")
                 }
 
                 return url;
