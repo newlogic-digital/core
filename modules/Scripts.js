@@ -186,7 +186,7 @@ export class Scripts {
                                     preventAssignment: true,
                                     values: Object.assign({
                                         'process.env.NODE_ENV': JSON.stringify('production'),
-                                        [Config.paths.input.assets]: `${Config.paths.output.assets.replace(Config.paths.output.root + "/", "")}`
+                                        [Config.paths.input.assets]: `${Config.paths.output.assets.replace(Config.paths.output.root + "/", Config.paths.base.length > 0 ? Config.paths.base + "/" : "")}`
                                     }, assetsManifest)
                                 }),
                                 Config.scripts.optimizations && terser(),
