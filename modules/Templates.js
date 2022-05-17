@@ -13,6 +13,8 @@ import loadLanguages from 'prismjs/components/index.js'
 import NormalizeWhitespace from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js'
 import {Config, Exists, Functions, Modules, root} from "./Core.js";
 
+loadLanguages(['markup', 'css', 'javascript'])
+
 export class Templates {
     get functions() {
         return Object.assign(Config.templates.functions, {
@@ -238,8 +240,6 @@ export class Templates {
                             mirror = true;
                             type = type.replace(":mirror", "")
                         }
-
-                        loadLanguages(['markup', 'css', 'javascript'])
 
                         const Normalize = new NormalizeWhitespace({
                             'remove-trailing': true,
