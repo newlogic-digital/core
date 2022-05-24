@@ -300,11 +300,11 @@ export class Templates {
             (Twig) => {
                 Twig.exports.extendTag({
                     type: "json",
-                    regex: /^json\s+(.+)$/,
+                    regex: /^json\s+(.+)$|^json$/,
                     next: ["endjson"],
                     open: true,
                     compile: function (token) {
-                        const expression = token.match[1];
+                        const expression = token.match[1] ?? `'_null'`;
 
                         token.stack = Reflect.apply(Twig.expression.compile, this, [{
                             type: Twig.expression.type.expression,
@@ -318,17 +318,26 @@ export class Templates {
                         let name = Reflect.apply(Twig.expression.parse, this, [token.stack, context]);
                         let output = this.parse(token.output, context);
 
-                        return {
-                            chain: chain,
-                            output: JSON.stringify({
-                                [name]: minifier.minify(output, {
-                                    collapseWhitespace: true,
-                                    collapseInlineTagWhitespace: false,
-                                    minifyCSS: true,
-                                    minifyJS: true
+                        const minify = minifier.minify(output, {
+                            collapseWhitespace: true,
+                            collapseInlineTagWhitespace: false,
+                            minifyCSS: true,
+                            minifyJS: true
+                        })
+
+                        if (name === '_null') {
+                            return {
+                                chain: chain,
+                                output: JSON.stringify(minify)
+                            };
+                        } else {
+                            return {
+                                chain: chain,
+                                output: JSON.stringify({
+                                    [name]: minify
                                 })
-                            })
-                        };
+                            };
+                        }
                     }
                 });
                 Twig.exports.extendTag({
