@@ -383,7 +383,8 @@ export class Templates {
                 layout: {template: Config.templates.layout}
             }),
             namespaces: {
-                'src': Config.paths.input.root
+                'src': Config.paths.input.root,
+                'templates': Config.paths.input.templates
             },
             globals: root + Config.paths.input.main
         }

@@ -35,10 +35,23 @@ export class Emails {
                 hbsFiles = hbsFiles.replace("hbs", "{hbs,latte,tpl}")
             }
 
+            let outputDir = "/" + Config.paths.output.root;
+
+            if (Config.paths.output.root === Config.paths.output.assets) {
+                outputDir = ""
+            }
+
             const build = lazypipe().pipe(() => gulpif(twigFiles, twig({
                 functions: new Templates().functions,
                 filters: new Templates().filters,
-                extensions: new Templates().tags
+                extensions: new Templates().tags,
+                context: {
+                    config: Config,
+                    lang: Config.lang,
+                    outputPath: "/" + Config.paths.output.root,
+                    inputPath: "/" + Config.paths.input.root,
+                    resolvePath: Config.serve.mode === "dev" ? "" : outputDir,
+                }
             })))
                 .pipe(() => gulpif(hbsFiles, Modules.hbs.module(`${root + Config.paths.input.emails}/**/*.hbs`, Modules.hbs.helpers(Object.assign(new Templates().filters, new Templates().functions)))))
                 .pipe(() => gulpif("*.{hbs,twig}", rename({ extname: ".html" })))
