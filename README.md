@@ -21,7 +21,7 @@ Starter for creating web applications. Powered by Vite and Vituum.
 
 Newlogic Core is an integration for [Vituum](https://vituum.dev), and contains set of tools that can be used to create modern web applications.
 
-We use it at [Newlogic Digital](https://www.newlogic.cz/) to create astonishing websites and applications.
+We use it as our main front-end tool at [Newlogic Digital](https://www.newlogic.cz/) to create wonders.
 
 ## 🛠️ Integrated tools
 * **[Vite](https://vitejs.dev)** next-generation frontend tooling
