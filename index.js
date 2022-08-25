@@ -255,6 +255,14 @@ const integration = (userConfig = {}) => {
             },
             templates: {
                 format: 'twig'
+            },
+            imports: {
+                paths: ['./src/styles/**', './src/scripts/**', '!./src/styles/Utils/**']
+            },
+            vite: {
+                server: {
+                    origin: fs.existsSync(resolve(process.cwd(), 'app/settings.php')) ? (fs.readFileSync(resolve(process.cwd(), 'app/settings.php')).toString().match(/VITE_URL = '(.+)';/) || [null, null])[1] : null
+                }
             }
         }
     }

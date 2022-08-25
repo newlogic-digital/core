@@ -10,16 +10,18 @@
 
 # ⚙️ Newlogic Core
 
-Modern principles for creating web applications. Powered by Vite and Vituum
+Starter for creating web applications. Powered by Vite and Vituum.
 
+- ⚡️ Powered by Vite
 - 💡 Modern principles
 - 🚀️ Fast development
 - 🛠️ Integrated tools
 - 📦 Modular structure
 - ✉️ Email templates
-- ⚡ Vite as webserver
 
-Newlogic Core is an integration for [Vituum](https://vituum.dev), and contains set of tools that can be used to create modern web applications. Use of modern Javascript, CSS, ES modules, dynamic imports, etc.
+Newlogic Core is an integration for [Vituum](https://vituum.dev), and contains set of tools that can be used to create modern web applications.
+
+We use it at [Newlogic Digital](https://www.newlogic.cz/) to create astonishing websites and applications.
 
 ## 🛠️ Integrated tools
 * **[Vite](https://vitejs.dev)** next-generation frontend tooling
@@ -36,15 +38,15 @@ PHP programmers often **don't want to configure anything**, basic idea is to add
 
 It doesn't matter if you use Nette, Symfony or Laravel - the structure can be freely adjusted as needed - `resources` and` public`, `src` and` dist` or `app/assets` and` www` 
 
-It's up to you - all paths are freely configurable in `vite.config.js` config
+It's up to you - all paths are freely configurable via `vite.config.js` config
 
 ### 📦 Modularity
 
 Newlogic Core uses [Vituum](https://vituum.dev) and [Vite](https://vitejs.dev) for frontend tooling.
 
-Source files are divided by modules inside `src` directory - styles, scripts, templates, emails, assets. It is optional which modules you want to use for the project, simple delete the directory. You really only use what you want to use.
+Source files are divided by modules inside `src` directory - styles, scripts, templates, data, emails, assets. It is optional which modules you want to use for the project, simple delete the directory. You really only use what you want to use.
 
-## 🪄 Instalation
+## 🪄 Get started
 
 ```sh
 npm i @newlogic-digital/core --save-dev
@@ -53,10 +55,11 @@ npm i @newlogic-digital/core --save-dev
 ### Requirements
 
 - [Node.js LTS (16.x)](https://nodejs.org/en/download/)
+- [Vituum](https://vituum.dev/)
 
 ### Config
 
-Each Newlogic Core project has to have config via `vite.config.js`
+Each **Newlogic Core** project needs to have config via `vite.config.js`
 
 ```js
 import { defineConfig } from 'vituum'
