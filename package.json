@@ -1,11 +1,14 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
+  "scripts": {
+    "npm-publish": "npm publish --tag next"
+  },
   "dependencies": {
     "@vituum/tailwind": "^0.1.2",
     "@vituum/posthtml": "^0.1.0",
