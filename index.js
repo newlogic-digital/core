@@ -34,6 +34,7 @@ const stripIndent = (string) => {
 }
 
 const defaultConfig = {
+    format: 'twig',
     posthtml: {},
     juice: {},
     tailwind: {},
@@ -238,7 +239,36 @@ const defaultConfig = {
         ]
     },
     latte: {
-        isStringFilter: (filename) => dirname(filename).endsWith('emails')
+        isStringFilter: (filename) => dirname(filename).endsWith('emails'),
+        globals: {
+            srcPath: resolve(process.cwd(), 'src'),
+            templatesPath: resolve(process.cwd(), 'src/templates')
+        },
+        functions: {
+            pages: () => {
+                return fs.readdirSync(resolve(process.cwd(), 'src/views')).filter(file => fs.statSync(resolve(process.cwd(), 'src/views/' + file)).isFile())
+            }
+        },
+        filters: {
+            json: async (dialog, name) => {
+                const minify = await minifier.minify(dialog, {
+                    collapseWhitespace: true,
+                    collapseInlineTagWhitespace: false,
+                    minifyCSS: true,
+                    removeAttributeQuotes: true,
+                    quoteCharacter: '\'',
+                    minifyJS: true
+                })
+
+                if (name) {
+                    return JSON.stringify({
+                        [name]: minify
+                    })
+                } else {
+                    return JSON.stringify(minify)
+                }
+            }
+        }
     }
 }
 
@@ -254,7 +284,7 @@ const integration = (userConfig = {}) => {
                 reload: file => (file.endsWith('.tpl') || file.endsWith('.latte')) && !file.includes('temp/')
             },
             templates: {
-                format: 'twig'
+                format: userConfig.format
             },
             imports: {
                 paths: ['./src/styles/**', './src/scripts/**', '!./src/styles/Utils/**']
