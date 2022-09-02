@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -22,6 +22,7 @@
     "vituum": "^0.0.27"
   },
   "files": [
+    "latte",
     "index.js",
     "prism.js"
   ],
