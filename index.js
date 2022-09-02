@@ -7,11 +7,34 @@ import lodash from 'lodash'
 import minifier from 'html-minifier-terser'
 import fs from 'fs'
 import { dirname, resolve } from 'path'
-import Prism from 'prismjs'
-import loadLanguages from 'prismjs/components/index.js'
-import NormalizeWhitespace from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js'
+import postHtml from 'posthtml'
+import highlight from './prism.js'
 
-loadLanguages(['markup', 'css', 'javascript'])
+const posthtmlPrism = {
+    name: '@vituum/vite-plugin-posthtml-prism',
+    enforce: 'post',
+    transformIndexHtml: {
+        enforce: 'post',
+        transform: async(html, { filename }) => {
+            filename = filename.replace('?raw', '')
+
+            if (!filename.endsWith('ui.json')) {
+                console.log(filename)
+                return
+            }
+
+            const plugins = [highlight({ inline: false  })]
+
+            const result = await postHtml(plugins).process(html)
+
+            return result.html
+        }
+    }
+}
+
+const wrapPreCode = (code, lang) => {
+    return `<pre class="language-${lang}"><code class="language-${lang}">${code}</code></pre>`
+}
 
 const stripIndent = (string) => {
     const indent = () => {
@@ -31,53 +54,6 @@ const stripIndent = (string) => {
     const regex = new RegExp(`^[ \\t]{${indent()}}`, 'gm')
 
     return string.replace(regex, '')
-}
-
-const parsePrism = (type, input) => {
-    const Normalize = new NormalizeWhitespace({
-        'remove-trailing': true,
-        'remove-indent': true,
-        'left-trim': true,
-        'right-trim': true,
-    });
-
-    const wrap = (code, lang) => {
-        return `<pre class="language-${lang}"><code>${code}</code></pre>`
-    }
-
-    const highlight = (str, lang) => {
-        if (!lang) {
-            return wrap(str, 'text')
-        }
-        lang = lang.toLowerCase()
-        const rawLang = lang
-        if (lang === 'vue' || lang === 'html') {
-            lang = 'markup'
-        }
-        if (lang === 'md') {
-            lang = 'markdown'
-        }
-        if (lang === 'ts') {
-            lang = 'typescript'
-        }
-        if (lang === 'py') {
-            lang = 'python'
-        }
-        if (!Prism.languages[lang]) {
-            try {
-                loadLanguages([lang])
-            } catch (e) {
-                console.warn(`Syntax highlight for language "${lang}" is not supported.`)
-            }
-        }
-        if (Prism.languages[lang]) {
-            const code = Prism.highlight(Normalize.normalize(str), Prism.languages[lang], lang)
-            return wrap(code, rawLang)
-        }
-        return wrap(str, 'text')
-    }
-
-    return highlight(input, type);
 }
 
 const parseMinifyHtml = async (input, name) => {
@@ -237,7 +213,7 @@ const defaultConfig = {
 
                         return {
                             chain: chain,
-                            output: `${mirror ? output : ""}${parsePrism(type, output)}`
+                            output: `${mirror ? output : ""}${wrapPreCode(output, type)}`
                         };
                     }
                 });
@@ -259,22 +235,13 @@ const defaultConfig = {
         functions: {
             pages: () => {
                 return fs.readdirSync(resolve(process.cwd(), 'src/views')).filter(file => fs.statSync(resolve(process.cwd(), 'src/views/' + file)).isFile())
-            },
-            // code: (input, type = '') => {
-            //     let mirror = false;
-            //
-            //     if (type.includes(":mirror")) {
-            //         mirror = true;
-            //         type = type.replace(":mirror", "")
-            //     }
-            //
-            //     return `${mirror ? input : ""}${parsePrism(type, input)}`
-            // }
+            }
         },
         filters: {
             json: async (input, name) => {
                 return await parseMinifyHtml(input, name)
-            }
+            },
+            code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         }
     }
 }
@@ -285,6 +252,7 @@ const integration = (userConfig = {}) => {
     return {
         config: {
             integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), tailwind(userConfig.tailwind), twig(userConfig.twig), latte(userConfig.latte)],
+            plugins: [posthtmlPrism],
             server: {
                 open: true,
                 https: true,
