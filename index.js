@@ -33,6 +33,72 @@ const stripIndent = (string) => {
     return string.replace(regex, '')
 }
 
+const parsePrism = (type, input) => {
+    const Normalize = new NormalizeWhitespace({
+        'remove-trailing': true,
+        'remove-indent': true,
+        'left-trim': true,
+        'right-trim': true,
+    });
+
+    const wrap = (code, lang) => {
+        return `<pre class="language-${lang}"><code>${code}</code></pre>`
+    }
+
+    const highlight = (str, lang) => {
+        if (!lang) {
+            return wrap(str, 'text')
+        }
+        lang = lang.toLowerCase()
+        const rawLang = lang
+        if (lang === 'vue' || lang === 'html') {
+            lang = 'markup'
+        }
+        if (lang === 'md') {
+            lang = 'markdown'
+        }
+        if (lang === 'ts') {
+            lang = 'typescript'
+        }
+        if (lang === 'py') {
+            lang = 'python'
+        }
+        if (!Prism.languages[lang]) {
+            try {
+                loadLanguages([lang])
+            } catch (e) {
+                console.warn(`Syntax highlight for language "${lang}" is not supported.`)
+            }
+        }
+        if (Prism.languages[lang]) {
+            const code = Prism.highlight(Normalize.normalize(str), Prism.languages[lang], lang)
+            return wrap(code, rawLang)
+        }
+        return wrap(str, 'text')
+    }
+
+    return highlight(input, type);
+}
+
+const parseMinifyHtml = async (input, name) => {
+    const minify = await minifier.minify(input, {
+        collapseWhitespace: true,
+        collapseInlineTagWhitespace: false,
+        minifyCSS: true,
+        removeAttributeQuotes: true,
+        quoteCharacter: '\'',
+        minifyJS: true
+    })
+
+    if (name) {
+        return JSON.stringify({
+            [name]: minify
+        })
+    } else {
+        return JSON.stringify(minify)
+    }
+}
+
 const defaultConfig = {
     format: 'twig',
     posthtml: {},
@@ -122,26 +188,15 @@ const defaultConfig = {
                         const name = Reflect.apply(Twig.expression.parse, this, [token.stack, context])
                         const output = this.parse(token.output, context)
 
-                        const minify = await minifier.minify(output, {
-                            collapseWhitespace: true,
-                            collapseInlineTagWhitespace: false,
-                            minifyCSS: true,
-                            removeAttributeQuotes: true,
-                            quoteCharacter: '\'',
-                            minifyJS: true
-                        })
-
                         if (name === '_null') {
                             return {
                                 chain,
-                                output: JSON.stringify(minify)
+                                output: await parseMinifyHtml(output)
                             }
                         } else {
                             return {
                                 chain,
-                                output: JSON.stringify({
-                                    [name]: minify
-                                })
+                                output: await parseMinifyHtml(output, name)
                             }
                         }
                     }
@@ -180,52 +235,9 @@ const defaultConfig = {
                             type = type.replace(":mirror", "")
                         }
 
-                        const Normalize = new NormalizeWhitespace({
-                            'remove-trailing': true,
-                            'remove-indent': true,
-                            'left-trim': true,
-                            'right-trim': true,
-                        });
-
-                        const wrap = (code, lang) => {
-                            return `<pre class="language-${lang}"><code>${code}</code></pre>`
-                        }
-
-                        const highlight = (str, lang) => {
-                            if (!lang) {
-                                return wrap(str, 'text')
-                            }
-                            lang = lang.toLowerCase()
-                            const rawLang = lang
-                            if (lang === 'vue' || lang === 'html') {
-                                lang = 'markup'
-                            }
-                            if (lang === 'md') {
-                                lang = 'markdown'
-                            }
-                            if (lang === 'ts') {
-                                lang = 'typescript'
-                            }
-                            if (lang === 'py') {
-                                lang = 'python'
-                            }
-                            if (!Prism.languages[lang]) {
-                                try {
-                                    loadLanguages([lang])
-                                } catch (e) {
-                                    console.warn(`Syntax highlight for language "${lang}" is not supported.`)
-                                }
-                            }
-                            if (Prism.languages[lang]) {
-                                const code = Prism.highlight(Normalize.normalize(str), Prism.languages[lang], lang)
-                                return wrap(code, rawLang)
-                            }
-                            return wrap(str, 'text')
-                        }
-
                         return {
                             chain: chain,
-                            output: `${mirror ? output : ""}${highlight(output, type)}`
+                            output: `${mirror ? output : ""}${parsePrism(type, output)}`
                         };
                     }
                 });
@@ -247,26 +259,21 @@ const defaultConfig = {
         functions: {
             pages: () => {
                 return fs.readdirSync(resolve(process.cwd(), 'src/views')).filter(file => fs.statSync(resolve(process.cwd(), 'src/views/' + file)).isFile())
-            }
+            },
+            // code: (input, type = '') => {
+            //     let mirror = false;
+            //
+            //     if (type.includes(":mirror")) {
+            //         mirror = true;
+            //         type = type.replace(":mirror", "")
+            //     }
+            //
+            //     return `${mirror ? input : ""}${parsePrism(type, input)}`
+            // }
         },
         filters: {
-            json: async (dialog, name) => {
-                const minify = await minifier.minify(dialog, {
-                    collapseWhitespace: true,
-                    collapseInlineTagWhitespace: false,
-                    minifyCSS: true,
-                    removeAttributeQuotes: true,
-                    quoteCharacter: '\'',
-                    minifyJS: true
-                })
-
-                if (name) {
-                    return JSON.stringify({
-                        [name]: minify
-                    })
-                } else {
-                    return JSON.stringify(minify)
-                }
+            json: async (input, name) => {
+                return await parseMinifyHtml(input, name)
             }
         }
     }
