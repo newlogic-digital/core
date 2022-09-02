@@ -19,7 +19,6 @@ const posthtmlPrism = {
             filename = filename.replace('?raw', '')
 
             if (!filename.endsWith('ui.json')) {
-                console.log(filename)
                 return
             }
 
