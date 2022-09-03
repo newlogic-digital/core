@@ -1,4 +1,3 @@
-import tailwind from '@vituum/tailwind'
 import posthtml from '@vituum/posthtml'
 import juice from '@vituum/juice'
 import twig from '@vituum/twig'
@@ -9,6 +8,13 @@ import fs from 'fs'
 import { dirname, resolve } from 'path'
 import postHtml from 'posthtml'
 import highlight from './prism.js'
+import tailwindcss from 'tailwindcss'
+import tailwindcssNesting from 'tailwindcss/nesting/index.js'
+import postcssImport from 'postcss-import'
+import postcssNesting from 'postcss-nesting'
+import postcssCustomMedia from 'postcss-custom-media'
+import postcssCustomSelectors from 'postcss-custom-selectors'
+import autoprefixer from 'autoprefixer'
 
 const posthtmlPrism = {
     name: '@vituum/vite-plugin-posthtml-prism',
@@ -250,7 +256,7 @@ const integration = (userConfig = {}) => {
 
     return {
         config: {
-            integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), tailwind(userConfig.tailwind), twig(userConfig.twig), latte(userConfig.latte)],
+            integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), twig(userConfig.twig), latte(userConfig.latte)],
             plugins: [posthtmlPrism],
             server: {
                 open: true,
@@ -266,6 +272,13 @@ const integration = (userConfig = {}) => {
             vite: {
                 server: {
                     origin: fs.existsSync(resolve(process.cwd(), 'app/settings.php')) ? (fs.readFileSync(resolve(process.cwd(), 'app/settings.php')).toString().match(/VITE_URL = '(.+)';/) || [null, null])[1] : null
+                },
+                css: {
+                    postcss: {
+                        plugins: [postcssImport, tailwindcssNesting(postcssNesting({
+                            noIsPseudoSelector: true
+                        })), postcssCustomMedia, postcssCustomSelectors, tailwindcss(userConfig.tailwind), autoprefixer]
+                    }
                 }
             }
         }
