@@ -5,6 +5,7 @@ import latte from '@vituum/latte'
 import lodash from 'lodash'
 import minifier from 'html-minifier-terser'
 import fs from 'fs'
+import fse from 'fs-extra'
 import { dirname, resolve } from 'path'
 import postHtml from 'posthtml'
 import highlight from './prism.js'
@@ -15,6 +16,8 @@ import postcssNesting from 'postcss-nesting'
 import postcssCustomMedia from 'postcss-custom-media'
 import postcssCustomSelectors from 'postcss-custom-selectors'
 import autoprefixer from 'autoprefixer'
+import chalk from 'chalk'
+import FastGlob from 'fast-glob'
 
 const posthtmlPrism = {
     name: '@vituum/vite-plugin-posthtml-prism',
@@ -82,6 +85,10 @@ const parseMinifyHtml = async (input, name) => {
 
 const defaultConfig = {
     format: 'twig',
+    emails: {
+        outputDir: resolve(process.cwd(), 'public/emails'),
+        prodDir: resolve(process.cwd(), 'app/Templates/Emails')
+    },
     posthtml: {},
     juice: {},
     tailwind: {},
@@ -256,7 +263,23 @@ const integration = (userConfig = {}) => {
 
     return {
         config: {
-            integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), twig(userConfig.twig), latte(userConfig.latte)],
+            integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), twig(userConfig.twig), latte(userConfig.latte), {
+                task: {
+                    name: 'emails',
+                    action: async () => {
+                        const emails = FastGlob.sync(`${resolve(process.cwd(), userConfig.emails.outputDir)}/**`).filter(entry => entry.endsWith('prod.html'))
+                        const emailsProd = emails.map(path => {
+                            return path.replace(resolve(process.cwd(), userConfig.emails.outputDir), resolve(process.cwd(), userConfig.emails.prodDir)).replace('.prod.html', '.latte')
+                        })
+
+                        await Promise.all(emails.map((file, i) =>
+                            fse.move(file, emailsProd[i])
+                        ))
+
+                        console.info(`${chalk.cyan(`newlogic-core`)} ${chalk.green('all email files moved')}`)
+                    }
+                }
+            }],
             plugins: [posthtmlPrism],
             server: {
                 open: true,

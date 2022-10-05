@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -19,7 +19,7 @@
     "prismjs": "^1.29.0",
     "html-minifier-terser": "^7.0.0",
     "lodash": "^4.17.21",
-    "vituum": "^0.0.29"
+    "vituum": "^0.0.32"
   },
   "files": [
     "latte",
