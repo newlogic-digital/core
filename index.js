@@ -273,7 +273,7 @@ const integration = (userConfig = {}) => {
                         })
 
                         await Promise.all(emails.map((file, i) =>
-                            fse.move(file, emailsProd[i])
+                            fse.move(file, emailsProd[i], { overwrite: true })
                         ))
 
                         console.info(`${chalk.cyan(`newlogic-core`)} ${chalk.green('all email files moved')}`)
