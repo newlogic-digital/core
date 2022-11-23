@@ -27,7 +27,7 @@ const posthtmlPrism = {
         transform: async(html, { filename }) => {
             filename = filename.replace('?raw', '')
 
-            if (!filename.endsWith('ui.json')) {
+            if (!filename.endsWith('ui.json') && !filename.endsWith('ui.vituum.json.html')) {
                 return
             }
 
