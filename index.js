@@ -86,8 +86,8 @@ const parseMinifyHtml = async (input, name) => {
 const defaultConfig = {
     format: 'twig',
     emails: {
-        outputDir: resolve(process.cwd(), 'public/emails'),
-        prodDir: resolve(process.cwd(), 'app/Templates/Emails')
+        outputDir: resolve(process.cwd(), 'public/email'),
+        appDir: resolve(process.cwd(), 'app/Templates/Emails')
     },
     posthtml: {},
     juice: {},
@@ -239,7 +239,7 @@ const defaultConfig = {
         ]
     },
     latte: {
-        isStringFilter: (filename) => dirname(filename).endsWith('emails'),
+        isStringFilter: (filename) => dirname(filename).endsWith('email'),
         globals: {
             srcPath: resolve(process.cwd(), 'src'),
             templatesPath: resolve(process.cwd(), 'src/templates')
@@ -267,9 +267,9 @@ const integration = (userConfig = {}) => {
                 task: {
                     name: 'emails',
                     action: async () => {
-                        const emails = FastGlob.sync(`${resolve(process.cwd(), userConfig.emails.outputDir)}/**`).filter(entry => entry.endsWith('prod.html'))
+                        const emails = FastGlob.sync(`${resolve(process.cwd(), userConfig.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
                         const emailsProd = emails.map(path => {
-                            return path.replace(resolve(process.cwd(), userConfig.emails.outputDir), resolve(process.cwd(), userConfig.emails.prodDir)).replace('.prod.html', '.latte')
+                            return path.replace(resolve(process.cwd(), userConfig.emails.outputDir), resolve(process.cwd(), userConfig.emails.appDir)).replace('.html', '.latte')
                         })
 
                         await Promise.all(emails.map((file, i) =>
