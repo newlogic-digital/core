@@ -254,7 +254,8 @@ const defaultConfig = {
                 return await parseMinifyHtml(input, name)
             },
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
-        }
+        },
+        ignoredPaths: ['**/views/email/**/!(*.test).latte']
     }
 }
 
