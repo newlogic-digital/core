@@ -256,6 +256,9 @@ const defaultConfig = {
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         },
         ignoredPaths: ['**/views/email/**/!(*.test).latte']
+    },
+    postcssNesting: {
+        noIsPseudoSelector: true
     }
 }
 
@@ -299,9 +302,7 @@ const integration = (userConfig = {}) => {
                 },
                 css: {
                     postcss: {
-                        plugins: [postcssImport, tailwindcssNesting(postcssNesting({
-                            noIsPseudoSelector: true
-                        })), postcssCustomMedia, postcssCustomSelectors, tailwindcss(userConfig.tailwind), autoprefixer]
+                        plugins: [postcssImport, tailwindcssNesting(postcssNesting(userConfig.postcssNesting)), postcssCustomMedia, postcssCustomSelectors, tailwindcss(userConfig.tailwind), autoprefixer]
                     }
                 }
             }
