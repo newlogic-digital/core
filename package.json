@@ -1,25 +1,34 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "1.1.1",
+  "version": "2.0.0-alpha.1",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
   "scripts": {
-    "npm-publish": "npm publish --tag next"
+    "tsc": "tsc",
+    "eslint": "eslint '**/*.js' --fix"
   },
   "dependencies": {
-    "@vituum/posthtml": "^0.1.0",
-    "@vituum/juice": "^0.1.5",
-    "@vituum/twig": "^0.1.1",
-    "@vituum/latte": "^0.1.1",
-    "tailwindcss": "^3.3.1",
+    "@vituum/vite-plugin-posthtml": "^1.0.0-alpha.3",
+    "@vituum/vite-plugin-juice": "^1.0.0-alpha.1",
+    "@vituum/vite-plugin-latte": "^1.0.0-alpha.3",
+    "@vituum/vite-plugin-tailwindcss": "^1.0.0-alpha.1",
+    "@vituum/vite-plugin-send": "^1.0.0-alpha.1",
+    "vituum": "^1.0.0-alpha.16",
+    "posthtml": "^0.16.6",
     "posthtml-prism": "^2.0.0",
     "prismjs": "^1.29.0",
     "html-minifier-terser": "^7.2.0",
-    "lodash": "^4.17.21",
-    "vituum": "^0.0.42"
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "eslint": "^8.42.0",
+    "eslint-config-standard": "^17.1.0",
+    "typescript": "^5.1.3",
+    "vite": "^4.3.9"
   },
   "files": [
     "latte",
