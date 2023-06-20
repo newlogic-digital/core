@@ -4,6 +4,7 @@ interface Emails {
 }
 
 export interface PluginUserConfig {
+    cert?: string
     emails?: Emails
     vituum?: import('vituum/types').UserConfig,
     posthtml?: import('@vituum/vite-plugin-posthtml/types').PluginUserConfig

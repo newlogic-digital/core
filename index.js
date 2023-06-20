@@ -1,5 +1,6 @@
 import fs from 'fs'
-import { dirname, resolve } from 'path'
+import os from 'os'
+import { dirname, resolve, join } from 'path'
 import postHtml from 'posthtml'
 import vituum from 'vituum'
 import posthtml from '@vituum/vite-plugin-posthtml'
@@ -21,7 +22,7 @@ const posthtmlPrism = {
         transform: async (html, { filename }) => {
             filename = filename.replace('?raw', '')
 
-            if (!filename.endsWith('ui.json') && !filename.endsWith('ui.vituum.json.html')) {
+            if (!filename.replace('.html', '').endsWith('ui.json')) {
                 return
             }
 
@@ -57,15 +58,26 @@ const parseMinifyHtml = async (input, name) => {
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
  */
 const defaultOptions = {
+    cert: 'localhost',
     emails: {
         outputDir: resolve(process.cwd(), 'public/email'),
         appDir: resolve(process.cwd(), 'app/Templates/Emails')
     },
-    vituum: {},
+    vituum: {
+        pages: {
+            dir: './src/views'
+        }
+    },
     posthtml: {},
-    juice: {},
+    juice: {
+        paths: ['src/views/email']
+    },
     tailwindcss: {},
-    send: {},
+    send: {
+        host: 'smtp.newlogic.cz',
+        from: 'noreply@newlogic.cz',
+        user: 'noreply@newlogic.cz'
+    },
     latte: {
         renderTransformedHtml: (filename) => dirname(filename).endsWith('email'),
         globals: {
@@ -83,13 +95,13 @@ const defaultOptions = {
             },
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         },
-        ignoredPaths: ['**/views/email/**/!(*.test).latte']
+        ignoredPaths: ['**/views/email/**/!(*.test).latte', '**/emails/!(*.test).latte']
     }
 }
 
 /**
  * @param {import('@newlogic-digital/core/types').PluginUserConfig} options
- * @returns import('vite').Plugin
+ * @returns [import('vite').Plugin]
  */
 const plugin = (options = {}) => {
     options = merge(defaultOptions, options)
@@ -104,17 +116,41 @@ const plugin = (options = {}) => {
         posthtmlPrism
     ]
 
-    return {
+    return [{
         name,
         enforce: 'pre',
         config (userConfig) {
-            if (!userConfig?.plugins) {
-                userConfig.plugins = plugins
-            } else if (userConfig.plugins) {
-                userConfig.plugins = plugins.concat(...userConfig.plugins)
-            }
+            const isHttps = userConfig?.server?.https !== false &&
+                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`)) &&
+                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
+
+            userConfig.build = Object.assign({
+                manifest: true,
+                emptyOutDir: false,
+                modulePreload: false,
+                outDir: resolve(userConfig.root ?? process.cwd(), 'public'),
+                rollupOptions: {
+                    input: [
+                        './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                        '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                    ]
+                }
+            }, userConfig.build ?? {})
+
+            userConfig.server = Object.assign({
+                host: true,
+                fsServe: {
+                    strict: false
+                },
+                https: isHttps
+                    ? {
+                        key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
+                        cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
+                    }
+                    : false
+            }, userConfig.server ?? {})
         }
-    }
+    }, ...plugins]
 }
 
 export default plugin
