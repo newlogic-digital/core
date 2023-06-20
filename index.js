@@ -1,6 +1,6 @@
-import fs from 'fs'
-import os from 'os'
-import { dirname, resolve, join } from 'path'
+import fs from 'node:fs'
+import os from 'node:os'
+import { dirname, resolve, join, relative } from 'node:path'
 import postHtml from 'posthtml'
 import vituum from 'vituum'
 import posthtml from '@vituum/vite-plugin-posthtml'
@@ -13,6 +13,9 @@ import { getPackageInfo, merge } from 'vituum/utils/common.js'
 import parseMinifyHtml from './src/minify.js'
 import highlight from './src/prism.js'
 import twigOptions from './src/twig.js'
+import FastGlob from 'fast-glob'
+import fse from 'fs-extra'
+import pc from 'picocolors'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -41,6 +44,7 @@ const posthtmlPrism = {
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
  */
 const defaultOptions = {
+    mode: null,
     cert: 'localhost',
     emails: {
         outputDir: resolve(process.cwd(), 'public/email'),
@@ -106,10 +110,37 @@ const plugin = (options = {}) => {
     return [{
         name,
         enforce: 'pre',
-        config (userConfig) {
+        config (userConfig, userEnv) {
             const isHttps = userConfig?.server?.https !== false &&
                 fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`)) &&
                 fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
+
+            let defaultInput = [
+                './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                './src/scripts/*.{js,ts,mjs}',
+                './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+            ]
+
+            if (!options.mode) {
+                options.mode = userEnv.mode
+            }
+
+            if (userEnv.mode === 'headless') {
+                userEnv.mode = 'production'
+
+                defaultInput = [
+                    './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                    './src/scripts/*.{js,ts,mjs}'
+                ]
+            } else if (userEnv.mode === 'emails') {
+                userEnv.mode = 'production'
+
+                defaultInput = [
+                    './src/views/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/views/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                ]
+            }
 
             userConfig.build = Object.assign({
                 manifest: true,
@@ -118,12 +149,7 @@ const plugin = (options = {}) => {
                 assetsInlineLimit: 0,
                 outDir: resolve(userConfig.root ?? process.cwd(), 'public'),
                 rollupOptions: {
-                    input: [
-                        './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
-                        './src/scripts/*.{js,ts,mjs}',
-                        './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                        '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
-                    ]
+                    input: defaultInput
                 }
             }, userConfig.build ?? {})
 
@@ -139,6 +165,20 @@ const plugin = (options = {}) => {
                     }
                     : false
             }, userConfig.server ?? {})
+        },
+        writeBundle: async () => {
+            if (options.mode === 'emails') {
+                const emails = FastGlob.sync(`${resolve(process.cwd(), options.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
+                const emailsProd = emails.map(path => {
+                    return path.replace(resolve(process.cwd(), options.emails.outputDir), resolve(process.cwd(), options.emails.appDir)).replace('.html', '.latte')
+                })
+
+                await Promise.all(emails.map((file, i) =>
+                    fse.move(file, emailsProd[i], { overwrite: true })
+                ))
+
+                console.info(`${pc.cyan('@newlogic-digital/core')} ${pc.green(`all email files were moved to ${relative(process.cwd(), options.emails.appDir)}`)}`)
+            }
         }
     }, ...plugins]
 }

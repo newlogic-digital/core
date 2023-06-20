@@ -67,7 +67,7 @@ export default {
     },
     filters: {
         asset: (url) => {
-            return url.replace('/src/', '/')
+            return url
         },
         rem: (value) => {
             return `${value / 16}rem`
