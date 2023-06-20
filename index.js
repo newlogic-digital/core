@@ -68,7 +68,9 @@ const defaultOptions = {
             dir: './src/views'
         }
     },
-    posthtml: {},
+    posthtml: {
+        root: resolve(process.cwd(), 'src')
+    },
     juice: {
         paths: ['src/views/email']
     },
@@ -128,9 +130,12 @@ const plugin = (options = {}) => {
                 manifest: true,
                 emptyOutDir: false,
                 modulePreload: false,
+                assetsInlineLimit: 0,
                 outDir: resolve(userConfig.root ?? process.cwd(), 'public'),
                 rollupOptions: {
                     input: [
+                        './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                        './src/scripts/*.{js,ts,mjs}',
                         './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
                         '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
                     ]
