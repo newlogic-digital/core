@@ -5,12 +5,14 @@ import postHtml from 'posthtml'
 import vituum from 'vituum'
 import posthtml from '@vituum/vite-plugin-posthtml'
 import latte from '@vituum/vite-plugin-latte'
+import twig from '@vituum/vite-plugin-twig'
 import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
 import tailwindcss from '@vituum/vite-plugin-tailwindcss'
 import { getPackageInfo, merge } from 'vituum/utils/common.js'
-import minifier from 'html-minifier-terser'
-import highlight from './prism.js'
+import parseMinifyHtml from './src/minify.js'
+import highlight from './src/prism.js'
+import twigOptions from './src/twig.js'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -32,25 +34,6 @@ const posthtmlPrism = {
 
             return result.html
         }
-    }
-}
-
-const parseMinifyHtml = async (input, name) => {
-    const minify = await minifier.minify(input, {
-        collapseWhitespace: true,
-        collapseInlineTagWhitespace: false,
-        minifyCSS: true,
-        removeAttributeQuotes: true,
-        quoteCharacter: '\'',
-        minifyJS: true
-    })
-
-    if (name) {
-        return JSON.stringify({
-            [name]: minify
-        })
-    } else {
-        return JSON.stringify(minify)
     }
 }
 
@@ -98,7 +81,8 @@ const defaultOptions = {
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         },
         ignoredPaths: ['**/views/email/**/!(*.test).latte', '**/emails/!(*.test).latte']
-    }
+    },
+    twig: twigOptions
 }
 
 /**
@@ -113,6 +97,7 @@ const plugin = (options = {}) => {
         tailwindcss(options.tailwindcss),
         posthtml(options.posthtml),
         latte(options.latte),
+        twig(options.twig),
         juice(options.juice),
         send(options.send),
         posthtmlPrism

@@ -12,4 +12,5 @@ export interface PluginUserConfig {
     send?: import('@vituum/vite-plugin-send/types').PluginUserConfig
     tailwindcss?: import('@vituum/vite-plugin-tailwindcss/types').PluginUserConfig
     latte?: import('@vituum/vite-plugin-latte/types').PluginUserConfig
+    twig?: import('@vituum/vite-plugin-twig/types').PluginUserConfig
 }
