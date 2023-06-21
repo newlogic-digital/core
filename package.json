@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "2.0.0-alpha.8",
+  "version": "2.0.0-alpha.10",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@vituum/vite-plugin-posthtml": "^1.0.0-alpha.3",
     "@vituum/vite-plugin-juice": "^1.0.0-alpha.2",
-    "@vituum/vite-plugin-latte": "^1.0.0-alpha.5",
-    "@vituum/vite-plugin-twig": "^1.0.0-alpha.4",
+    "@vituum/vite-plugin-latte": "^1.0.0-alpha.8",
+    "@vituum/vite-plugin-twig": "^1.0.0-alpha.6",
     "@vituum/vite-plugin-tailwindcss": "^1.0.0-alpha.2",
     "@vituum/vite-plugin-send": "^1.0.0-alpha.2",
     "vituum": "^1.0.0-alpha.18",

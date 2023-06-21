@@ -5,6 +5,7 @@ interface Emails {
 
 export interface PluginUserConfig {
     mode?: string
+    format?: string[]
     cert?: string
     emails?: Emails
     vituum?: import('vituum/types').UserConfig,

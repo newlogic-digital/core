@@ -10,7 +10,6 @@ import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
 import tailwindcss from '@vituum/vite-plugin-tailwindcss'
 import { getPackageInfo, merge } from 'vituum/utils/common.js'
-import parseMinifyHtml from './src/minify.js'
 import highlight from './src/prism.js'
 import twigOptions from './src/twig.js'
 import FastGlob from 'fast-glob'
@@ -46,6 +45,7 @@ const posthtmlPrism = {
 const defaultOptions = {
     mode: null,
     cert: 'localhost',
+    format: ['latte'],
     emails: {
         outputDir: resolve(process.cwd(), 'public/email'),
         appDir: resolve(process.cwd(), 'app/Templates/Emails')
@@ -79,9 +79,7 @@ const defaultOptions = {
             }
         },
         filters: {
-            json: async (input, name) => {
-                return await parseMinifyHtml(input, name)
-            },
+            json: resolve(process.cwd(), 'node_modules/@newlogic-digital/core/latte/JsonFilter.js'),
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         },
         ignoredPaths: ['**/views/email/**/!(*.test).latte', '**/emails/!(*.test).latte']
@@ -96,12 +94,21 @@ const defaultOptions = {
 const plugin = (options = {}) => {
     options = merge(defaultOptions, options)
 
+    const templatesPlugins = []
+
+    if (options.format.includes('twig')) {
+        templatesPlugins.push(twig(options.twig))
+    }
+
+    if (options.format.includes('latte')) {
+        templatesPlugins.push(latte(options.latte))
+    }
+
     const plugins = [
         vituum(options.vituum),
         tailwindcss(options.tailwindcss),
         posthtml(options.posthtml),
-        latte(options.latte),
-        twig(options.twig),
+        ...templatesPlugins,
         juice(options.juice),
         send(options.send),
         posthtmlPrism
@@ -116,10 +123,10 @@ const plugin = (options = {}) => {
                 fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
 
             let defaultInput = [
-                './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
-                './src/scripts/*.{js,ts,mjs}',
                 './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+                './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                './src/scripts/*.{js,ts,mjs}'
             ]
 
             if (!options.mode) {
