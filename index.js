@@ -123,8 +123,6 @@ const plugin = (options = {}) => {
                 fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
 
             let defaultInput = [
-                './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
                 './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                 './src/scripts/*.{js,ts,mjs}'
             ]
@@ -133,14 +131,16 @@ const plugin = (options = {}) => {
                 options.mode = userEnv.mode
             }
 
-            if (userEnv.mode === 'headless') {
-                userEnv.mode = 'production'
-
+            if (options.mode === 'development') {
                 defaultInput = [
+                    './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
                     './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                     './src/scripts/*.{js,ts,mjs}'
                 ]
-            } else if (userEnv.mode === 'emails') {
+            }
+
+            if (options.mode === 'emails') {
                 userEnv.mode = 'production'
 
                 defaultInput = [
