@@ -56,6 +56,7 @@ const defaultOptions = {
         }
     },
     posthtml: {
+        enforce: 'pre',
         root: resolve(process.cwd(), 'src')
     },
     juice: {
