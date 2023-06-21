@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "2.0.0-alpha.12",
+  "version": "2.0.0-alpha.13",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -36,9 +36,14 @@
   },
   "files": [
     "latte",
+    "types",
     "index.js",
     "src"
   ],
+  "exports": {
+    ".": "./index.js",
+    "./types": "./types/*"
+  },
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
