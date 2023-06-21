@@ -149,12 +149,18 @@ const plugin = (options = {}) => {
                 ]
             }
 
+            const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
+
+            if (userConfig.build && !userConfig.build.outDir) {
+                userConfig.build.outDir = outDir
+            }
+
             userConfig.build = Object.assign({
                 manifest: true,
                 emptyOutDir: false,
                 modulePreload: false,
                 assetsInlineLimit: 0,
-                outDir: resolve(userConfig.root ?? process.cwd(), 'public'),
+                outDir,
                 rollupOptions: {
                     input: defaultInput
                 }
