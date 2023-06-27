@@ -62,11 +62,7 @@ const defaultOptions = {
         paths: ['src/views/email']
     },
     tailwindcss: {},
-    send: {
-        host: 'smtp.newlogic.cz',
-        from: 'noreply@newlogic.cz',
-        user: 'noreply@newlogic.cz'
-    },
+    send: {},
     latte: {
         renderTransformedHtml: (filename) => dirname(filename).endsWith('email'),
         globals: {

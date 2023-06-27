@@ -4,7 +4,7 @@ interface Emails {
 }
 
 export interface PluginUserConfig {
-    mode?: string
+    mode?: 'development' | 'production' | 'emails'
     format?: string[]
     cert?: string
     emails?: Emails
