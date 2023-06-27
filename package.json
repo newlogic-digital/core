@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -11,13 +11,13 @@
     "eslint": "eslint '**/*.js' --fix"
   },
   "dependencies": {
-    "@vituum/vite-plugin-posthtml": "^1.0.0-beta.1",
+    "@vituum/vite-plugin-posthtml": "^1.0.0-beta.2",
     "@vituum/vite-plugin-juice": "^1.0.0-beta.1",
     "@vituum/vite-plugin-latte": "^1.0.0-beta.1",
-    "@vituum/vite-plugin-twig": "^1.0.0-beta.1",
+    "@vituum/vite-plugin-twig": "^1.0.0-beta.2",
     "@vituum/vite-plugin-tailwindcss": "^1.0.0-beta.1",
-    "@vituum/vite-plugin-send": "^1.0.0-beta.1",
-    "vituum": "^1.0.0-beta.3",
+    "@vituum/vite-plugin-send": "^1.0.0-beta.2",
+    "vituum": "^1.0.0-beta.7",
     "posthtml": "^0.16.6",
     "posthtml-prism": "^2.0.0",
     "prismjs": "^1.29.0",
@@ -28,7 +28,7 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.3.2",
     "eslint": "^8.43.0",
     "eslint-config-standard": "^17.1.0",
     "typescript": "^5.1.3",
