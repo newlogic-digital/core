@@ -1,37 +1,36 @@
-import posthtml from '@vituum/posthtml'
-import juice from '@vituum/juice'
-import twig from '@vituum/twig'
-import latte from '@vituum/latte'
-import lodash from 'lodash'
-import minifier from 'html-minifier-terser'
-import fs from 'fs'
-import fse from 'fs-extra'
-import { dirname, resolve } from 'path'
+import fs from 'node:fs'
+import os from 'node:os'
+import { dirname, resolve, join, relative } from 'node:path'
 import postHtml from 'posthtml'
-import highlight from './prism.js'
-import tailwindcss from 'tailwindcss'
-import tailwindcssNesting from 'tailwindcss/nesting/index.js'
-import postcssImport from 'postcss-import'
-import postcssNesting from 'postcss-nesting'
-import postcssCustomMedia from 'postcss-custom-media'
-import postcssCustomSelectors from 'postcss-custom-selectors'
-import autoprefixer from 'autoprefixer'
-import chalk from 'chalk'
+import vituum from 'vituum'
+import posthtml from '@vituum/vite-plugin-posthtml'
+import latte from '@vituum/vite-plugin-latte'
+import twig from '@vituum/vite-plugin-twig'
+import juice from '@vituum/vite-plugin-juice'
+import send from '@vituum/vite-plugin-send'
+import tailwindcss from '@vituum/vite-plugin-tailwindcss'
+import { getPackageInfo, merge } from 'vituum/utils/common.js'
+import highlight from './src/prism.js'
+import twigOptions from './src/twig.js'
 import FastGlob from 'fast-glob'
+import fse from 'fs-extra'
+import pc from 'picocolors'
+
+const { name } = getPackageInfo(import.meta.url)
 
 const posthtmlPrism = {
-    name: '@vituum/vite-plugin-posthtml-prism',
+    name: '@newlogic-digital/vite-plugin-posthtml-prism',
     enforce: 'post',
     transformIndexHtml: {
         enforce: 'post',
-        transform: async(html, { filename }) => {
+        transform: async (html, { filename }) => {
             filename = filename.replace('?raw', '')
 
-            if (!filename.endsWith('ui.json') && !filename.endsWith('ui.vituum.json.html')) {
+            if (!filename.replace('.html', '').endsWith('ui.json')) {
                 return
             }
 
-            const plugins = [highlight({ inline: false  })]
+            const plugins = [highlight({ inline: false })]
 
             const result = await postHtml(plugins).process(html)
 
@@ -40,206 +39,32 @@ const posthtmlPrism = {
     }
 }
 
-const wrapPreCode = (code, lang) => {
-    return `<pre class="language-${lang}"><code class="language-${lang}">${code}</code></pre>`
-}
-
-const stripIndent = (string) => {
-    const indent = () => {
-        const match = string.match(/^[ \t]*(?=\S)/gm)
-
-        if (!match) {
-            return 0
-        }
-
-        return match.reduce((r, a) => Math.min(r, a.length), Infinity)
-    }
-
-    if (indent() === 0) {
-        return string
-    }
-
-    const regex = new RegExp(`^[ \\t]{${indent()}}`, 'gm')
-
-    return string.replace(regex, '')
-}
-
-const parseMinifyHtml = async (input, name) => {
-    const minify = await minifier.minify(input, {
-        collapseWhitespace: true,
-        collapseInlineTagWhitespace: false,
-        minifyCSS: true,
-        removeAttributeQuotes: true,
-        quoteCharacter: '\'',
-        minifyJS: true
-    })
-
-    if (name) {
-        return JSON.stringify({
-            [name]: minify
-        })
-    } else {
-        return JSON.stringify(minify)
-    }
-}
-
-const defaultConfig = {
-    format: 'twig',
+/**
+ * @type {import('@newlogic-digital/core/types').PluginUserConfig}
+ */
+const defaultOptions = {
+    mode: null,
+    cert: 'localhost',
+    format: ['latte'],
     emails: {
         outputDir: resolve(process.cwd(), 'public/email'),
         appDir: resolve(process.cwd(), 'app/Templates/Emails')
     },
-    posthtml: {},
-    juice: {},
-    tailwind: {},
-    twig: {
-        namespaces: {
-            src: resolve(process.cwd(), 'src'),
-            templates: resolve(process.cwd(), 'src/templates')
-        },
-        functions: {
-            pages: () => {
-                return fs.readdirSync('src/views').filter(file => fs.statSync('src/views/' + file).isFile())
-            },
-            fetch: (data) => {
-                if (typeof data !== 'undefined') {
-                    if (data.indexOf('http') > -1) {
-                        return data
-                    } else {
-                        let slash = data.indexOf('/') + 1
-                        if (slash > 1) {
-                            slash = 0
-                        }
-
-                        return fs.readFileSync(process.cwd() + '/' + data.substring(slash, data.length), 'utf8').toString()
-                    }
-                }
-            },
-            randomColor: () => {
-                return '#' + Math.random().toString(16).slice(2, 8)
-            },
-            placeholder: (width, height) => {
-                const colors = ['333', '444', '666', '222', '777', '888', '111']
-                return 'https://via.placeholder.com/' + width + 'x' + height + '/' + colors[Math.floor(Math.random() * colors.length)] + '.webp'
-            },
-            lazy: (width, height) => {
-                const svg = encodeURIComponent(stripIndent('<svg width="' + width + '" height="' + height + '" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + width + ' ' + height + '"></svg>'))
-
-                return 'data:image/svg+xml;charset=UTF-8,' + svg
-            },
-            ratio: (width, height) => {
-                return (height / width) * 100
-            }
-        },
-        filters: {
-            asset: (url) => {
-                return url.replace('/src/', '/')
-            },
-            rem: (value) => {
-                return `${value / 16}rem`
-            },
-            encode64: (path) => {
-                const svg = encodeURIComponent(stripIndent(path))
-
-                return 'data:image/svg+xml;charset=UTF-8,' + svg
-            },
-            exists: (path) => {
-                if (path.indexOf('/') === 0) {
-                    path = path.slice(1)
-                }
-
-                return fs.existsSync(resolve(process.cwd(), path))
-            },
-            tel: (value) => {
-                return value.replace(/\s+/g, '').replace('(', '').replace(')', '')
-            }
-        },
-        extensions: [
-            (Twig) => {
-                Twig.exports.extendTag({
-                    type: 'json',
-                    regex: /^json\s+(.+)$|^json$/,
-                    next: ['endjson'],
-                    open: true,
-                    compile: function(token) {
-                        const expression = token.match[1] ?? '\'_null\''
-
-                        token.stack = Reflect.apply(Twig.expression.compile, this, [{
-                            type: Twig.expression.type.expression,
-                            value: expression
-                        }]).stack
-
-                        delete token.match
-                        return token
-                    },
-                    parse: async function(token, context, chain) {
-                        const name = Reflect.apply(Twig.expression.parse, this, [token.stack, context])
-                        const output = this.parse(token.output, context)
-
-                        if (name === '_null') {
-                            return {
-                                chain,
-                                output: await parseMinifyHtml(output)
-                            }
-                        } else {
-                            return {
-                                chain,
-                                output: await parseMinifyHtml(output, name)
-                            }
-                        }
-                    }
-                })
-                Twig.exports.extendTag({
-                    type: 'endjson',
-                    regex: /^endjson$/,
-                    next: [],
-                    open: false
-                })
-            },
-            (Twig) => {
-                Twig.exports.extendTag({
-                    type: "code",
-                    regex: /^code\s+(.+)$/,
-                    next: ["endcode"], // match the type of the end tag
-                    open: true,
-                    compile: function (token) {
-                        const expression = token.match[1];
-
-                        token.stack = Reflect.apply(Twig.expression.compile, this, [{
-                            type: Twig.expression.type.expression,
-                            value: expression
-                        }]).stack;
-
-                        delete token.match;
-                        return token;
-                    },
-                    parse: function (token, context, chain) {
-                        let type = Reflect.apply(Twig.expression.parse, this, [token.stack, context]);
-                        let output = this.parse(token.output, context);
-                        let mirror = false;
-
-                        if (type.includes(":mirror")) {
-                            mirror = true;
-                            type = type.replace(":mirror", "")
-                        }
-
-                        return {
-                            chain: chain,
-                            output: `${mirror ? output : ""}${wrapPreCode(output, type)}`
-                        };
-                    }
-                });
-                Twig.exports.extendTag({
-                    type: "endcode",
-                    regex: /^endcode$/,
-                    next: [ ],
-                    open: false
-                });
-            }
-        ]
+    vituum: {
+        pages: {
+            dir: './src/views'
+        }
     },
+    posthtml: {
+        root: resolve(process.cwd(), 'src')
+    },
+    juice: {
+        paths: ['src/views/email']
+    },
+    tailwindcss: {},
+    send: {},
     latte: {
-        isStringFilter: (filename) => dirname(filename).endsWith('email'),
+        renderTransformedHtml: (filename) => dirname(filename).endsWith('email'),
         globals: {
             srcPath: resolve(process.cwd(), 'src'),
             templatesPath: resolve(process.cwd(), 'src/templates')
@@ -250,64 +75,121 @@ const defaultConfig = {
             }
         },
         filters: {
-            json: async (input, name) => {
-                return await parseMinifyHtml(input, name)
-            },
+            json: resolve(process.cwd(), 'node_modules/@newlogic-digital/core/latte/JsonFilter.js'),
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
         },
-        ignoredPaths: ['**/views/email/**/!(*.test).latte']
+        ignoredPaths: ['**/views/email/**/!(*.test).latte', '**/emails/!(*.test).latte']
     },
-    postcssNesting: {
-        noIsPseudoSelector: true
-    }
+    twig: twigOptions
 }
 
-const integration = (userConfig = {}) => {
-    userConfig = lodash.merge(defaultConfig, userConfig)
+/**
+ * @param {import('@newlogic-digital/core/types').PluginUserConfig} options
+ * @returns [import('vite').Plugin]
+ */
+const plugin = (options = {}) => {
+    options = merge(defaultOptions, options)
 
-    return {
-        config: {
-            integrations: [posthtml(userConfig.posthtml), juice(userConfig.juice), twig(userConfig.twig), latte(userConfig.latte), {
-                task: {
-                    name: 'emails',
-                    action: async () => {
-                        const emails = FastGlob.sync(`${resolve(process.cwd(), userConfig.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
-                        const emailsProd = emails.map(path => {
-                            return path.replace(resolve(process.cwd(), userConfig.emails.outputDir), resolve(process.cwd(), userConfig.emails.appDir)).replace('.html', '.latte')
-                        })
+    const templatesPlugins = []
 
-                        await Promise.all(emails.map((file, i) =>
-                            fse.move(file, emailsProd[i], { overwrite: true })
-                        ))
+    if (options.format.includes('twig')) {
+        templatesPlugins.push(twig(options.twig))
+    }
 
-                        console.info(`${chalk.cyan(`newlogic-core`)} ${chalk.green('all email files moved')}`)
-                    }
+    if (options.format.includes('latte')) {
+        templatesPlugins.push(latte(options.latte))
+    }
+
+    const plugins = [
+        vituum(options.vituum),
+        tailwindcss(options.tailwindcss),
+        posthtml(options.posthtml),
+        ...templatesPlugins,
+        juice(options.juice),
+        send(options.send),
+        posthtmlPrism
+    ]
+
+    return [{
+        name,
+        enforce: 'pre',
+        config (userConfig, userEnv) {
+            const isHttps = userConfig?.server?.https !== false &&
+                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`)) &&
+                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
+
+            let defaultInput = [
+                './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                './src/scripts/*.{js,ts,mjs}'
+            ]
+
+            if (!options.mode) {
+                options.mode = userEnv.mode
+            }
+
+            if (options.mode === 'development') {
+                defaultInput = [
+                    './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+                    './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+                    './src/scripts/*.{js,ts,mjs}'
+                ]
+            }
+
+            if (options.mode === 'emails') {
+                userEnv.mode = 'production'
+
+                defaultInput = [
+                    './src/views/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/views/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                ]
+            }
+
+            const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
+
+            if (userConfig.build && !userConfig.build.outDir) {
+                userConfig.build.outDir = outDir
+            }
+
+            userConfig.build = Object.assign({
+                manifest: true,
+                emptyOutDir: false,
+                modulePreload: false,
+                assetsInlineLimit: 0,
+                outDir,
+                rollupOptions: {
+                    input: defaultInput
                 }
-            }],
-            plugins: [posthtmlPrism],
-            server: {
-                open: true,
-                https: true,
-                reload: file => (file.endsWith('.tpl') || file.endsWith('.latte')) && !file.includes('temp/')
-            },
-            templates: {
-                format: userConfig.format
-            },
-            imports: {
-                paths: ['./src/styles/**', './src/scripts/**', '!./src/styles/Utils/**']
-            },
-            vite: {
-                server: {
-                    origin: fs.existsSync(resolve(process.cwd(), 'app/settings.php')) ? (fs.readFileSync(resolve(process.cwd(), 'app/settings.php')).toString().match(/VITE_URL = '(.+)';/) || [null, null])[1] : null
+            }, userConfig.build ?? {})
+
+            userConfig.server = Object.assign({
+                host: true,
+                fsServe: {
+                    strict: false
                 },
-                css: {
-                    postcss: {
-                        plugins: [postcssImport, tailwindcssNesting(postcssNesting(userConfig.postcssNesting)), postcssCustomMedia, postcssCustomSelectors, tailwindcss(userConfig.tailwind), autoprefixer]
+                https: isHttps
+                    ? {
+                        key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
+                        cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
                     }
-                }
+                    : false
+            }, userConfig.server ?? {})
+        },
+        writeBundle: async () => {
+            if (options.mode === 'emails') {
+                const emails = FastGlob.sync(`${resolve(process.cwd(), options.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
+                const emailsProd = emails.map(path => {
+                    return path.replace(resolve(process.cwd(), options.emails.outputDir), resolve(process.cwd(), options.emails.appDir)).replace('.html', '.latte')
+                })
+
+                await Promise.all(emails.map((file, i) =>
+                    fse.move(file, emailsProd[i], { overwrite: true })
+                ))
+
+                console.info(`${pc.cyan('@newlogic-digital/core')} ${pc.green(`all email files were moved to ${relative(process.cwd(), options.emails.appDir)}`)}`)
             }
         }
-    }
+    }, ...plugins]
 }
 
-export default integration
+export default plugin
