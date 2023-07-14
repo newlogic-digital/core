@@ -1,5 +1,5 @@
 import Prism from 'prismjs'
-import {render} from 'posthtml-render'
+import { render } from 'posthtml-render'
 import loadLanguages from 'prismjs/components/index.js'
 import NormalizeWhitespace from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js'
 
@@ -7,17 +7,17 @@ const Normalize = new NormalizeWhitespace({
     'remove-trailing': true,
     'remove-indent': true,
     'left-trim': true,
-    'right-trim': true,
-});
+    'right-trim': true
+})
 
 const createPrismPlugin = options => {
     return tree => {
-        const highlightCodeTags = node => tree.match.call(node, {tag: 'code'}, highlightNode)
+        const highlightCodeTags = node => tree.match.call(node, { tag: 'code' }, highlightNode)
 
         if (options.inline) {
             highlightCodeTags(tree)
         } else {
-            tree.match({tag: 'pre'}, highlightCodeTags)
+            tree.match({ tag: 'pre' }, highlightCodeTags)
         }
     }
 }

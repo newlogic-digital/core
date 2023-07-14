@@ -39,6 +39,19 @@ const posthtmlPrism = {
     }
 }
 
+function postcssImportSupports () {
+    return {
+        name: 'postcss-import-supports',
+        transform (code, path) {
+            if (path.endsWith('.css')) {
+                return {
+                    code: code.replace('@media supports', '@supports')
+                }
+            }
+        }
+    }
+}
+
 /**
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
  */
@@ -107,7 +120,8 @@ const plugin = (options = {}) => {
         ...templatesPlugins,
         juice(options.juice),
         send(options.send),
-        posthtmlPrism
+        posthtmlPrism,
+        postcssImportSupports()
     ]
 
     return [{
