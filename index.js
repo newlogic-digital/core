@@ -78,7 +78,8 @@ const defaultOptions = {
         renderTransformedHtml: (filename) => dirname(filename).endsWith('email'),
         globals: {
             srcPath: resolve(process.cwd(), 'src'),
-            templatesPath: resolve(process.cwd(), 'src/templates')
+            templatesPath: resolve(process.cwd(), 'src/templates'),
+            template: './src/templates/Layout/Main.latte'
         },
         functions: {
             pages: () => {
@@ -158,6 +159,8 @@ const plugin = (options = {}) => {
             }
 
             const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
+
+            userConfig.publicDir = userConfig.publicDir ?? false
 
             if (userConfig.build && !userConfig.build.outDir) {
                 userConfig.build.outDir = outDir
