@@ -147,6 +147,8 @@ const plugin = (options = {}) => {
                     './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                     './src/scripts/*.{js,ts,mjs}'
                 ]
+            } else {
+                userConfig.publicDir = userConfig.publicDir ?? false
             }
 
             if (options.mode === 'emails') {
@@ -159,8 +161,6 @@ const plugin = (options = {}) => {
             }
 
             const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
-
-            userConfig.publicDir = userConfig.publicDir ?? false
 
             if (userConfig.build && !userConfig.build.outDir) {
                 userConfig.build.outDir = outDir
