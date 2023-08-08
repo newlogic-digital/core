@@ -147,7 +147,9 @@ const plugin = (options = {}) => {
                     './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                     './src/scripts/*.{js,ts,mjs}'
                 ]
-            } else {
+            }
+
+            if (userEnv.command === 'build') {
                 userConfig.publicDir = userConfig.publicDir ?? false
             }
 

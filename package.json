@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -28,11 +28,11 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.4.5",
+    "@types/node": "^20.4.8",
     "eslint": "^8.46.0",
     "eslint-config-standard": "^17.1.0",
     "typescript": "^5.1.6",
-    "vite": "^4.4.7"
+    "vite": "^4.4.9"
   },
   "files": [
     "latte",
