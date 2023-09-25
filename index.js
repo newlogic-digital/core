@@ -168,7 +168,12 @@ const plugin = (options = {}) => {
                 userConfig.build.outDir = outDir
             }
 
+            userConfig.optimizeDeps = Object.assign({
+                entries: []
+            }, userConfig.optimizeDeps ?? {})
+
             userConfig.build = Object.assign({
+                target: ['edge89', 'firefox89', 'chrome89', 'safari15'],
                 manifest: true,
                 emptyOutDir: false,
                 modulePreload: false,
