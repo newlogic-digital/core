@@ -174,7 +174,7 @@ const plugin = (options = {}) => {
 
             userConfig.build = Object.assign({
                 target: ['edge89', 'firefox89', 'chrome89', 'safari15'],
-                manifest: true,
+                manifest: 'manifest.json',
                 emptyOutDir: false,
                 modulePreload: false,
                 assetsInlineLimit: 0,
