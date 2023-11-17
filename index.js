@@ -22,8 +22,8 @@ const posthtmlPrism = {
     name: '@newlogic-digital/vite-plugin-posthtml-prism',
     enforce: 'post',
     transformIndexHtml: {
-        enforce: 'post',
-        transform: async (html, { filename }) => {
+        order: 'post',
+        handler: async (html, { filename }) => {
             filename = filename.replace('?raw', '')
 
             if (!filename.replace('.html', '').endsWith('ui.json')) {

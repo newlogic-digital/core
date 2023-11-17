@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -11,28 +11,28 @@
     "eslint": "eslint '**/*.js' --fix"
   },
   "dependencies": {
-    "@vituum/vite-plugin-posthtml": "^1.0.0",
-    "@vituum/vite-plugin-juice": "^1.1.0",
-    "@vituum/vite-plugin-latte": "^1.0.0",
-    "@vituum/vite-plugin-twig": "^1.0.0",
-    "@vituum/vite-plugin-tailwindcss": "^1.0.0",
-    "@vituum/vite-plugin-send": "^1.0.1",
-    "vituum": "^1.0.0",
+    "@vituum/vite-plugin-posthtml": "^1.1.0",
+    "@vituum/vite-plugin-juice": "^1.2.0",
+    "@vituum/vite-plugin-latte": "^1.1.0",
+    "@vituum/vite-plugin-twig": "^1.1.0",
+    "@vituum/vite-plugin-tailwindcss": "^1.1.0",
+    "@vituum/vite-plugin-send": "^1.1.0",
+    "vituum": "^1.1.0",
     "posthtml": "^0.16.6",
     "posthtml-prism": "^2.0.0",
     "prismjs": "^1.29.0",
     "html-minifier-terser": "^7.2.0",
     "lodash": "^4.17.21",
-    "fast-glob": "^3.3.1",
+    "fast-glob": "^3.3.2",
     "fs-extra": "^11.1.1",
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.6.5",
-    "eslint": "^8.50.0",
+    "@types/node": "^20.9.1",
+    "eslint": "^8.53.0",
     "eslint-config-standard": "^17.1.0",
     "typescript": "^5.2.2",
-    "vite": "^4.4.9"
+    "vite": "^5.0.0"
   },
   "files": [
     "latte",
