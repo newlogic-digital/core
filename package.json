@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "0.9.15",
+  "version": "0.10.0",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -39,11 +39,6 @@
     "gulp-rev-rewrite": "^5.0.0",
     "lazypipe": "^1.0.2",
     "lodash": "^4.17.21",
-    "postcss-custom-media": "^8.0.0",
-    "postcss-custom-properties": "^12.1.7",
-    "postcss-custom-selectors": "^6.0.0",
-    "postcss-import": "^14.1.0",
-    "postcss-nesting": "^10.1.6",
     "rollup": "^2.73.0",
     "rollup-plugin-import-map": "^2.2.2",
     "rollup-plugin-terser": "^7.0.2",
@@ -53,7 +48,12 @@
   "peerDependencies": {
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.13",
-    "tailwindcss": "^3.0.24"
+    "tailwindcss": "^3.0.24",
+    "postcss-custom-media": "^10.0.2",
+    "postcss-custom-properties": "^13.3.4",
+    "postcss-custom-selectors": "^7.1.6",
+    "postcss-import": "^16.0.0",
+    "postcss-nesting": "^12.0.2"
   },
   "devDependencies": {
     "vitepress": "^0.22.4"
