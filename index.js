@@ -178,11 +178,12 @@ const plugin = (options = {}) => {
                 emptyOutDir: false,
                 modulePreload: false,
                 assetsInlineLimit: 0,
-                outDir,
-                rollupOptions: {
-                    input: defaultInput
-                }
+                outDir
             }, userConfig.build ?? {})
+
+            userConfig.build.rollupOptions = Object.assign({
+                input: defaultInput
+            }, userConfig.build.rollupOptions ?? {})
 
             userConfig.server = Object.assign({
                 host: true,
