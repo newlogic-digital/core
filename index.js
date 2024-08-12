@@ -41,7 +41,7 @@ const posthtmlPrism = {
 
 const postcssImportSupports = {
     name: 'postcss-import-supports',
-    transform (code, path) {
+    transform(code, path) {
         if (path.endsWith('.css')) {
             return {
                 code: code.replace('@media supports', '@supports')
@@ -57,33 +57,39 @@ const defaultOptions = {
     mode: null,
     cert: 'localhost',
     format: ['latte'],
+    manualChunks: {},
     emails: {
         outputDir: resolve(process.cwd(), 'public/email'),
         appDir: resolve(process.cwd(), 'app/Templates/Emails')
     },
     vituum: {
         pages: {
-            dir: './src/views'
+            dir: './src/pages'
         }
     },
     posthtml: {
         root: resolve(process.cwd(), 'src')
     },
     juice: {
-        paths: ['src/views/email']
+        paths: ['src/pages/email'],
+        postcss: {
+            globalData: {
+                files: ['./src/emails/styles/main/base/config.css']
+            }
+        }
     },
     tailwindcss: {},
     send: {},
     latte: {
-        renderTransformedHtml: (filename) => dirname(filename).endsWith('email'),
+        renderTransformedHtml: filename => dirname(filename).endsWith('email'),
         globals: {
             srcPath: resolve(process.cwd(), 'src'),
             templatesPath: resolve(process.cwd(), 'src/templates'),
-            template: './src/templates/Layout/Main.latte'
+            template: './src/templates/layouts/default.latte'
         },
         functions: {
             pages: () => {
-                return fs.readdirSync(resolve(process.cwd(), 'src/views')).filter(file => fs.statSync(resolve(process.cwd(), 'src/views/' + file)).isFile())
+                return fs.readdirSync(resolve(process.cwd(), 'src/pages')).filter(file => fs.statSync(resolve(process.cwd(), 'src/pages/' + file)).isFile())
             }
         },
         filters: {
@@ -126,10 +132,10 @@ const plugin = (options = {}) => {
     return [{
         name,
         enforce: 'pre',
-        config (userConfig, userEnv) {
-            const isHttps = userConfig?.server?.https !== false &&
-                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`)) &&
-                fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
+        config(userConfig, userEnv) {
+            const isHttps = userConfig?.server?.https !== false
+                && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
+                && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
 
             let defaultInput = [
                 './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
@@ -142,8 +148,8 @@ const plugin = (options = {}) => {
 
             if (options.mode === 'development') {
                 defaultInput = [
-                    './src/views/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                    '!./src/views/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+                    './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
                     './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                     './src/scripts/*.{js,ts,mjs}'
                 ]
@@ -157,8 +163,8 @@ const plugin = (options = {}) => {
                 userEnv.mode = 'production'
 
                 defaultInput = [
-                    './src/views/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                    '!./src/views/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                    './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
                 ]
             }
 
@@ -173,7 +179,7 @@ const plugin = (options = {}) => {
             }, userConfig.optimizeDeps ?? {})
 
             userConfig.build = Object.assign({
-                target: ['edge89', 'firefox89', 'chrome89', 'safari15'],
+                target: ['edge111', 'firefox111', 'chrome111', 'safari16'],
                 manifest: 'manifest.json',
                 emptyOutDir: false,
                 modulePreload: false,
@@ -182,7 +188,15 @@ const plugin = (options = {}) => {
             }, userConfig.build ?? {})
 
             userConfig.build.rollupOptions = Object.assign({
-                input: defaultInput
+                input: defaultInput,
+                output: {
+                    manualChunks: {
+                        swup: ['swup'],
+                        stimulus: ['@hotwired/stimulus'],
+                        naja: ['naja'],
+                        ...options.manualChunks
+                    }
+                }
             }, userConfig.build.rollupOptions ?? {})
 
             userConfig.server = Object.assign({
@@ -192,16 +206,16 @@ const plugin = (options = {}) => {
                 },
                 https: isHttps
                     ? {
-                        key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
-                        cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
-                    }
+                            key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
+                            cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
+                        }
                     : false
             }, userConfig.server ?? {})
         },
         writeBundle: async () => {
             if (options.mode === 'emails') {
                 const emails = FastGlob.sync(`${resolve(process.cwd(), options.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
-                const emailsProd = emails.map(path => {
+                const emailsProd = emails.map((path) => {
                     return path.replace(resolve(process.cwd(), options.emails.outputDir), resolve(process.cwd(), options.emails.appDir)).replace('.html', '.latte')
                 })
 
