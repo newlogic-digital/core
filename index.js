@@ -15,6 +15,7 @@ import twigOptions from './src/twig.js'
 import FastGlob from 'fast-glob'
 import fse from 'fs-extra'
 import pc from 'picocolors'
+import browserslistToEsbuild from 'browserslist-to-esbuild'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -179,7 +180,7 @@ const plugin = (options = {}) => {
             }, userConfig.optimizeDeps ?? {})
 
             userConfig.build = Object.assign({
-                target: ['edge111', 'firefox111', 'chrome111', 'safari16'],
+                target: browserslistToEsbuild(),
                 manifest: 'manifest.json',
                 emptyOutDir: false,
                 modulePreload: false,
