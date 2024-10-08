@@ -4,7 +4,7 @@ interface Emails {
 }
 
 export interface PluginUserConfig {
-    mode?: 'development' | 'production' | 'emails'
+    mode?: 'development' | 'production' | 'emails' | string
     format?: string[]
     cert?: string
     manualChunks?: import('rollup').ManualChunksOption

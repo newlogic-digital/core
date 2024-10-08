@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "3.0.0-next.3",
+  "version": "3.0.0-next.4",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -12,30 +12,30 @@
     "publish-next": "npm publish --tag next"
   },
   "dependencies": {
-    "@vituum/vite-plugin-juice": "^1.2.0",
+    "@vituum/vite-plugin-juice": "^1.3.0",
     "@vituum/vite-plugin-latte": "^1.2.1",
     "@vituum/vite-plugin-posthtml": "^1.1.0",
     "@vituum/vite-plugin-send": "^1.1.0",
-    "@vituum/vite-plugin-tailwindcss": "^1.1.0",
+    "@vituum/vite-plugin-tailwindcss": "^1.2.0",
     "@vituum/vite-plugin-twig": "^1.1.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",
     "html-minifier-terser": "^7.2.0",
     "lodash": "^4.17.21",
-    "picocolors": "^1.0.1",
+    "picocolors": "^1.1.0",
     "posthtml": "^0.16.6",
     "posthtml-prism": "^2.0.1",
     "prismjs": "^1.29.0",
     "vituum": "^1.1.1",
-    "browserslist": "^4.23.3",
+    "browserslist": "^4.24.0",
     "browserslist-to-esbuild": "^2.1.1"
   },
   "devDependencies": {
-    "@types/node": "^22.2.0",
-    "eslint": "^9.9.0",
-    "neostandard": "^0.11.2",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.0"
+    "@types/node": "^22.7.5",
+    "eslint": "^9.12.0",
+    "neostandard": "^0.11.6",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
   },
   "files": [
     "latte",

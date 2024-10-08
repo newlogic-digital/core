@@ -1,44 +1,17 @@
 import fs from 'node:fs'
 import os from 'node:os'
-import { dirname, resolve, join, relative } from 'node:path'
-import postHtml from 'posthtml'
+import { resolve, join } from 'node:path'
 import vituum from 'vituum'
-import posthtml from '@vituum/vite-plugin-posthtml'
 import latte from '@vituum/vite-plugin-latte'
 import twig from '@vituum/vite-plugin-twig'
 import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
 import tailwindcss from '@vituum/vite-plugin-tailwindcss'
 import { getPackageInfo, merge } from 'vituum/utils/common.js'
-import highlight from './src/prism.js'
 import twigOptions from './src/twig.js'
-import FastGlob from 'fast-glob'
-import fse from 'fs-extra'
-import pc from 'picocolors'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
 
 const { name } = getPackageInfo(import.meta.url)
-
-const posthtmlPrism = {
-    name: '@newlogic-digital/vite-plugin-posthtml-prism',
-    enforce: 'post',
-    transformIndexHtml: {
-        order: 'post',
-        handler: async (html, { filename }) => {
-            filename = filename.replace('?raw', '')
-
-            if (!filename.replace('.html', '').endsWith('ui.json')) {
-                return
-            }
-
-            const plugins = [highlight({ inline: false })]
-
-            const result = await postHtml(plugins).process(html)
-
-            return result.html
-        }
-    }
-}
 
 const postcssImportSupports = {
     name: 'postcss-import-supports',
@@ -59,30 +32,22 @@ const defaultOptions = {
     cert: 'localhost',
     format: ['latte'],
     manualChunks: {},
-    emails: {
-        outputDir: resolve(process.cwd(), 'public/email'),
-        appDir: resolve(process.cwd(), 'app/Templates/Emails')
-    },
     vituum: {
         pages: {
             dir: './src/pages'
         }
     },
-    posthtml: {
-        root: resolve(process.cwd(), 'src')
-    },
     juice: {
         paths: ['src/pages/email'],
         postcss: {
             globalData: {
-                files: ['./src/emails/styles/main/base/config.css']
+                files: ['./src/styles/emails/theme/config.css']
             }
         }
     },
     tailwindcss: {},
     send: {},
     latte: {
-        renderTransformedHtml: filename => dirname(filename).endsWith('email'),
         globals: {
             srcPath: resolve(process.cwd(), 'src'),
             templatesPath: resolve(process.cwd(), 'src/templates'),
@@ -96,8 +61,7 @@ const defaultOptions = {
         filters: {
             json: resolve(process.cwd(), 'node_modules/@newlogic-digital/core/latte/JsonFilter.js'),
             code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
-        },
-        ignoredPaths: ['**/views/email/**/!(*.test).latte', '**/emails/!(*.test).latte']
+        }
     },
     twig: twigOptions
 }
@@ -122,11 +86,9 @@ const plugin = (options = {}) => {
     const plugins = [
         vituum(options.vituum),
         tailwindcss(options.tailwindcss),
-        posthtml(options.posthtml),
         ...templatesPlugins,
         juice(options.juice),
         send(options.send),
-        posthtmlPrism,
         postcssImportSupports
     ]
 
@@ -160,15 +122,6 @@ const plugin = (options = {}) => {
                 userConfig.publicDir = userConfig.publicDir ?? false
             }
 
-            if (options.mode === 'emails') {
-                userEnv.mode = 'production'
-
-                defaultInput = [
-                    './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                    '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
-                ]
-            }
-
             const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
 
             if (userConfig.build && !userConfig.build.outDir) {
@@ -181,24 +134,41 @@ const plugin = (options = {}) => {
 
             userConfig.build = Object.assign({
                 target: browserslistToEsbuild(),
-                manifest: 'manifest.json',
+                manifest: (options.mode === 'emails') ? false : 'manifest.json',
                 emptyOutDir: false,
                 modulePreload: false,
                 assetsInlineLimit: 0,
                 outDir
             }, userConfig.build ?? {})
 
-            userConfig.build.rollupOptions = Object.assign({
-                input: defaultInput,
-                output: {
-                    manualChunks: {
-                        swup: ['swup'],
-                        stimulus: ['@hotwired/stimulus'],
-                        naja: ['naja'],
-                        ...options.manualChunks
+            if (options.mode === 'emails') {
+                userEnv.mode = 'production'
+
+                defaultInput = [
+                    './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+                    './src/styles/emails/*.{css,pcss,scss,sass,less,styl,stylus}',
+                    '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                ]
+
+                userConfig.build.rollupOptions = Object.assign({
+                    input: defaultInput,
+                    output: {
+                        assetFileNames: 'assets/email/[name].[ext]'
                     }
-                }
-            }, userConfig.build.rollupOptions ?? {})
+                }, userConfig.build.rollupOptions ?? {})
+            } else {
+                userConfig.build.rollupOptions = Object.assign({
+                    input: defaultInput,
+                    output: {
+                        manualChunks: {
+                            swup: ['swup'],
+                            stimulus: ['@hotwired/stimulus'],
+                            naja: ['naja'],
+                            ...options.manualChunks
+                        }
+                    }
+                }, userConfig.build.rollupOptions ?? {})
+            }
 
             userConfig.server = Object.assign({
                 host: true,
@@ -212,20 +182,6 @@ const plugin = (options = {}) => {
                         }
                     : false
             }, userConfig.server ?? {})
-        },
-        writeBundle: async () => {
-            if (options.mode === 'emails') {
-                const emails = FastGlob.sync(`${resolve(process.cwd(), options.emails.outputDir)}/**`).filter(entry => !entry.endsWith('test.html'))
-                const emailsProd = emails.map((path) => {
-                    return path.replace(resolve(process.cwd(), options.emails.outputDir), resolve(process.cwd(), options.emails.appDir)).replace('.html', '.latte')
-                })
-
-                await Promise.all(emails.map((file, i) =>
-                    fse.move(file, emailsProd[i], { overwrite: true })
-                ))
-
-                console.info(`${pc.cyan('@newlogic-digital/core')} ${pc.green(`all email files were moved to ${relative(process.cwd(), options.emails.appDir)}`)}`)
-            }
         }
     }, ...plugins]
 }
