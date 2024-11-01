@@ -160,11 +160,10 @@ const plugin = (options = {}) => {
                 userConfig.build.rollupOptions = Object.assign({
                     input: defaultInput,
                     output: {
-                        manualChunks: {
+                        manualChunks: options.manualChunks ?? {
                             swup: ['swup'],
                             stimulus: ['@hotwired/stimulus'],
-                            naja: ['naja'],
-                            ...options.manualChunks
+                            naja: ['naja']
                         }
                     }
                 }, userConfig.build.rollupOptions ?? {})
