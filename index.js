@@ -86,6 +86,7 @@ const plugin = async (options = {}) => {
     }
 
     if (options.css.transformer === 'lightningcss') {
+        // @ts-ignore
         const tailwindcss = (await import('@tailwindcss/vite')).default
 
         tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
@@ -120,6 +121,7 @@ const plugin = async (options = {}) => {
                 defaultInput = [
                     './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
                     '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+                    '!./src/pages/email/**/*',
                     './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
                     './src/scripts/*.{js,ts,mjs}'
                 ]
