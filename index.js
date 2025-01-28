@@ -3,26 +3,15 @@ import os from 'node:os'
 import { resolve, join } from 'node:path'
 import vituum from 'vituum'
 import latte from '@vituum/vite-plugin-latte'
-import twig from '@vituum/vite-plugin-twig'
 import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
-import tailwindcss from '@vituum/vite-plugin-tailwindcss'
 import { getPackageInfo, merge } from 'vituum/utils/common.js'
 import twigOptions from './src/twig.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
+import browserslist from 'browserslist'
+import { Features as LightningCssFeatures, browserslistToTargets } from 'lightningcss'
 
 const { name } = getPackageInfo(import.meta.url)
-
-const postcssImportSupports = {
-    name: 'postcss-import-supports',
-    transform(code, path) {
-        if (path.endsWith('.css')) {
-            return {
-                code: code.replace('@media supports', '@supports')
-            }
-        }
-    }
-}
 
 /**
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
@@ -44,6 +33,10 @@ const defaultOptions = {
                 files: ['./src/styles/emails/theme/config.css']
             }
         }
+    },
+    css: {
+        transformer: 'postcss',
+        lightningcss: {}
     },
     tailwindcss: {},
     send: {},
@@ -70,12 +63,15 @@ const defaultOptions = {
  * @param {import('@newlogic-digital/core/types').PluginUserConfig} options
  * @returns [import('vite').Plugin]
  */
-const plugin = (options = {}) => {
+const plugin = async (options = {}) => {
     options = merge(defaultOptions, options)
 
     const templatesPlugins = []
+    const tailwindcssPlugin = []
 
     if (options.format.includes('twig')) {
+        const twig = (await import('@vituum/vite-plugin-twig')).default
+
         templatesPlugins.push(twig(options.twig))
     }
 
@@ -83,13 +79,24 @@ const plugin = (options = {}) => {
         templatesPlugins.push(latte(options.latte))
     }
 
+    if (options.css.transformer === 'postcss') {
+        const tailwindcss = (await import('@vituum/vite-plugin-tailwindcss')).default
+
+        tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
+    }
+
+    if (options.css.transformer === 'lightningcss') {
+        const tailwindcss = (await import('@tailwindcss/vite')).default
+
+        tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
+    }
+
     const plugins = [
         vituum(options.vituum),
-        tailwindcss(options.tailwindcss),
+        ...tailwindcssPlugin,
         ...templatesPlugins,
         juice(options.juice),
-        send(options.send),
-        postcssImportSupports
+        send(options.send)
     ]
 
     return [{
@@ -132,6 +139,18 @@ const plugin = (options = {}) => {
                 entries: []
             }, userConfig.optimizeDeps ?? {})
 
+            userConfig.css = Object.assign({
+                transformer: options.css.transformer
+            }, userConfig.css ?? {})
+
+            userConfig.css.lightningcss = Object.assign({
+                targets: browserslistToTargets(browserslist()),
+                exclude: LightningCssFeatures.Nesting,
+                drafts: {
+                    customMedia: true
+                }
+            }, userConfig.css.lightningcss ?? {})
+
             userConfig.build = Object.assign({
                 target: browserslistToEsbuild(),
                 manifest: (options.mode === 'emails') ? false : 'manifest.json',
@@ -171,6 +190,7 @@ const plugin = (options = {}) => {
 
             userConfig.server = Object.assign({
                 host: true,
+                cors: true,
                 fsServe: {
                     strict: false
                 },

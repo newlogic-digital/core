@@ -10,6 +10,7 @@ export interface PluginUserConfig {
     manualChunks?: import('rollup').ManualChunksOption
     emails?: Emails
     vituum?: import('vituum').UserConfig,
+    css?: import('vite').CSSOptions
     posthtml?: import('@vituum/vite-plugin-posthtml/types').PluginUserConfig
     juice?: import('@vituum/vite-plugin-juice/types').PluginUserConfig
     send?: import('@vituum/vite-plugin-send/types').PluginUserConfig
