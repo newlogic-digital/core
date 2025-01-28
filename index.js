@@ -145,7 +145,7 @@ const plugin = async (options = {}) => {
 
             userConfig.css.lightningcss = Object.assign({
                 targets: browserslistToTargets(browserslist()),
-                exclude: LightningCssFeatures.Nesting,
+                exclude: (options.mode !== 'emails') ? LightningCssFeatures.Nesting : 0,
                 drafts: {
                     customMedia: true
                 }
