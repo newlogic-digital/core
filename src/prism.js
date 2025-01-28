@@ -1,5 +1,5 @@
 import Prism from 'prismjs'
-import {render} from 'posthtml-render'
+import { render } from 'posthtml-render'
 import loadLanguages from 'prismjs/components/index.js'
 import NormalizeWhitespace from 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js'
 
@@ -7,22 +7,22 @@ const Normalize = new NormalizeWhitespace({
     'remove-trailing': true,
     'remove-indent': true,
     'left-trim': true,
-    'right-trim': true,
-});
+    'right-trim': true
+})
 
-const createPrismPlugin = options => {
-    return tree => {
-        const highlightCodeTags = node => tree.match.call(node, {tag: 'code'}, highlightNode)
+const createPrismPlugin = (options) => {
+    return (tree) => {
+        const highlightCodeTags = node => tree.match.call(node, { tag: 'code' }, highlightNode)
 
         if (options.inline) {
             highlightCodeTags(tree)
         } else {
-            tree.match({tag: 'pre'}, highlightCodeTags)
+            tree.match({ tag: 'pre' }, highlightCodeTags)
         }
     }
 }
 
-const highlightNode = node => {
+const highlightNode = (node) => {
     const attrs = node.attrs || {}
     const classList = `${attrs.class || ''}`.trimStart()
 
@@ -74,13 +74,13 @@ const mapStringOrNode = (stringOrNode, lang = null) => {
     return stringOrNode
 }
 
-const getExplicitLanguage = classList => {
+const getExplicitLanguage = (classList) => {
     const matches = classList.match(/(?:lang|language)-(\w*)/)
 
     return matches === null ? null : matches[1]
 }
 
-const plugin = options => {
+const plugin = (options) => {
     options = options || {}
     options.inline = options.inline || false
 
