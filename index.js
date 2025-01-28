@@ -187,6 +187,7 @@ const plugin = (options = {}) => {
 
             userConfig.server = Object.assign({
                 host: true,
+                cors: true,
                 fsServe: {
                     strict: false
                 },
