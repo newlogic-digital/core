@@ -22,8 +22,8 @@ const defaultOptions = {
     format: ['latte'],
     manualChunks: {},
     vituum: {
-        pages: {
-            dir: './src/pages'
+        imports: {
+            paths: ['./src/styles/*/**', '!./src/styles/emails/*', './src/scripts/*/**']
         }
     },
     juice: {

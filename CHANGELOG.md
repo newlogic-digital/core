@@ -1,4 +1,7 @@
-## v3.0.0
+## 3.0.1
+* feat: updated deps
+
+## 3.0.0
 * feat(bc): removed emails copy
 * feat(bc): changed default pages dir from `src/views` to `src/pages`
 * feat: added tailwindcss v4 support
