@@ -1,3 +1,6 @@
+## 3.1.0
+* feat: added input paths configuration
+
 ## 3.0.1
 * feat: updated deps
 

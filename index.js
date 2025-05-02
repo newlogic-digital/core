@@ -21,6 +21,22 @@ const defaultOptions = {
     cert: 'localhost',
     format: ['latte'],
     manualChunks: {},
+    input: {
+        assets: [
+            './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+            './src/scripts/*.{js,ts,mjs}'
+        ],
+        pages: [
+            './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+            '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+            '!./src/pages/email/**/*'
+        ],
+        emails: [
+            './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+            './src/styles/emails/*.{css,pcss,scss,sass,less,styl,stylus}',
+            '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+        ]
+    },
     vituum: {
         imports: {
             paths: ['./src/styles/*/**', '!./src/styles/emails/*', './src/scripts/*/**']
@@ -109,8 +125,7 @@ const plugin = async (options = {}) => {
                 && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
 
             let defaultInput = [
-                './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
-                './src/scripts/*.{js,ts,mjs}'
+                ...(options?.input?.assets ?? [])
             ]
 
             if (!options.mode) {
@@ -119,11 +134,8 @@ const plugin = async (options = {}) => {
 
             if (options.mode === 'development') {
                 defaultInput = [
-                    './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                    '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
-                    '!./src/pages/email/**/*',
-                    './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
-                    './src/scripts/*.{js,ts,mjs}'
+                    ...(options?.input?.pages ?? []),
+                    ...(options?.input?.assets ?? [])
                 ]
             }
 
@@ -166,9 +178,7 @@ const plugin = async (options = {}) => {
                 userEnv.mode = 'production'
 
                 defaultInput = [
-                    './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-                    './src/styles/emails/*.{css,pcss,scss,sass,less,styl,stylus}',
-                    '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
+                    ...(options?.input?.emails ?? [])
                 ]
 
                 userConfig.build.rollupOptions = Object.assign({

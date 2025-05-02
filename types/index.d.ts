@@ -1,14 +1,15 @@
-interface Emails {
-    outputDir?: string
-    appDir?: string
+interface Input {
+    assets?: string[]
+    pages?: string[]
+    emails?: string[]
 }
 
 export interface PluginUserConfig {
     mode?: 'development' | 'production' | 'emails' | string
     format?: string[]
+    input?: Input
     cert?: string
     manualChunks?: import('rollup').ManualChunksOption
-    emails?: Emails
     vituum?: import('vituum').UserConfig,
     css?: import('vite').CSSOptions
     posthtml?: import('@vituum/vite-plugin-posthtml/types').PluginUserConfig
