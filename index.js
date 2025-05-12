@@ -102,6 +102,10 @@ const plugin = async (options = {}) => {
     }
 
     if (options.css.transformer === 'lightningcss') {
+        if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
+            fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
+        }
+
         // @ts-ignore
         const tailwindcss = (await import('@tailwindcss/vite')).default
 

@@ -1,3 +1,6 @@
+## 3.1.1
+* fix: tailwindcss autocomplete
+
 ## 3.1.0
 * feat: added input paths configuration
 
