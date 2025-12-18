@@ -6,12 +6,11 @@
     "noEmit": true,
     "target": "es2020",
     "module": "es2022",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
       "@newlogic-digital/core/*": ["./*"],
-      "vituum/*": ["./node_modules/vituum/src/*"]
     }
   },
   "include": [

@@ -20,7 +20,7 @@ const defaultOptions = {
     mode: null,
     cert: 'localhost',
     format: ['latte'],
-    manualChunks: {},
+    advancedChunks: {},
     input: {
         assets: [
             './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
@@ -123,7 +123,12 @@ const plugin = async (options = {}) => {
     return [{
         name,
         enforce: 'pre',
+        /**
+         * @param {import('vite').UserConfig} userConfig
+         * @param {import('vite').ConfigEnv} userEnv
+         */
         config(userConfig, userEnv) {
+            // @ts-ignore
             const isHttps = userConfig?.server?.https !== false
                 && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
                 && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
@@ -185,23 +190,34 @@ const plugin = async (options = {}) => {
                     ...(options?.input?.emails ?? [])
                 ]
 
-                userConfig.build.rollupOptions = Object.assign({
+                userConfig.build.rolldownOptions = Object.assign({
                     input: defaultInput,
                     output: {
                         assetFileNames: 'assets/email/[name].[ext]'
                     }
-                }, userConfig.build.rollupOptions ?? {})
+                }, userConfig.build.rolldownOptions ?? {})
             } else {
-                userConfig.build.rollupOptions = Object.assign({
+                userConfig.build.rolldownOptions = Object.assign({
                     input: defaultInput,
                     output: {
-                        manualChunks: options.manualChunks ?? {
-                            swup: ['swup'],
-                            stimulus: ['@hotwired/stimulus'],
-                            naja: ['naja']
+                        advancedChunks: options.advancedChunks ?? {
+                            groups: [
+                                {
+                                    name: 'swup',
+                                    test: /swup/
+                                },
+                                {
+                                    name: '@hotwired/stimulus',
+                                    test: /@hotwired\/stimulus/
+                                },
+                                {
+                                    name: 'naja',
+                                    test: /naja/
+                                }
+                            ]
                         }
                     }
-                }, userConfig.build.rollupOptions ?? {})
+                }, userConfig.build.rolldownOptions ?? {})
             }
 
             userConfig.server = Object.assign({
