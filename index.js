@@ -6,7 +6,6 @@ import latte from '@vituum/vite-plugin-latte'
 import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
 import { getPackageInfo, merge } from 'vituum/utils/common.js'
-import twigOptions from './src/twig.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
 import browserslist from 'browserslist'
 import { Features as LightningCssFeatures, browserslistToTargets } from 'lightningcss'
@@ -73,7 +72,6 @@ const defaultOptions = {
       code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php',
     },
   },
-  twig: twigOptions,
 }
 
 /**
