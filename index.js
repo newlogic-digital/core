@@ -3,7 +3,7 @@ import os from 'node:os'
 import { resolve, join } from 'node:path'
 import vituum from 'vituum'
 import latte from '@vituum/vite-plugin-latte'
-import juice from '@vituum/vite-plugin-juice'
+import cssInline from '@vituum/vite-plugin-css-inline'
 import send from '@vituum/vite-plugin-send'
 import { getPackageInfo, deepMergeWith } from 'vituum/utils/common.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
@@ -42,7 +42,7 @@ const defaultOptions = {
       paths: ['./src/styles/*/**', '!./src/styles/emails/*', './src/scripts/*/**'],
     },
   },
-  juice: {
+  cssInline: {
     paths: ['src/pages/email'],
     postcss: {
       globalData: {
@@ -115,7 +115,7 @@ const plugin = async (options = {}) => {
     vituum(options.vituum),
     ...tailwindcssPlugin,
     ...templatesPlugins,
-    juice(options.juice),
+    cssInline(options.cssInline),
     send(options.send),
   ]
 

@@ -12,7 +12,7 @@ export interface PluginUserConfig {
     codeSplitting?: import('rolldown').OutputOptions['codeSplitting']
     vituum?: import('vituum').UserConfig,
     css?: import('vite').CSSOptions
-    juice?: import('@vituum/vite-plugin-juice').PluginUserConfig
+    cssInline?: import('@vituum/vite-plugin-css-inline').PluginUserConfig
     send?: import('@vituum/vite-plugin-send').PluginUserConfig
     tailwindcss?: import('@vituum/vite-plugin-tailwindcss').PluginUserConfig
     latte?: import('@vituum/vite-plugin-latte').PluginUserConfig
