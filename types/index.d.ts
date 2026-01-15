@@ -9,10 +9,9 @@ export interface PluginUserConfig {
     format?: string[]
     input?: Input
     cert?: string
-    advancedChunks?: import('rolldown').OutputOptions['advancedChunks']
+    codeSplitting?: import('rolldown').OutputOptions['codeSplitting']
     vituum?: import('vituum').UserConfig,
     css?: import('vite').CSSOptions
-    posthtml?: import('@vituum/vite-plugin-posthtml').PluginUserConfig
     juice?: import('@vituum/vite-plugin-juice').PluginUserConfig
     send?: import('@vituum/vite-plugin-send').PluginUserConfig
     tailwindcss?: import('@vituum/vite-plugin-tailwindcss').PluginUserConfig

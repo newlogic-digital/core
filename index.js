@@ -20,7 +20,7 @@ const defaultOptions = {
   mode: null,
   cert: 'localhost',
   format: ['latte'],
-  advancedChunks: {},
+  codeSplitting: {},
   input: {
     assets: [
       './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
@@ -200,7 +200,7 @@ const plugin = async (options = {}) => {
         userConfig.build.rolldownOptions = Object.assign({
           input: defaultInput,
           output: {
-            advancedChunks: options.advancedChunks ?? {
+            codeSplitting: options.codeSplitting ?? {
               groups: [
                 {
                   name: 'swup',
