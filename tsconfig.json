@@ -11,6 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "@newlogic-digital/core/*": ["./*"],
+      "vituum/*": ["./node_modules/vituum/*"]
     }
   },
   "include": [

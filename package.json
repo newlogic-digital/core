@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.0.0-next.10",
+  "version": "4.0.0-next.12",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "@minify-html/node": "^0.18.1",
-    "@vituum/vite-plugin-juice": "^2.0.0-next.2",
-    "@vituum/vite-plugin-latte": "^2.0.0-next.3",
-    "@vituum/vite-plugin-send": "^2.0.0-next.3",
+    "@vituum/vite-plugin-juice": "^2.0.0-next.3",
+    "@vituum/vite-plugin-latte": "^2.0.0-next.4",
+    "@vituum/vite-plugin-send": "^2.0.0-next.4",
     "browserslist": "^4.28.1",
     "browserslist-to-esbuild": "^2.1.1",
     "lightningcss": "^1.30.2",
-    "vituum": "^2.0.0-next.6"
+    "vituum": "^2.0.0-next.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.39",

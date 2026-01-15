@@ -5,7 +5,7 @@ import vituum from 'vituum'
 import latte from '@vituum/vite-plugin-latte'
 import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
-import { getPackageInfo, merge } from 'vituum/utils/common.js'
+import { getPackageInfo, deepMergeWith } from 'vituum/utils/common.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
 import browserslist from 'browserslist'
 import { Features as LightningCssFeatures, browserslistToTargets } from 'lightningcss'
@@ -79,7 +79,7 @@ const defaultOptions = {
  * @returns [import('vite').Plugin]
  */
 const plugin = async (options = {}) => {
-  options = merge(defaultOptions, options)
+  options = deepMergeWith(defaultOptions, options)
 
   const templatesPlugins = []
   const tailwindcssPlugin = []
