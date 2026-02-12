@@ -10,6 +10,7 @@ import browserslistToEsbuild from 'browserslist-to-esbuild'
 import browserslist from 'browserslist'
 import { Features as LightningCssFeatures, browserslistToTargets } from 'lightningcss'
 import process from 'node:process'
+import heroicons from '@newlogic-digital/vite-plugin-heroicons'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -44,11 +45,7 @@ const defaultOptions = {
   },
   cssInline: {
     paths: ['src/pages/email'],
-    postcss: {
-      globalData: {
-        files: ['./src/styles/emails/theme/config.css'],
-      },
-    },
+    postcss: {},
   },
   css: {
     transformer: 'postcss',
@@ -72,6 +69,7 @@ const defaultOptions = {
       code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php',
     },
   },
+  heroicons: {},
 }
 
 /**
@@ -117,6 +115,17 @@ const plugin = async (options = {}) => {
     ...templatesPlugins,
     cssInline(options.cssInline),
     send(options.send),
+    heroicons(
+      {
+        fileName: 'icons.svg',
+        iconSets: {
+          'simpleicons-solid': 'src/icons/simpleicons',
+          'icons-solid': 'src/icons/solid',
+          'icons-outline': 'src/icons/outline',
+        },
+        ...options.heroicons,
+      },
+    ),
   ]
 
   return [{

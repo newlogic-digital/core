@@ -1,3 +1,5 @@
+import {HeroiconsOptions} from "@newlogic-digital/vite-plugin-heroicons";
+
 interface Input {
     assets?: string[]
     pages?: string[]
@@ -17,4 +19,5 @@ export interface PluginUserConfig {
     tailwindcss?: import('@vituum/vite-plugin-tailwindcss').PluginUserConfig
     latte?: import('@vituum/vite-plugin-latte').PluginUserConfig
     twig?: import('@vituum/vite-plugin-twig').PluginUserConfig
+    heroicons?: import('@newlogic-digital/vite-plugin-heroicons').HeroiconsOptions
 }
