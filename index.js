@@ -2,7 +2,6 @@ import fs from 'node:fs'
 import os from 'node:os'
 import { resolve, join } from 'node:path'
 import vituum from 'vituum'
-import latte from '@vituum/vite-plugin-latte'
 import cssInline from '@vituum/vite-plugin-css-inline'
 import send from '@vituum/vite-plugin-send'
 import { getPackageInfo, deepMergeWith } from 'vituum/utils/common.js'
@@ -48,7 +47,7 @@ const defaultOptions = {
     postcss: {},
   },
   css: {
-    transformer: 'postcss',
+    transformer: 'lightningcss',
     lightningcss: {},
   },
   tailwindcss: {},
@@ -79,40 +78,29 @@ const defaultOptions = {
 const plugin = async (options = {}) => {
   options = deepMergeWith(defaultOptions, options)
 
-  const templatesPlugins = []
-  const tailwindcssPlugin = []
+  const optionalPlugins = []
 
   if (options.format.includes('twig')) {
     const twig = (await import('@vituum/vite-plugin-twig')).default
 
-    templatesPlugins.push(twig(options.twig))
+    optionalPlugins.push(twig(options.twig))
   }
 
   if (options.format.includes('latte')) {
-    templatesPlugins.push(latte(options.latte))
-  }
+    const latte = (await import('@vituum/vite-plugin-latte')).default
 
-  if (options.css.transformer === 'postcss') {
-    const tailwindcss = (await import('@vituum/vite-plugin-tailwindcss')).default
-
-    tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
+    optionalPlugins.push(latte(options.latte))
   }
 
   if (options.css.transformer === 'lightningcss') {
-    if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
-      fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
-    }
-
-    // @ts-ignore
     const tailwindcss = (await import('@tailwindcss/vite')).default
 
-    tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
+    optionalPlugins.push(tailwindcss(options.tailwindcss))
   }
 
   const plugins = [
     vituum(options.vituum),
-    ...tailwindcssPlugin,
-    ...templatesPlugins,
+    ...optionalPlugins,
     cssInline(options.cssInline),
     send(options.send),
     heroicons(
@@ -132,9 +120,9 @@ const plugin = async (options = {}) => {
     name,
     enforce: 'pre',
     /**
-         * @param {import('vite').UserConfig} userConfig
-         * @param {import('vite').ConfigEnv} userEnv
-         */
+    * @param {import('vite').UserConfig} userConfig
+    * @param {import('vite').ConfigEnv} userEnv
+    */
     config(userConfig, userEnv) {
       // @ts-ignore
       const isHttps = userConfig?.server?.https !== false
