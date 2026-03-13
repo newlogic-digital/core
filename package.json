@@ -1,35 +1,36 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.0.0-rc.1",
+  "version": "4.0.0-rc.3",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
   "scripts": {
     "tsc": "tsc",
-    "eslint": "eslint --fix",
+    "oxlint": "oxlint",
+    "oxlint-fix": "oxlint --fix",
     "publish-next": "npm publish --tag next"
   },
   "dependencies": {
     "@minify-html/node": "^0.18.1",
     "@newlogic-digital/vite-plugin-heroicons": "^1.0.0",
+    "@stylistic/eslint-plugin": "^5.10",
+    "@stylistic/stylelint-config": "^4.0.0",
     "@vituum/vite-plugin-css-inline": "^2.0.0",
     "@vituum/vite-plugin-latte": "^2.0.0",
     "@vituum/vite-plugin-send": "^2.0.0",
     "browserslist": "^4.28.1",
     "browserslist-to-esbuild": "^2.1.1",
     "lightningcss": "^1.32.0",
+    "oxlint": "^1.55.0",
+    "stylelint-config-standard": "^40.0.0",
     "vituum": "^2.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0",
-    "@stylistic/eslint-plugin": "^5.10",
     "@tailwindcss/vite": "^4.2.1",
     "@types/node": "^25.5",
     "@vituum/vite-plugin-twig": "^2.0.0",
-    "eslint": "^10.0.3",
-    "globals": "^17.4.0",
     "rolldown": "^1.0.0-rc.9",
     "typescript": "^5",
     "vite": "^8.0.0"
@@ -38,6 +39,7 @@
     "latte",
     "types",
     "index.js",
+    "eslint-stylistic.json",
     "src"
   ],
   "exports": {
