@@ -98,6 +98,9 @@ const plugin = async (options = {}) => {
     optionalPlugins.push(tailwindcss(options.tailwindcss))
   }
 
+  const simpleIcons = resolve(import.meta.url, 'icons/simpleicons')
+  const solidIcons = resolve(import.meta.url, 'icons/solid')
+
   const plugins = [
     vituum(options.vituum),
     ...optionalPlugins,
@@ -107,8 +110,8 @@ const plugin = async (options = {}) => {
       {
         fileName: 'icons.svg',
         iconSets: {
-          'simpleicons-solid': 'src/icons/simpleicons',
-          'icons-solid': 'src/icons/solid',
+          'simpleicons-solid': [simpleIcons, 'src/icons/simpleicons'],
+          'icons-solid': [solidIcons, 'src/icons/solid'],
           'icons-outline': 'src/icons/outline',
         },
         ...options.heroicons,

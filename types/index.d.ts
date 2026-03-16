@@ -1,5 +1,3 @@
-import { HeroiconsOptions } from '@newlogic-digital/vite-plugin-heroicons';
-
 interface Input {
   assets?: string[]
   pages?: string[]
