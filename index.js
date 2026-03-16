@@ -2,7 +2,6 @@ import fs from 'node:fs'
 import os from 'node:os'
 import { resolve, join, dirname } from 'node:path'
 import vituum from 'vituum'
-import cssInline from '@vituum/vite-plugin-css-inline'
 import send from '@vituum/vite-plugin-send'
 import { getPackageInfo, deepMergeWith } from 'vituum/utils/common.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
@@ -99,13 +98,18 @@ const plugin = async (options = {}) => {
     optionalPlugins.push(tailwindcss(options.tailwindcss))
   }
 
+  if (options.cssInline.paths.length > 0) {
+    const cssInline = (await import('@vituum/vite-plugin-css-inline')).default
+
+    optionalPlugins.push(cssInline(options.cssInline))
+  }
+
   const simpleIcons = resolve(dirname((fileURLToPath(import.meta.url))), 'icons/simpleicons')
   const solidIcons = resolve(dirname((fileURLToPath(import.meta.url))), 'icons/solid')
 
   const plugins = [
     vituum(options.vituum),
     ...optionalPlugins,
-    cssInline(options.cssInline),
     send(options.send),
     heroicons(
       {
