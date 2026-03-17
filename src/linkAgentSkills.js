@@ -31,7 +31,7 @@ function getExistingTargetStat(targetPath) {
   }
 }
 
-function createSkillSymlink(sourcePath, targetPath) {
+function createDirectorySymlink(sourcePath, targetPath) {
   const symlinkTarget = IS_WIN32
     ? sourcePath
     : path.relative(path.dirname(targetPath), sourcePath)
@@ -44,7 +44,9 @@ if (!projectRoot || projectRoot === packageRoot || !fs.existsSync(sourceSkillsDi
   process.exit(0)
 }
 
-const targetSkillsDir = path.join(projectRoot, '.agents', 'skills')
+const targetAgentsDir = path.join(projectRoot, '.agents')
+const targetSkillsDir = path.join(targetAgentsDir, 'skills')
+const targetClaudePath = path.join(projectRoot, '.claude')
 const skillEntries = fs.readdirSync(sourceSkillsDir, { withFileTypes: true })
   .filter(entry => entry.isDirectory())
 
@@ -55,6 +57,7 @@ if (skillEntries.length === 0) {
 fs.mkdirSync(targetSkillsDir, { recursive: true })
 
 let linkedCount = 0
+let linkedClaudeDir = false
 
 for (const entry of skillEntries) {
   const sourcePath = path.join(sourceSkillsDir, entry.name)
@@ -74,10 +77,31 @@ for (const entry of skillEntries) {
     fs.unlinkSync(targetPath)
   }
 
-  createSkillSymlink(sourcePath, targetPath)
+  createDirectorySymlink(sourcePath, targetPath)
   linkedCount += 1
+}
+
+const claudeStat = getExistingTargetStat(targetClaudePath)
+
+if (claudeStat) {
+  if (!claudeStat.isSymbolicLink()) {
+    console.warn(`${styleText(['cyan', 'bold'], name)} ${styleText('yellow', `Skipping ".claude" because "${targetClaudePath}" already exists and is not a symlink.`)}`)
+  }
+  else if (!isSameSymlinkTarget(targetClaudePath, targetAgentsDir)) {
+    fs.unlinkSync(targetClaudePath)
+    createDirectorySymlink(targetAgentsDir, targetClaudePath)
+    linkedClaudeDir = true
+  }
+}
+else {
+  createDirectorySymlink(targetAgentsDir, targetClaudePath)
+  linkedClaudeDir = true
 }
 
 if (linkedCount > 0) {
   console.info(`${styleText(['cyan', 'bold'], name)} ${styleText('green', `Linked ${linkedCount} skill${linkedCount === 1 ? '' : 's'} into "${targetSkillsDir}".`)}`)
+}
+
+if (linkedClaudeDir) {
+  console.info(`${styleText(['cyan', 'bold'], name)} ${styleText('green', `Linked "${targetClaudePath}" to "${targetAgentsDir}".`)}`)
 }
