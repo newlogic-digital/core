@@ -1,13 +1,13 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.0.0-rc.8",
+  "version": "4.0.0-rc.9",
   "main": "index.js",
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
   "scripts": {
-    "postinstall": "node ./src/createEslintStylisticConfig.js",
+    "postinstall": "node ./src/createEslintStylisticConfig.js && node ./src/linkAgentSkills.js",
     "tsc": "tsc",
     "oxlint": "oxlint",
     "oxlint-fix": "oxlint --fix",
@@ -27,7 +27,8 @@
     "lightningcss": "^1.32.0",
     "oxlint": "^1.56.0",
     "stylelint-config-standard": "^40.0.0",
-    "vituum": "^2.0.0"
+    "vituum": "^2.0.0",
+    "npm-check-updates": "^19.6.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "0.0.0-insiders.d24b112",
