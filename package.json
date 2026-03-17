@@ -1,13 +1,16 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.0.0-rc.9",
+  "version": "4.0.0-rc.10",
   "main": "index.js",
+  "bin": {
+    "newlogic-core": "./bin/newlogic-core.js"
+  },
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
   "scripts": {
-    "postinstall": "node ./src/createEslintStylisticConfig.js && node ./src/linkAgentSkills.js",
+    "postinstall": "node ./bin/newlogic-core.js postinstall",
     "tsc": "tsc",
     "oxlint": "oxlint",
     "oxlint-fix": "oxlint --fix",
@@ -39,6 +42,7 @@
     "vite": "^8.0.0"
   },
   "files": [
+    "bin",
     "icons",
     "latte",
     "skills",
