@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.0.0-rc.11",
+  "version": "4.0.0-rc.12",
   "main": "index.js",
   "bin": {
     "newlogic-core": "./bin/newlogic-core.js"

@@ -25,6 +25,7 @@ const defaultOptions = {
     assets: [
       './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
       './src/scripts/*.{js,ts,mjs}',
+      './src/assets/**/*',
     ],
     pages: [
       './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
