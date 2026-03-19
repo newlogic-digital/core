@@ -97,6 +97,10 @@ const plugin = async (options = {}) => {
     const tailwindcss = (await import('@tailwindcss/vite')).default
 
     optionalPlugins.push(tailwindcss(options.tailwindcss))
+
+    if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
+      fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
+    }
   }
 
   if (options.cssInline.paths.length > 0) {
