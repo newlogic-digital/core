@@ -1,22 +1,22 @@
-import minifier from 'html-minifier-terser'
+import minifyHtml from '@minify-html/node'
+import { Buffer } from 'node:buffer'
 
 const parseMinifyHtml = async (input, name) => {
-    const minify = await minifier.minify(input, {
-        collapseWhitespace: true,
-        collapseInlineTagWhitespace: false,
-        minifyCSS: true,
-        removeAttributeQuotes: true,
-        quoteCharacter: '\'',
-        minifyJS: true
-    })
+  const minify = await minifyHtml.minify(Buffer.from(input), {
+    minify_css: true,
+    minify_js: true,
+  })
 
-    if (name) {
-        return JSON.stringify({
-            [name]: minify
-        })
-    } else {
-        return JSON.stringify(minify)
-    }
+  const minifyWithQuotes = minify.toString().replaceAll(/=(\s*)"(.*?)"/g, '=\'$2\'')
+
+  if (name) {
+    return JSON.stringify({
+      [name]: minifyWithQuotes,
+    })
+  }
+  else {
+    return JSON.stringify(minifyWithQuotes)
+  }
 }
 
 export default parseMinifyHtml

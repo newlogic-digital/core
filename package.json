@@ -1,56 +1,72 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "main": "index.js",
+  "bin": {
+    "newlogic-core": "./bin/newlogic-core.js"
+  },
   "author": "New Logic Studio s.r.o.",
   "description": "Set of tools that can be used to create modern web applications",
   "license": "MIT",
   "scripts": {
     "tsc": "tsc",
-    "eslint": "eslint '**/*.js' --fix",
+    "oxlint": "oxlint",
+    "oxlint-fix": "oxlint --fix",
+    "lint": "npm run oxlint && npm run tsc",
     "publish-next": "npm publish --tag next"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.4",
-    "@vituum/vite-plugin-juice": "^1.4.0",
-    "@vituum/vite-plugin-latte": "^1.3.0",
-    "@vituum/vite-plugin-posthtml": "^1.1.0",
-    "@vituum/vite-plugin-send": "^1.1.0",
-    "browserslist": "^4.24.4",
+    "@minify-html/node": "^0.18.1",
+    "@newlogic-digital/vite-plugin-heroicons": "^1.1.1",
+    "@stylistic/eslint-plugin": "^5.10",
+    "@stylistic/stylelint-config": "^4.0.0",
+    "@vituum/vite-plugin-css-inline": "^2.0.2",
+    "@vituum/vite-plugin-latte": "^2.0.2",
+    "@vituum/vite-plugin-send": "^2.0.1",
+    "browserslist": "^4.28.1",
     "browserslist-to-esbuild": "^2.1.1",
-    "fast-glob": "^3.3.3",
-    "fs-extra": "^11.3.0",
-    "html-minifier-terser": "^7.2.0",
-    "lightningcss": "^1.29.3",
-    "lodash": "^4.17.21",
-    "picocolors": "^1.1.1",
-    "posthtml": "^0.16.6",
-    "posthtml-prism": "^2.0.1",
-    "prismjs": "^1.30.0",
-    "vituum": "^1.2.0"
+    "lightningcss": "^1.32.0",
+    "npm-check-updates": "^19.6.5",
+    "oxlint": "^1.56.0",
+    "stylelint-config-standard": "^40.0.0",
+    "vituum": "^2.0.1"
+  },
+  "peerDependencies": {
+    "@tailwindcss/vite": "4.2.2",
+    "@vituum/vite-plugin-twig": "^2.0.1",
+    "vite": "^8.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@vituum/vite-plugin-twig": {
+      "optional": true
+    },
+    "@tailwindcss/vite": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "eslint": "^9.25.1",
-    "neostandard": "^0.12.1",
-    "typescript": "^5",
-    "vite": "^6",
-    "@vituum/vite-plugin-tailwindcss": "^1.2.0",
-    "@vituum/vite-plugin-twig": "^1.1.0"
+    "@types/node": "^25.5",
+    "rolldown": "^1.0.0-rc.10",
+    "typescript": "^5"
   },
   "files": [
+    "bin",
+    "icons",
     "latte",
+    "skills",
+    "src",
     "types",
-    "index.js",
-    "src"
+    "eslint-stylistic.json",
+    "stylelint-config.json",
+    "index.js"
   ],
   "exports": {
     ".": "./index.js",
     "./types": "./types/*"
   },
   "engines": {
-    "node": "^18.0.0 || >=20.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "repository": {
     "type": "git",

@@ -1,15 +1,15 @@
 import fs from 'node:fs'
 import os from 'node:os'
-import { resolve, join } from 'node:path'
+import { resolve, join, dirname } from 'node:path'
 import vituum from 'vituum'
-import latte from '@vituum/vite-plugin-latte'
-import juice from '@vituum/vite-plugin-juice'
 import send from '@vituum/vite-plugin-send'
-import { getPackageInfo, merge } from 'vituum/utils/common.js'
-import twigOptions from './src/twig.js'
+import { getPackageInfo, deepMergeWith } from 'vituum/utils/common.js'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
 import browserslist from 'browserslist'
 import { Features as LightningCssFeatures, browserslistToTargets } from 'lightningcss'
+import process from 'node:process'
+import heroicons from '@newlogic-digital/vite-plugin-heroicons'
+import { fileURLToPath } from 'node:url'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -17,62 +17,59 @@ const { name } = getPackageInfo(import.meta.url)
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
  */
 const defaultOptions = {
-    mode: null,
-    cert: 'localhost',
-    format: ['latte'],
-    manualChunks: {},
-    input: {
-        assets: [
-            './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
-            './src/scripts/*.{js,ts,mjs}'
-        ],
-        pages: [
-            './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-            '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
-            '!./src/pages/email/**/*'
-        ],
-        emails: [
-            './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
-            './src/styles/emails/*.{css,pcss,scss,sass,less,styl,stylus}',
-            '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json'
-        ]
+  mode: null,
+  cert: 'localhost',
+  format: ['latte'],
+  codeSplitting: {},
+  input: {
+    assets: [
+      './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
+      './src/scripts/*.{js,ts,mjs}',
+      './src/assets/**/*',
+    ],
+    pages: [
+      './src/pages/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+      '!./src/pages/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+      '!./src/pages/email/**/*',
+    ],
+    emails: [
+      './src/pages/email/**/*.{json,latte,twig,liquid,njk,hbs,pug,html}',
+      './src/styles/emails/*.{css,pcss,scss,sass,less,styl,stylus}',
+      '!./src/pages/email/**/*.{latte,twig,liquid,njk,hbs,pug,html}.json',
+    ],
+  },
+  vituum: {
+    imports: {
+      paths: ['./src/styles/*/**', '!./src/styles/emails/*', './src/scripts/*/**'],
     },
-    vituum: {
-        imports: {
-            paths: ['./src/styles/*/**', '!./src/styles/emails/*', './src/scripts/*/**']
-        }
+  },
+  cssInline: {
+    paths: ['src/pages/email'],
+    postcss: {},
+  },
+  css: {
+    transformer: 'lightningcss',
+    lightningcss: {},
+  },
+  tailwindcss: {},
+  send: {},
+  latte: {
+    globals: {
+      srcPath: resolve(process.cwd(), 'src'),
+      templatesPath: resolve(process.cwd(), 'src/templates'),
+      template: './src/templates/layouts/default.latte',
     },
-    juice: {
-        paths: ['src/pages/email'],
-        postcss: {
-            globalData: {
-                files: ['./src/styles/emails/theme/config.css']
-            }
-        }
+    functions: {
+      pages: () => {
+        return fs.readdirSync(resolve(process.cwd(), 'src/pages')).filter(file => fs.statSync(resolve(process.cwd(), 'src/pages/' + file)).isFile())
+      },
     },
-    css: {
-        transformer: 'postcss',
-        lightningcss: {}
+    filters: {
+      json: resolve(process.cwd(), 'node_modules/@newlogic-digital/core/latte/JsonFilter.js'),
+      code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php',
     },
-    tailwindcss: {},
-    send: {},
-    latte: {
-        globals: {
-            srcPath: resolve(process.cwd(), 'src'),
-            templatesPath: resolve(process.cwd(), 'src/templates'),
-            template: './src/templates/layouts/default.latte'
-        },
-        functions: {
-            pages: () => {
-                return fs.readdirSync(resolve(process.cwd(), 'src/pages')).filter(file => fs.statSync(resolve(process.cwd(), 'src/pages/' + file)).isFile())
-            }
-        },
-        filters: {
-            json: resolve(process.cwd(), 'node_modules/@newlogic-digital/core/latte/JsonFilter.js'),
-            code: 'node_modules/@newlogic-digital/core/latte/CodeFilter.php'
-        }
-    },
-    twig: twigOptions
+  },
+  heroicons: {},
 }
 
 /**
@@ -80,145 +77,170 @@ const defaultOptions = {
  * @returns [import('vite').Plugin]
  */
 const plugin = async (options = {}) => {
-    options = merge(defaultOptions, options)
+  options = deepMergeWith(defaultOptions, options)
 
-    const templatesPlugins = []
-    const tailwindcssPlugin = []
+  const optionalPlugins = []
 
-    if (options.format.includes('twig')) {
-        const twig = (await import('@vituum/vite-plugin-twig')).default
+  if (options.format.includes('twig')) {
+    const twig = (await import('@vituum/vite-plugin-twig')).default
 
-        templatesPlugins.push(twig(options.twig))
-    }
+    optionalPlugins.push(twig(options.twig))
+  }
 
-    if (options.format.includes('latte')) {
-        templatesPlugins.push(latte(options.latte))
-    }
+  if (options.format.includes('latte')) {
+    const latte = (await import('@vituum/vite-plugin-latte')).default
 
-    if (options.css.transformer === 'postcss') {
-        const tailwindcss = (await import('@vituum/vite-plugin-tailwindcss')).default
+    optionalPlugins.push(latte(options.latte))
+  }
 
-        tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
-    }
+  if (options.css.transformer === 'lightningcss') {
+    const tailwindcss = (await import('@tailwindcss/vite')).default
 
-    if (options.css.transformer === 'lightningcss') {
-        if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
-            fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
-        }
+    optionalPlugins.push(tailwindcss(options.tailwindcss))
+  }
 
-        // @ts-ignore
-        const tailwindcss = (await import('@tailwindcss/vite')).default
+  if (options.cssInline.paths.length > 0) {
+    const cssInline = (await import('@vituum/vite-plugin-css-inline')).default
 
-        tailwindcssPlugin.push(tailwindcss(options.tailwindcss))
-    }
+    optionalPlugins.push(cssInline(options.cssInline))
+  }
 
-    const plugins = [
-        vituum(options.vituum),
-        ...tailwindcssPlugin,
-        ...templatesPlugins,
-        juice(options.juice),
-        send(options.send)
-    ]
+  const simpleIcons = resolve(dirname((fileURLToPath(import.meta.url))), 'icons/simpleicons')
+  const solidIcons = resolve(dirname((fileURLToPath(import.meta.url))), 'icons/solid')
 
-    return [{
-        name,
-        enforce: 'pre',
-        config(userConfig, userEnv) {
-            const isHttps = userConfig?.server?.https !== false
-                && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
-                && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
+  const plugins = [
+    vituum(options.vituum),
+    ...optionalPlugins,
+    send(options.send),
+    heroicons(
+      {
+        fileName: 'icons.svg',
+        iconSets: {
+          'simpleicons-solid': [simpleIcons, 'src/icons/simpleicons'],
+          'icons-solid': [solidIcons, 'src/icons/solid'],
+          'icons-outline': 'src/icons/outline',
+        },
+        ...options.heroicons,
+      },
+    ),
+  ]
 
-            let defaultInput = [
-                ...(options?.input?.assets ?? [])
-            ]
+  return [{
+    name,
+    enforce: 'pre',
+    /**
+    * @param {import('vite').UserConfig} userConfig
+    * @param {import('vite').ConfigEnv} userEnv
+    */
+    config(userConfig, userEnv) {
+      // @ts-ignore
+      const isHttps = userConfig?.server?.https !== false
+        && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
+        && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`))
 
-            if (!options.mode) {
-                options.mode = userEnv.mode
-            }
+      let defaultInput = [
+        ...(options?.input?.assets ?? []),
+      ]
 
-            if (options.mode === 'development') {
-                defaultInput = [
-                    ...(options?.input?.pages ?? []),
-                    ...(options?.input?.assets ?? [])
-                ]
-            }
+      if (!options.mode) {
+        options.mode = userEnv.mode
+      }
 
-            if (userEnv.command === 'build') {
-                userConfig.publicDir = userConfig.publicDir ?? false
-            }
+      if (options.mode === 'development') {
+        defaultInput = [
+          ...(options?.input?.pages ?? []),
+          ...(options?.input?.assets ?? []),
+        ]
+      }
 
-            const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
+      if (userEnv.command === 'build') {
+        userConfig.publicDir = userConfig.publicDir ?? false
+      }
 
-            if (userConfig.build && !userConfig.build.outDir) {
-                userConfig.build.outDir = outDir
-            }
+      const outDir = resolve(userConfig.root ?? process.cwd(), 'public')
 
-            userConfig.optimizeDeps = Object.assign({
-                entries: []
-            }, userConfig.optimizeDeps ?? {})
+      if (userConfig.build && !userConfig.build.outDir) {
+        userConfig.build.outDir = outDir
+      }
 
-            userConfig.css = Object.assign({
-                transformer: options.css.transformer
-            }, userConfig.css ?? {})
+      userConfig.optimizeDeps = Object.assign({
+        entries: [],
+      }, userConfig.optimizeDeps ?? {})
 
-            userConfig.css.lightningcss = Object.assign({
-                targets: browserslistToTargets(browserslist()),
-                exclude: (options.mode !== 'emails') ? LightningCssFeatures.Nesting : 0,
-                drafts: {
-                    customMedia: true
-                }
-            }, userConfig.css.lightningcss ?? {})
+      userConfig.css = Object.assign({
+        transformer: options.css.transformer,
+      }, userConfig.css ?? {})
 
-            userConfig.build = Object.assign({
-                target: browserslistToEsbuild(),
-                manifest: (options.mode === 'emails') ? false : 'manifest.json',
-                emptyOutDir: false,
-                modulePreload: false,
-                assetsInlineLimit: 0,
-                outDir
-            }, userConfig.build ?? {})
+      userConfig.css.lightningcss = Object.assign({
+        targets: browserslistToTargets(browserslist()),
+        exclude: (options.mode !== 'emails') ? LightningCssFeatures.Nesting : 0,
+        drafts: {
+          customMedia: true,
+        },
+      }, userConfig.css.lightningcss ?? {})
 
-            if (options.mode === 'emails') {
-                userEnv.mode = 'production'
+      userConfig.build = Object.assign({
+        target: browserslistToEsbuild(),
+        manifest: (options.mode === 'emails') ? false : 'manifest.json',
+        emptyOutDir: false,
+        modulePreload: false,
+        assetsInlineLimit: 0,
+        outDir,
+      }, userConfig.build ?? {})
 
-                defaultInput = [
-                    ...(options?.input?.emails ?? [])
-                ]
+      if (options.mode === 'emails') {
+        userEnv.mode = 'production'
 
-                userConfig.build.rollupOptions = Object.assign({
-                    input: defaultInput,
-                    output: {
-                        assetFileNames: 'assets/email/[name].[ext]'
-                    }
-                }, userConfig.build.rollupOptions ?? {})
-            } else {
-                userConfig.build.rollupOptions = Object.assign({
-                    input: defaultInput,
-                    output: {
-                        manualChunks: options.manualChunks ?? {
-                            swup: ['swup'],
-                            stimulus: ['@hotwired/stimulus'],
-                            naja: ['naja']
-                        }
-                    }
-                }, userConfig.build.rollupOptions ?? {})
-            }
+        defaultInput = [
+          ...(options?.input?.emails ?? []),
+        ]
 
-            userConfig.server = Object.assign({
-                host: true,
-                cors: true,
-                fsServe: {
-                    strict: false
+        userConfig.build.rolldownOptions = Object.assign({
+          input: defaultInput,
+          output: {
+            assetFileNames: 'assets/email/[name].[ext]',
+          },
+        }, userConfig.build.rolldownOptions ?? {})
+      }
+      else {
+        userConfig.build.rolldownOptions = Object.assign({
+          input: defaultInput,
+          output: {
+            codeSplitting: options.codeSplitting ?? {
+              groups: [
+                {
+                  name: 'swup',
+                  test: /swup/,
                 },
-                https: isHttps
-                    ? {
-                            key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
-                            cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
-                        }
-                    : false
-            }, userConfig.server ?? {})
-        }
-    }, ...plugins]
+                {
+                  name: '@hotwired/stimulus',
+                  test: /@hotwired\/stimulus/,
+                },
+                {
+                  name: 'naja',
+                  test: /naja/,
+                },
+              ],
+            },
+          },
+        }, userConfig.build.rolldownOptions ?? {})
+      }
+
+      userConfig.server = Object.assign({
+        host: true,
+        cors: true,
+        fsServe: {
+          strict: false,
+        },
+        https: isHttps
+          ? {
+              key: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}-key.pem`)),
+              cert: fs.readFileSync(join(os.homedir(), `.ssh/${options.cert}.pem`)),
+            }
+          : false,
+      }, userConfig.server ?? {})
+    },
+  }, ...plugins]
 }
 
 export default plugin
