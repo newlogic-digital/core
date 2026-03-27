@@ -8,7 +8,6 @@
     "module": "es2022",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "paths": {
       "@newlogic-digital/core/*": ["./*"],
       "vituum/*": ["./node_modules/vituum/*"]

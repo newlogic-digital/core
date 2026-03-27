@@ -46,7 +46,8 @@ if (!projectRoot || projectRoot === packageRoot || !fs.existsSync(sourceSkillsDi
 
 const targetAgentsDir = path.join(projectRoot, '.agents')
 const targetSkillsDir = path.join(targetAgentsDir, 'skills')
-const targetClaudePath = path.join(projectRoot, '.claude')
+const targetClaudeDir = path.join(projectRoot, '.claude')
+const targetClaudeSkillsDir = path.join(targetClaudeDir, 'skills')
 const skillEntries = fs.readdirSync(sourceSkillsDir, { withFileTypes: true })
   .filter(entry => entry.isDirectory())
 
@@ -57,7 +58,7 @@ if (skillEntries.length === 0) {
 fs.mkdirSync(targetSkillsDir, { recursive: true })
 
 let linkedCount = 0
-let linkedClaudeDir = false
+let linkedClaudeSkillsDir = false
 
 for (const entry of skillEntries) {
   const sourcePath = path.join(sourceSkillsDir, entry.name)
@@ -81,27 +82,39 @@ for (const entry of skillEntries) {
   linkedCount += 1
 }
 
-const claudeStat = getExistingTargetStat(targetClaudePath)
+const claudeStat = getExistingTargetStat(targetClaudeDir)
+let shouldLinkClaudeSkillsDir = true
 
-if (claudeStat) {
-  if (!claudeStat.isSymbolicLink()) {
-    console.warn(`${styleText(['cyan', 'bold'], name)} ${styleText('yellow', `Skipping ".claude" because "${targetClaudePath}" already exists and is not a symlink.`)}`)
-  }
-  else if (!isSameSymlinkTarget(targetClaudePath, targetAgentsDir)) {
-    fs.unlinkSync(targetClaudePath)
-    createDirectorySymlink(targetAgentsDir, targetClaudePath)
-    linkedClaudeDir = true
-  }
+if (claudeStat?.isSymbolicLink()) {
+  console.warn(`${styleText(['cyan', 'bold'], name)} ${styleText('yellow', `Skipping "${targetClaudeSkillsDir}" because "${targetClaudeDir}" already exists as a symlink. Remove "${targetClaudeDir}" and run the command again.`)}`)
+  shouldLinkClaudeSkillsDir = false
 }
-else {
-  createDirectorySymlink(targetAgentsDir, targetClaudePath)
-  linkedClaudeDir = true
+
+if (shouldLinkClaudeSkillsDir) {
+  fs.mkdirSync(targetClaudeDir, { recursive: true })
+
+  const claudeSkillsStat = getExistingTargetStat(targetClaudeSkillsDir)
+
+  if (claudeSkillsStat) {
+    if (!claudeSkillsStat.isSymbolicLink()) {
+      console.warn(`${styleText(['cyan', 'bold'], name)} ${styleText('yellow', `Skipping "${targetClaudeSkillsDir}" because it already exists and is not a symlink.`)}`)
+    }
+    else if (!isSameSymlinkTarget(targetClaudeSkillsDir, targetSkillsDir)) {
+      fs.unlinkSync(targetClaudeSkillsDir)
+      createDirectorySymlink(targetSkillsDir, targetClaudeSkillsDir)
+      linkedClaudeSkillsDir = true
+    }
+  }
+  else {
+    createDirectorySymlink(targetSkillsDir, targetClaudeSkillsDir)
+    linkedClaudeSkillsDir = true
+  }
 }
 
 if (linkedCount > 0) {
   console.info(`${styleText(['cyan', 'bold'], name)} ${styleText('green', `Linked ${linkedCount} skill${linkedCount === 1 ? '' : 's'} into "${targetSkillsDir}".`)}`)
 }
 
-if (linkedClaudeDir) {
-  console.info(`${styleText(['cyan', 'bold'], name)} ${styleText('green', `Linked "${targetClaudePath}" to "${targetAgentsDir}".`)}`)
+if (linkedClaudeSkillsDir) {
+  console.info(`${styleText(['cyan', 'bold'], name)} ${styleText('green', `Linked "${targetClaudeSkillsDir}" to "${targetSkillsDir}".`)}`)
 }
