@@ -10,6 +10,7 @@ import { Features as LightningCssFeatures, browserslistToTargets } from 'lightni
 import process from 'node:process'
 import heroicons from '@newlogic-digital/vite-plugin-heroicons'
 import { fileURLToPath } from 'node:url'
+import { processPostcssCustomProperties } from './src/postcssCustomProperties.js'
 
 const { name } = getPackageInfo(import.meta.url)
 
@@ -79,6 +80,9 @@ const defaultOptions = {
 const plugin = async (options = {}) => {
   options = deepMergeWith(defaultOptions, options)
 
+  /**
+   * @type import('vite').Plugin[]
+   */
   const optionalPlugins = []
 
   if (options.format.includes('twig')) {
@@ -105,6 +109,15 @@ const plugin = async (options = {}) => {
 
   if (options.cssInline.paths.length > 0) {
     const cssInline = (await import('@vituum/vite-plugin-css-inline')).default
+
+    optionalPlugins.push({
+      name: '@newlogic-digital/core:postcss-custom-properties',
+      transform(code, id) {
+        if (id.endsWith('.css') && options.mode === 'emails') {
+          return processPostcssCustomProperties(code)
+        }
+      },
+    })
 
     optionalPlugins.push(cssInline(options.cssInline))
   }
