@@ -75,7 +75,7 @@ const defaultOptions = {
 
 /**
  * @param {import('@newlogic-digital/core/types').PluginUserConfig} options
- * @returns [import('vite').Plugin]
+ * @returns {Promise<import('vite').Plugin[]>}
  */
 const plugin = async (options = {}) => {
   options = deepMergeWith(defaultOptions, options)
@@ -88,19 +88,19 @@ const plugin = async (options = {}) => {
   if (options.format.includes('twig')) {
     const twig = (await import('@vituum/vite-plugin-twig')).default
 
-    optionalPlugins.push(twig(options.twig))
+    optionalPlugins.push(...twig(options.twig))
   }
 
   if (options.format.includes('latte')) {
     const latte = (await import('@vituum/vite-plugin-latte')).default
 
-    optionalPlugins.push(latte(options.latte))
+    optionalPlugins.push(...latte(options.latte))
   }
 
   if (options.css.transformer === 'lightningcss') {
     const tailwindcss = (await import('@tailwindcss/vite')).default
 
-    optionalPlugins.push(tailwindcss(options.tailwindcss))
+    optionalPlugins.push(...tailwindcss(options.tailwindcss))
 
     if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
       fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
@@ -126,12 +126,13 @@ const plugin = async (options = {}) => {
   const solidIcons = resolve(dirname((fileURLToPath(import.meta.url))), 'icons/solid')
 
   const plugins = [
-    vituum(options.vituum),
+    ...vituum(options.vituum),
     ...optionalPlugins,
     send(options.send),
     heroicons(
       {
         fileName: 'icons.svg',
+        content: 'src/views/**/*.latte',
         iconSets: {
           'simpleicons-solid': [simpleIcons, 'src/icons/simpleicons'],
           'icons-solid': [solidIcons, 'src/icons/solid'],
