@@ -1,3 +1,7 @@
+# 4.1.0
+* feat: updated heroicons to support content option and rg
+* feat: css custom properties for email styles are now built into the email css
+
 # 4.0.0
 * feat(bc): added support for Vite v8, Vituum v2 and Rust-based Rolldown build configuration
 * feat(bc): raised the required Node.js version to `^20.19.0 || >=22.12.0`
