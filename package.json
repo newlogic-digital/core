@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "main": "index.js",
   "bin": {
     "newlogic-core": "./bin/newlogic-core.js"
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@minify-html/node": "^0.18.1",
-    "@newlogic-digital/vite-plugin-heroicons": "^1.3.0",
+    "@newlogic-digital/vite-plugin-heroicons": "^1.3.1",
     "@stylistic/eslint-plugin": "^5.10",
     "@stylistic/stylelint-config": "^5.0.0",
     "@vituum/vite-plugin-css-inline": "^2.1.0",
@@ -27,8 +27,8 @@
     "browserslist": "^4.28.2",
     "browserslist-to-esbuild": "^2.1.1",
     "lightningcss": "^1.32.0",
-    "npm-check-updates": "^20.0.0",
-    "oxlint": "^1.58.0",
+    "npm-check-updates": "^21.0.2",
+    "oxlint": "^1.60.0",
     "postcss-custom-properties": "^15.0.1",
     "stylelint-config-standard": "^40.0.0",
     "vituum": "^2.0.1"
@@ -48,9 +48,9 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
-    "@types/node": "^25.5",
+    "@types/node": "^25.6",
     "@vituum/vite-plugin-twig": "^2.0.1",
-    "rolldown": "^1.0.0-rc.13",
+    "rolldown": "^1.0.0-rc.16",
     "typescript": "^6"
   },
   "files": [

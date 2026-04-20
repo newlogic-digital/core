@@ -113,7 +113,7 @@ const plugin = async (options = {}) => {
     optionalPlugins.push({
       name: '@newlogic-digital/core:postcss-custom-properties',
       transform(code, id) {
-        if (id.endsWith('.css') && options.mode === 'emails') {
+        if (id.split('?')[0].endsWith('.css') && options.mode === 'emails') {
           return processPostcssCustomProperties(code)
         }
       },
@@ -191,7 +191,7 @@ const plugin = async (options = {}) => {
 
       userConfig.css.lightningcss = Object.assign({
         targets: browserslistToTargets(browserslist()),
-        exclude: (options.mode !== 'emails') ? LightningCssFeatures.Nesting : 0,
+        include: (options.mode === 'emails') ? LightningCssFeatures.Nesting : 0,
         drafts: {
           customMedia: true,
         },
