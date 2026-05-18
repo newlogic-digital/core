@@ -11,8 +11,30 @@ import process from 'node:process'
 import heroicons from '@newlogic-digital/vite-plugin-heroicons'
 import { fileURLToPath } from 'node:url'
 import { processPostcssCustomProperties } from './src/postcssCustomProperties.js'
+import { createLogger } from 'vite'
+import console from 'node:console'
 
 const { name } = getPackageInfo(import.meta.url)
+
+const logger = createLogger()
+const consoleWarn = console.warn.bind(console)
+const ignoredPseudoClasses = [
+  'interest-source',
+  'interest-target',
+]
+
+const isUnknownPseudoClassWarning = (/** @type {string | string[]} */ message) => (
+  message.includes('is not recognized as a valid pseudo-class')
+  && ignoredPseudoClasses.some(pseudoClass => message.includes(pseudoClass))
+)
+
+console.warn = (...messages) => {
+  if (messages.some(message => isUnknownPseudoClassWarning(String(message)))) {
+    return
+  }
+
+  consoleWarn(...messages)
+}
 
 /**
  * @type {import('@newlogic-digital/core/types').PluginUserConfig}
@@ -151,6 +173,27 @@ const plugin = async (options = {}) => {
     * @param {import('vite').ConfigEnv} userEnv
     */
     config(userConfig, userEnv) {
+      userConfig.customLogger = Object.assign({
+        ...logger,
+        /**
+        * @param {string} message
+        * @param {import("vite").LogOptions} options
+        */
+        warn(message, options) {
+          if (
+            isUnknownPseudoClassWarning(message)
+            && (
+              message.includes('[lightningcss minify]')
+              || message.includes('[vite:css][lightningcss]')
+            )
+          ) {
+            return
+          }
+
+          logger.warn(message, options)
+        },
+      }, userConfig.customLogger)
+
       // @ts-ignore
       const isHttps = userConfig?.server?.https !== false
         && fs.existsSync(join(os.homedir(), `.ssh/${options.cert}.pem`))
