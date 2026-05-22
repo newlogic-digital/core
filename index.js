@@ -271,15 +271,18 @@ const plugin = async (options = {}) => {
               groups: [
                 {
                   name: 'swup',
-                  test: /swup/,
+                  test: /node_modules[\\/]swup(?:[\\/]|$)/,
+                  priority: 30,
                 },
                 {
-                  name: '@hotwired/stimulus',
-                  test: /@hotwired\/stimulus/,
+                  name: 'hotwired-stimulus',
+                  test: /node_modules[\\/]@hotwired[\\/]stimulus(?:[\\/]|$)/,
+                  priority: 30,
                 },
                 {
                   name: 'naja',
-                  test: /naja/,
+                  test: /node_modules[\\/]naja(?:[\\/]|$)/,
+                  priority: 30,
                 },
               ],
             },
