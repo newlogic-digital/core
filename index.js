@@ -43,7 +43,7 @@ const defaultOptions = {
   mode: null,
   cert: 'localhost',
   format: ['latte'],
-  codeSplitting: {},
+  codeSplitting: undefined,
   input: {
     assets: [
       './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
