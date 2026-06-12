@@ -1,3 +1,18 @@
+# 4.1.5
+* feat: added fontless as optional plugin
+
+# 4.1.4
+* fix: module codeSplitting
+
+# 4.1.3
+feat: enhance logging, suppress pseudo-class warnings, and update dependencies
+
+# 4.1.2
+feat: update dependencies and peerDependencies
+
+# 4.1.1
+* fix: email builds
+
 # 4.1.0
 * feat: updated heroicons to support content option and rg
 * feat: css custom properties for email styles are now built into the email css

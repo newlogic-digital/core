@@ -15,6 +15,10 @@ export interface PluginUserConfig {
   cssInline?: import('@vituum/vite-plugin-css-inline').PluginUserConfig
   send?: import('@vituum/vite-plugin-send').PluginUserConfig
   tailwindcss?: import('@tailwindcss/vite').PluginOptions
+  fontless?: {
+    options?: import('fontless').FontlessOptions
+    manifest?: string[]
+  }
   latte?: import('@vituum/vite-plugin-latte').PluginUserConfig
   twig?: import('@vituum/vite-plugin-twig').PluginUserConfig
   heroicons?: import('@newlogic-digital/vite-plugin-heroicons').HeroiconsOptions

@@ -11,6 +11,7 @@ import process from 'node:process'
 import heroicons from '@newlogic-digital/vite-plugin-heroicons'
 import { fileURLToPath } from 'node:url'
 import { processPostcssCustomProperties } from './src/postcssCustomProperties.js'
+import { fontsManifest } from './src/fontsManifest.js'
 import { createLogger } from 'vite'
 import console from 'node:console'
 
@@ -76,6 +77,10 @@ const defaultOptions = {
   },
   tailwindcss: {},
   send: {},
+  fontless: {
+    options: undefined,
+    manifest: undefined,
+  },
   latte: {
     globals: {
       srcPath: resolve(process.cwd(), 'src'),
@@ -127,6 +132,12 @@ const plugin = async (options = {}) => {
     if (!fs.existsSync(resolve(process.cwd(), 'src/+.css'))) {
       fs.writeFileSync(resolve(process.cwd(), 'src/+.css'), '@import "./styles/main.css";')
     }
+  }
+
+  if (options.fontless?.options) {
+    const { fontless } = await import('fontless')
+
+    optionalPlugins.push(fontless(options.fontless.options), fontsManifest(options.fontless.manifest))
   }
 
   if (options.cssInline.paths.length > 0) {

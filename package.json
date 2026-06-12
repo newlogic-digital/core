@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.1.4",
+  "version": "4.1.5",
   "main": "index.js",
   "bin": {
     "newlogic-core": "./bin/newlogic-core.js"
@@ -36,6 +36,7 @@
   "peerDependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@vituum/vite-plugin-twig": "^2.0.1",
+    "fontless": "^0.2.1",
     "vite": "^8.0.10"
   },
   "peerDependenciesMeta": {
@@ -44,12 +45,16 @@
     },
     "@tailwindcss/vite": {
       "optional": true
+    },
+    "fontless": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^25.9",
     "@vituum/vite-plugin-twig": "^2.0.1",
+    "fontless": "^0.2.1",
     "rolldown": "^1.0.2",
     "typescript": "^6"
   },
