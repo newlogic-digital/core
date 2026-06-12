@@ -2,20 +2,47 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 /**
+ * Parsuje unicode-range na číselné intervaly [start, end] - minifikátory zápis normalizují
+ * (Lightning CSS ve Vite 8 stripuje nuly a používá wildcardy, např. U+0000-00FF → U+??)
+ *
+ * @param {string} rule
+ * @returns {[number, number][]}
+ */
+const parseUnicodeRange = (rule) => {
+  const range = (rule.match(/unicode-range:([^;}]+)/i)?.[1] ?? '').toUpperCase()
+
+  return range.split(',').flatMap((token) => {
+    const match = token.trim().match(/^U\+([0-9A-F?]+)(?:-([0-9A-F]+))?$/)
+
+    if (!match) return []
+    if (match[1].includes('?')) {
+      return [[parseInt(match[1].replace(/\?/g, '0'), 16), parseInt(match[1].replace(/\?/g, 'F'), 16)]]
+    }
+
+    return [[parseInt(match[1], 16), parseInt(match[2] ?? match[1], 16)]]
+  })
+}
+
+/**
  * @param {string} rule
  * @returns {string | null}
  */
 const unicodeRangeSubset = (rule) => {
-  // toUpperCase kvůli minifikátorům, které zápis normalizují na lowercase (Lightning CSS ve Vite 8)
-  const range = (rule.match(/unicode-range:([^;}]+)/i)?.[1] ?? '').toUpperCase()
+  const ranges = parseUnicodeRange(rule)
 
-  if (range.includes('U+0000-00FF')) return 'latin'
-  if (range.includes('U+0102-')) return 'vietnamese'
-  if (range.includes('U+0100-')) return 'latin-ext'
-  if (range.includes('U+0400-045F')) return 'cyrillic'
-  if (range.includes('U+0460-052F')) return 'cyrillic-ext'
-  if (range.includes('U+1F00-1FFF')) return 'greek-ext'
-  if (range.includes('U+0370-')) return 'greek'
+  /**
+   * @param {number} start
+   * @param {number} [end]
+   */
+  const has = (start, end) => ranges.some(([rangeStart, rangeEnd]) => rangeStart === start && (end === undefined || rangeEnd === end))
+
+  if (has(0x0000, 0x00FF)) return 'latin'
+  if (has(0x0102)) return 'vietnamese'
+  if (has(0x0100)) return 'latin-ext'
+  if (has(0x0400, 0x045F)) return 'cyrillic'
+  if (has(0x0460, 0x052F)) return 'cyrillic-ext'
+  if (has(0x1F00, 0x1FFF)) return 'greek-ext'
+  if (has(0x0370)) return 'greek'
 
   return null
 }

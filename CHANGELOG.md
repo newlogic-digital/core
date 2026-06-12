@@ -1,3 +1,6 @@
+# 4.1.6
+* fix: font manifest
+
 # 4.1.5
 * feat: added fontless as optional plugin
 
