@@ -16,6 +16,14 @@ export interface PluginUserConfig {
   send?: import('@vituum/vite-plugin-send').PluginUserConfig
   tailwindcss?: import('@tailwindcss/vite').PluginOptions
   fontless?: {
+    customProvider?: Array<{
+      name: string
+      fonts: Array<{
+        src: string
+        weight?: number | string
+        style?: string
+      }>
+    }>
     options?: import('fontless').FontlessOptions
     manifest?: string[]
   }

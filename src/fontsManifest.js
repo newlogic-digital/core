@@ -82,9 +82,10 @@ export const fontsManifest = families => ({
       if (fonts.length === 0) continue
 
       entry.assets = [...new Set([...entry.assets ?? [], ...fonts.map(font => font.file)])]
-      // rodina → subset → pole souborů; umožňuje preloadovat jen vybrané rodiny a subsety
+      // family → subset → array of files; allows preloading only selected families and subsets.
+      // Fonts without a detectable subset (e.g. non-subsetted local fonts) fall back to the 'default' key.
       entry.fonts = fonts.reduce((acc, font) => {
-        if (font.family && font.subset) ((acc[font.family] ??= {})[font.subset] ??= []).push(font.file)
+        if (font.family) ((acc[font.family] ??= {})[font.subset ?? 'default'] ??= []).push(font.file)
         return acc
       }, {})
       hasFonts = true

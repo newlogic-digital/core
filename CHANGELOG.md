@@ -1,3 +1,41 @@
+# 4.1.7
+* feat: support for custom fontless fonts
+
+  Define local fonts via `fontless.customProvider` — Core builds the `custom` unifont provider and injects it into `options.providers.custom`. You only wire up `families` (and `manifest`) yourself:
+
+  ```js
+  import { defineConfig } from 'vite'
+  import core from '@newlogic-digital/core'
+
+  export default defineConfig({
+    plugins: [
+      core({
+        fontless: {
+          customProvider: [
+            { name: 'Saans', fonts: [
+              { src: 'src/fonts/Saans-Regular.woff2', weight: 400, style: 'normal' },
+              { src: 'src/fonts/Saans-Medium.woff2',  weight: 500, style: 'normal' },
+            ] },
+            { name: 'Saans Mono', fonts: [
+              { src: 'src/fonts/SaansMono-Regular.woff2', weight: 400, style: 'normal' },
+            ] },
+          ],
+          options: {
+            processCSSVariables: true,
+            defaults: { weights: [400, 500], subsets: ['latin', 'latin-ext'] },
+            assets: { prefix: '/assets/fonts' },
+            families: [
+              { name: 'Saans',      provider: 'custom', weights: [400, 500] },
+              { name: 'Saans Mono', provider: 'custom', weights: [400] },
+            ],
+          },
+          manifest: ['Saans', 'Saans Mono'],
+        },
+      }),
+    ],
+  })
+  ```
+
 # 4.1.6
 * fix: font manifest
 

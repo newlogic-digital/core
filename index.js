@@ -12,6 +12,7 @@ import heroicons from '@newlogic-digital/vite-plugin-heroicons'
 import { fileURLToPath } from 'node:url'
 import { processPostcssCustomProperties } from './src/postcssCustomProperties.js'
 import { fontsManifest } from './src/fontsManifest.js'
+import { createCustomProvider } from './src/fontsCustomProvider.js'
 import { createLogger } from 'vite'
 import console from 'node:console'
 
@@ -78,6 +79,7 @@ const defaultOptions = {
   tailwindcss: {},
   send: {},
   fontless: {
+    customProvider: undefined,
     options: undefined,
     manifest: undefined,
   },
@@ -136,6 +138,11 @@ const plugin = async (options = {}) => {
 
   if (options.fontless?.options) {
     const { fontless } = await import('fontless')
+
+    if (Array.isArray(options.fontless.customProvider) && options.fontless.customProvider.length > 0) {
+      options.fontless.options.providers ??= {}
+      options.fontless.options.providers.custom = createCustomProvider(options.fontless.customProvider)
+    }
 
     optionalPlugins.push(fontless(options.fontless.options), fontsManifest(options.fontless.manifest))
   }
