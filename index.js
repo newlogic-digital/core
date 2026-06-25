@@ -46,6 +46,7 @@ const defaultOptions = {
   cert: 'localhost',
   format: ['latte'],
   codeSplitting: undefined,
+  preloadRemover: false,
   input: {
     assets: [
       './src/styles/*.{css,pcss,scss,sass,less,styl,stylus}',
@@ -114,6 +115,23 @@ const plugin = async (options = {}) => {
    */
   const optionalPlugins = []
 
+  if (options.preloadRemover || options.experimental) {
+    optionalPlugins.push({
+      name: '@newlogic-digital/preload-remover',
+      configResolved(config) {
+        if (config.command !== 'build') return
+
+        const pI = config.plugins.findIndex(
+          p => p.name === 'native:import-analysis-build',
+        )
+
+        const plugins = /** @type {import('vite').Plugin[]} */ (config.plugins)
+
+        if (pI !== -1) plugins.splice(pI, 1)
+      },
+    })
+  }
+
   if (options.format.includes('twig')) {
     const twig = (await import('@vituum/vite-plugin-twig')).default
 
@@ -138,6 +156,18 @@ const plugin = async (options = {}) => {
 
   if (options.fontless?.options) {
     const { fontless } = await import('fontless')
+
+    if (!options.fontless.options && options.experimental) {
+      options.fontless.options = {
+        processCSSVariables: true,
+        defaults: { weights: ['400 700'], subsets: ['latin', 'latin-ext'] },
+        assets: { prefix: '/assets/fonts' },
+      }
+    }
+
+    if (!options.fontless.manifest && options.experimental) {
+      options.fontless.manifest = ['Inter']
+    }
 
     if (Array.isArray(options.fontless.customProvider) && options.fontless.customProvider.length > 0) {
       options.fontless.options.providers ??= {}
@@ -282,27 +312,52 @@ const plugin = async (options = {}) => {
         }, userConfig.build.rolldownOptions ?? {})
       }
       else {
+        /**
+         * @type {import('rolldown').CodeSplittingGroup[]}
+         */
+        let groups = [
+          {
+            name: 'swup',
+            test: /node_modules[\\/]swup(?:[\\/]|$)/,
+            priority: 30,
+          },
+          {
+            name: 'hotwired-stimulus',
+            test: /node_modules[\\/]@hotwired[\\/]stimulus(?:[\\/]|$)/,
+            priority: 30,
+          },
+          {
+            name: 'naja',
+            test: /node_modules[\\/]naja(?:[\\/]|$)/,
+            priority: 30,
+          },
+        ]
+
+        if (options.experimental) {
+          groups = [
+            {
+              name: 'naja',
+              test: /node_modules[\\/]naja(?:[\\/]|$)/,
+              priority: 30,
+            },
+            {
+              name: 'webuum',
+              test: id => [
+                /node_modules[\\/]webuum(?:[\\/]|$)/,
+                /node_modules[\\/]@newlogic-digital[\\/]utils-js(?:[\\/]|$)/,
+                /node_modules[\\/]winduum[\\/]src[\\/]supports\.js$/,
+                /node_modules[\\/]winduum[\\/]src[\\/]common\.js$/,
+              ].some(pattern => pattern.test(id)),
+              priority: 30,
+            },
+          ]
+        }
+
         userConfig.build.rolldownOptions = Object.assign({
           input: defaultInput,
           output: {
             codeSplitting: options.codeSplitting ?? {
-              groups: [
-                {
-                  name: 'swup',
-                  test: /node_modules[\\/]swup(?:[\\/]|$)/,
-                  priority: 30,
-                },
-                {
-                  name: 'hotwired-stimulus',
-                  test: /node_modules[\\/]@hotwired[\\/]stimulus(?:[\\/]|$)/,
-                  priority: 30,
-                },
-                {
-                  name: 'naja',
-                  test: /node_modules[\\/]naja(?:[\\/]|$)/,
-                  priority: 30,
-                },
-              ],
+              groups,
             },
           },
         }, userConfig.build.rolldownOptions ?? {})

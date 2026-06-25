@@ -6,10 +6,12 @@ interface Input {
 
 export interface PluginUserConfig {
   mode?: 'development' | 'production' | 'emails' | string
+  experimental?: boolean
   format?: string[]
   input?: Input
   cert?: string
   codeSplitting?: import('rolldown').OutputOptions['codeSplitting']
+  preloadRemover?: boolean
   vituum?: import('vituum').UserConfig
   css?: import('vite').CSSOptions
   cssInline?: import('@vituum/vite-plugin-css-inline').PluginUserConfig
