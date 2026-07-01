@@ -1,7 +1,7 @@
 {
   "name": "@newlogic-digital/core",
   "type": "module",
-  "version": "4.1.8",
+  "version": "4.1.9",
   "main": "index.js",
   "bin": {
     "newlogic-core": "./bin/newlogic-core.js"
@@ -27,8 +27,8 @@
     "browserslist": "^4.28.4",
     "browserslist-to-esbuild": "^2.1.1",
     "lightningcss": "^1.32.0",
-    "npm-check-updates": "^22.2.7",
-    "oxlint": "^1.71.0",
+    "npm-check-updates": "^22.2.9",
+    "oxlint": "^1.72.0",
     "postcss-custom-properties": "^15.0.1",
     "stylelint-config-standard": "^40.0.0",
     "vituum": "^2.0.2"
@@ -51,11 +51,11 @@
     }
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.1",
-    "@types/node": "^26.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "@types/node": "^26.1",
     "@vituum/vite-plugin-twig": "^2.0.1",
     "fontless": "^0.2.1",
-    "rolldown": "^1.1.3",
+    "rolldown": "^1.1.4",
     "typescript": "^6"
   },
   "files": [

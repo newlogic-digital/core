@@ -154,7 +154,7 @@ const plugin = async (options = {}) => {
     }
   }
 
-  if (options.fontless?.options) {
+  if (options.fontless?.options || options.experimental) {
     const { fontless } = await import('fontless')
 
     if (!options.fontless.options && options.experimental) {
