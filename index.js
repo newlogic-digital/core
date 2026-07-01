@@ -336,11 +336,6 @@ const plugin = async (options = {}) => {
         if (options.experimental) {
           groups = [
             {
-              name: 'naja',
-              test: /node_modules[\\/]naja(?:[\\/]|$)/,
-              priority: 30,
-            },
-            {
               name: 'webuum',
               test: id => [
                 /node_modules[\\/]webuum(?:[\\/]|$)/,
