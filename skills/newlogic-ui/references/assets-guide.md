@@ -28,11 +28,12 @@
 
 - ALWAYS use SVG for icons.
 - Prefer `<use>` for reusable icons.
-- If adding reusable outline icons, place them in `src/icons/outline/`.
-- If adding reusable solid icons, place them in `src/icons/solid/`.
-- Brand icons are available in `src/icons/simpleicons/`.
-- Heroicons are already available through the build setup, so do NOT duplicate them in `src/icons/`.
-- The `<use href="...">` symbol definitions are generated automatically by the build setup.
+- If adding reusable outline icons, place them in `src/icons/outline/` and reference them as `#icons-outline/<name>`.
+- If adding reusable solid icons, place them in `src/icons/solid/` and reference them as `#icons-solid/<name>`.
+- Brand icons are bundled with Newlogic Core (`node_modules/@newlogic-digital/core/icons/simpleicons/`: apple, facebook, google, instagram, linkedin, messenger, threads, whatsapp, x, youtube) as `#simpleicons-solid/<name>`. Add a brand icon to `src/icons/simpleicons/` ONLY when it is not bundled.
+- The Newlogic logo is bundled as `#icons-solid/newlogic-logomark` and `#icons-solid/newlogic-logotype`.
+- Heroicons are available through the build setup as `#heroicons-outline/<name>`, `#heroicons-solid/<name>`, `#heroicons-mini/<name>` (20×20) and `#heroicons-micro/<name>` (16×16), so do NOT duplicate them in `src/icons/`.
+- The `<use href="...">` symbol definitions are generated automatically by the build setup into `public/icons.svg`.
 - Icon IDs SHOULD generally follow Figma naming when possible.
 - Inline `<svg>` without `<use>` is allowed ONLY for one-off icons that will NOT be reused.
 
@@ -59,8 +60,9 @@
 ### Icon Strategy Summary
 
 1. Heroicons via `<use href="#heroicons-*/*">`
-2. Project reusable icons via `src/icons/outline`, `src/icons/solid`, or `src/icons/simpleicons`
-3. Inline `<svg>` without `<use>` for one-off icons ONLY
+2. Bundled Newlogic Core icons via `#simpleicons-solid/*` and `#icons-solid/newlogic-*`
+3. Project reusable icons via `src/icons/outline`, `src/icons/solid`, or `src/icons/simpleicons`
+4. Inline `<svg>` without `<use>` for one-off icons ONLY
 
 ## Example
 You are about to translate the Figma output into this project.
@@ -105,8 +107,8 @@ You are about to translate the Figma output into this project.
 ### Step 2 – Icon
 - You check the width and height of the icon and decide if it is a brand icon, heroicon or other icon.
 
-- If you identify the icon as a brand icon, you will check if it is already available in `src/icons/simpleicons`.
-- If it is not available, you will add it to `src/icons/simpleicons`.
+- If you identify the icon as a brand icon, you will check if it is already bundled in `node_modules/@newlogic-digital/core/icons/simpleicons` or present in `src/icons/simpleicons`.
+- If it is not available in either place, you will add it to `src/icons/simpleicons`.
 - If it is available, you will use the existing icon.
 - You will use the following markup in the HTML:
 

@@ -6,7 +6,7 @@
 - Use kebab-case with `x-` prefix for component classes such as `x-button`, `x-hero-section`.
 - ALWAYS check if the component class name matches the file name, e.g. `HeroSection.latte` and `x-hero-section` matches
 - ALWAYS keep one primary `x-*` component per file.
-- Use kebab-case for generic utility files such as `format-date.js` or `scrollbar.css`.
+- Use camelCase for generic JS files such as `initAfter.js` and lowercase for generic CSS files such as `breakpoints.css`.
 
 ## Placement
 

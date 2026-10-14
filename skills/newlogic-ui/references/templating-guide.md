@@ -7,10 +7,10 @@
 
 ## Data Sources
 
-- Global data lives in `src/data/main.json`.
+- Global data lives in `src/data/*.json`; every file is merged into every page (`main.json`, `nav.json`, `socials.json`).
 - In this repo, global layout sections are typically defined through `head` and `foot` arrays in `src/data/main.json`.
 - Page data lives in `src/pages/*.json` and inherits global data.
-- Section rendering is handled through `src/templates/utils/sections.latte`.
+- Components listed in `head`, `body`, and `foot` are rendered through `src/templates/utils/components.latte`.
 - Components referenced from page JSON are passed as `$control`.
 - In this repo, `src/pages/*.json` is the composition layer for whole pages. Prefer assembling a page there instead of creating a wrapper `*Page.latte` component that just nests the entire page structure.
 - Preserve the existing `head` and `foot` layout structure unless the user explicitly asks to change the layout contract.
@@ -32,8 +32,8 @@
 **Layout asset access example:**
 
 ```latte
-<link n:foreach="$assets->css->all as $url" href="{$url|asset}" rel="stylesheet">
-<script src="{$assets->js->main|asset}" type="module"></script>
+<link n:foreach="$assets->links->main as $url" href="{$url->href|asset}" rel="{isset($url->rel) ? $url->rel}">
+<script n:ifset="$assets->scripts->main" src="{$assets->scripts->main|asset}" type="module"></script>
 ```
 
 ## JSON Rules
@@ -41,7 +41,7 @@
 - Do NOT store CSS class strings in JSON.
 - JSON should contain semantic values and content, NOT presentation classes.
 - If a template depends on an optional flag such as `active`, `dropdown`, or variant switches, define that flag explicitly in JSON.
-- Keep repeated global UI data in `src/data/main.json` rather than duplicating it across page JSON files.
+- Keep repeated global UI data in `src/data/`, in its own file such as `nav.json`, rather than duplicating it across page JSON files.
 
 ## Latte Rules
 
@@ -49,11 +49,14 @@
 - Keep ad hoc `{var ...}` usage to a minimum.
 - Use `{default}` for optional fallback values when needed.
 - Do NOT combine `class` and `n:class` on the same element. Use one `n:class` expression that includes the base classes.
+- Write `n:class` as a comma-separated list: base classes first, then conditional expressions such as `$cond ? 'a' : 'b'` or `$cond ? 'a'`.
+- Reusable `(ui)` components accept extra classes through `$classAttribute` (see `Pagination.latte`); pass them from the include as `classAttribute: '...'`.
 
 **`n:class` pattern:**
 
 ```latte
-<a n:class="'base classes ' . ($isActive ? 'active' : 'idle')">Link</a>
+<nav n:class="'x-pagination flex gap-2', $classAttribute ?? ''">...</nav>
+<a n:class="'x-button square sm', $iterator->first ? 'pointer-events-none' : 'muted'">1</a>
 ```
 
 **`{default}` pattern:**
@@ -88,8 +91,9 @@
 ```
 
 ```latte
-{foreach $sections as $section}
-    {include ('../' . $section->src), control => $section}
+{* src/templates/utils/components.latte *}
+{foreach $components as $component}
+    {include ('../' . $component->src), control => $component}
 {/foreach}
 ```
 
@@ -101,6 +105,9 @@
 
 **Direct include pattern:**
 
+Include paths are resolved relative to the directory of the current template file, e.g. from `src/templates/layouts/default.latte`:
+
 ```latte
-{include 'components/Button.latte', text: 'Click me'}
+{include '../components/(ui)/Toast.latte'}
+{include '../components/(ui)/Pagination.latte', classAttribute: 'mt-8'}
 ```
