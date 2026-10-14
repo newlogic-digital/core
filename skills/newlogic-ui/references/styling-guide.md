@@ -3,7 +3,7 @@
 ## General
 
 - ALWAYS prefer Tailwind utilities before writing custom CSS.
-- Use custom CSS for defaults, complex states, or component-specific behavior that should NOT live in templates.
+- Use custom CSS for defaults, very complex states, or component-specific behavior that should not live in templates.
 - Follow nearby files before introducing a new styling pattern.
 - Prefer responsive utilities such as `sm:`, `md:`, and `lg:` in templates. Use `@custom-media` only when writing custom CSS.
 
@@ -26,7 +26,7 @@
 - Define base sizing, padding, radius, font defaults, and default colors in CSS for UI components.
 - In templates, only small layout utilities are allowed on UI components, such as width, flex, gap, order, or spacing adjustments.
 - Do NOT redefine a UI component's base look directly in templates.
-- Do NOT restyle existing `x-*` UI components from a large level CSS file when the change is really a button, badge, control, field, pagination, or other UI-component concern.
+- Do NOT restyle existing `x-*` UI components from a large level CSS file (eg. main.css) when the change is really a button, badge, control, field, pagination, or other UI-component concern.
 - If a Figma page introduces a new shared UI look, extend the relevant file in `src/styles/components/(ui)/` instead of creating specific overrides from a parent component for that component.
 
 ## Non-UI Components

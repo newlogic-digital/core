@@ -14,23 +14,7 @@
 - Register one primary controller per file.
 - Keep controller names aligned with existing `x-*` naming in this repo.
 - If dynamic HTML is inserted into the DOM, ALWAYS re-initialize it with `src/scripts/utils/initAfter.js`.
-- Follow the existing import aggregation pattern with `+.js` files when adding new controllers to an existing folder.
-
-**Local `initAfter` import pattern:**
-
-```javascript
-import { initAfter } from '../utils/+.js'
-
-initAfter(document.querySelector('.newlyAppendedContent'))
-```
-
-**Aggregator pattern:**
-
-```javascript
-// src/scripts/components/(ui)/+.js
-import './Button.js'
-import './Dialog.js'
-```
+- Import aggregation pattern in `+.js` is generated automatically via Vite plugin, do not manually add imports.
 
 ## Before Adding JS
 
